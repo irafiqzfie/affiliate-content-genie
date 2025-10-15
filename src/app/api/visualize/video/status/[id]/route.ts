@@ -7,12 +7,11 @@ export function setOperation(id: string) {
     operationStore.set(id, { startTime: Date.now() });
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
-    const operationId = params.id;
+    const url = new URL(request.url);
+    const parts = url.pathname.split('/').filter(Boolean);
+    const operationId = parts[parts.length - 1];
     const operation = operationStore.get(operationId);
 
     if (!operation) {
