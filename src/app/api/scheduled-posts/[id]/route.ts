@@ -13,12 +13,13 @@ type ScheduledPost = {
 // This is a mock in-memory store. In a real app, use a database.
 let scheduledPosts: ScheduledPost[] = [];
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
-    const id = parseInt(params.id, 10);
+    // Parse id from the request URL to avoid typing mismatches with Next's validator.
+    const url = new URL(request.url);
+    const parts = url.pathname.split('/').filter(Boolean);
+    const idStr = parts[parts.length - 1];
+    const id = parseInt(idStr || '', 10);
     const initialLength = scheduledPosts.length;
     scheduledPosts = scheduledPosts.filter(post => post.id !== id);
 

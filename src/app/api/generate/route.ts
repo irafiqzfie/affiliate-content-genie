@@ -118,8 +118,9 @@ export async function POST(request: Request) {
     // Send the response back to the client
     return NextResponse.json({ content });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in /api/generate:', error);
-    return NextResponse.json({ message: error.message || 'Error generating content' }, { status: 500 });
+    const message = (typeof error === 'object' && error !== null && 'message' in error) ? (error as { message: unknown }).message : null;
+    return NextResponse.json({ message: typeof message === 'string' ? message : 'Error generating content' }, { status: 500 });
   }
 }

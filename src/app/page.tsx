@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import Image from 'next/image';
 
 const API_URL = '/api';
 const LOCAL_STORAGE_KEY = 'affteContentGenieilia_savedContent_v2';
@@ -223,6 +224,15 @@ export default function Home() {
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
 
+    // Helper to safely extract a message from an unknown error without using `any`.
+    const extractErrorMessage = (err: unknown): string | null => {
+        if (typeof err === 'object' && err !== null && 'message' in err) {
+            const maybeMsg = (err as { message: unknown }).message;
+            if (typeof maybeMsg === 'string') return maybeMsg;
+        }
+        return null;
+    };
+
   const initializeOptionIndexes = useCallback(() => {
     const videoIndexes = sectionsConfigVideo.reduce((acc, sec) => ({ ...acc, [sec.key]: 0 }), {});
     const postIndexes = sectionsConfigPost.reduce((acc, sec) => ({ ...acc, [sec.key]: 0 }), {});
@@ -424,8 +434,8 @@ export default function Home() {
 
     } catch (err: unknown) {
         console.error('Analysis failed:', err);
-        const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : null;
-        setError(message || 'Failed to analyze the product. Please fill details manually or try a different link.');
+    const message = extractErrorMessage(err);
+    setError(message || 'Failed to analyze the product. Please fill details manually or try a different link.');
     } finally {
         setIsAnalyzing(false);
     }
@@ -476,7 +486,7 @@ export default function Home() {
 
         } catch (err: unknown) {
             console.error(err);
-            const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : null;
+            const message = extractErrorMessage(err);
             setError(message || 'Failed to generate content. Please check the link and try again.');
         } finally {
       setIsLoading(false);
@@ -503,8 +513,8 @@ export default function Home() {
 
     } catch (err: unknown) {
         console.error('Image generation failed:', err);
-        const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : null;
-        setError(message || 'Failed to generate image. Please try again.');
+    const message = extractErrorMessage(err);
+    setError(message || 'Failed to generate image. Please try again.');
     } finally {
         setImageLoadingStates(prev => ({ ...prev, [key]: false }));
     }
@@ -571,8 +581,8 @@ export default function Home() {
 
     } catch (err: unknown) {
         console.error('Video generation failed:', err);
-        const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : null;
-        setError(message || 'Failed to generate video. Please try again.');
+    const message = extractErrorMessage(err);
+    setError(message || 'Failed to generate video. Please try again.');
     } finally {
         setVideoLoadingStates(prev => ({ ...prev, [key]: { status: false, message: '' } }));
     }
@@ -923,7 +933,7 @@ export default function Home() {
                     <div className="modal-preview">
                         <h4>Preview</h4>
                         {finalImageUrl ? (
-                            <img src={finalImageUrl} alt="Post preview" className="modal-preview-image" />
+                            <Image src={finalImageUrl} alt="Post preview" className="modal-preview-image" width={480} height={320} unoptimized />
                         ) : (
                             <div className="modal-preview-image-placeholder">No image generated</div>
                         )}
@@ -1105,7 +1115,7 @@ export default function Home() {
                     )}
                     {generatedImage && (
                         <div className="image-result-container">
-                            <img src={generatedImage} alt={`Generated visual for ${title}, option ${selectedIndex + 1}`} className="generated-image" />
+                            <Image src={generatedImage} alt={`Generated visual for ${title}, option ${selectedIndex + 1}`} className="generated-image" width={640} height={360} unoptimized />
                             <a href={generatedImage} download={`${optionKey}-visualization.jpg`} className="download-media-button" aria-label="Download Image">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
@@ -1499,7 +1509,7 @@ export default function Home() {
                     {scheduledPosts.map(post => (
                         <li key={post.id} className="scheduled-item">
                             <div className="scheduled-item-preview">
-                                <img src={post.imageUrl} alt="Scheduled post preview" />
+                                <Image src={post.imageUrl} alt="Scheduled post preview" width={120} height={80} unoptimized />
                             </div>
                             <div className="scheduled-item-details">
                                 <div className="scheduled-item-header">

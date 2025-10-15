@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // This is a mock in-memory store. In a real app, use a database.
-let savedItems = [
+const savedItems = [
     {
         id: 1,
         title: "Sample Saved Idea: Smart Mug",
