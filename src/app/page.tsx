@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
 const API_URL = '/api';
-const LOCAL_STORAGE_KEY = 'affiliateContentGenie_savedContent_v2';
+const LOCAL_STORAGE_KEY = 'affteContentGenieilia_savedContent_v2';
 
 interface ParsedContent {
   title?: string[];
@@ -353,7 +353,8 @@ export default function Home() {
             } else {
                  localStorage.removeItem(LOCAL_STORAGE_KEY);
             }
-        } catch (e) {
+        } catch {
+            // If parsing fails or structure is wrong, clear the saved key.
             localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
     }
@@ -421,9 +422,10 @@ export default function Home() {
         setAffiliatePotential(suggestions.affiliatePotential);
         setIsAnalysisCollapsed(false);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error('Analysis failed:', err);
-        setError(err.message || 'Failed to analyze the product. Please fill details manually or try a different link.');
+        const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : null;
+        setError(message || 'Failed to analyze the product. Please fill details manually or try a different link.');
     } finally {
         setIsAnalyzing(false);
     }
@@ -472,10 +474,11 @@ export default function Home() {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newGenerated));
       initializeOptionIndexes();
 
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Failed to generate content. Please check the link and try again.');
-    } finally {
+        } catch (err: unknown) {
+            console.error(err);
+            const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : null;
+            setError(message || 'Failed to generate content. Please check the link and try again.');
+        } finally {
       setIsLoading(false);
     }
   };
@@ -498,9 +501,10 @@ export default function Home() {
         const { imageUrl } = await response.json();
         setGeneratedImages(prev => ({ ...prev, [key]: imageUrl }));
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error('Image generation failed:', err);
-        setError(err.message || 'Failed to generate image. Please try again.');
+        const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : null;
+        setError(message || 'Failed to generate image. Please try again.');
     } finally {
         setImageLoadingStates(prev => ({ ...prev, [key]: false }));
     }
@@ -565,9 +569,10 @@ export default function Home() {
             pollCount++;
         }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error('Video generation failed:', err);
-        setError(err.message || 'Failed to generate video. Please try again.');
+        const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : null;
+        setError(message || 'Failed to generate video. Please try again.');
     } finally {
         setVideoLoadingStates(prev => ({ ...prev, [key]: { status: false, message: '' } }));
     }
@@ -942,7 +947,7 @@ export default function Home() {
                     )}
                      {!schedulingPlatform && !finalImageUrl && (
                         <div className="modal-info">
-                            <p>Please generate content and an image for the 'Post' format before scheduling.</p>
+                            <p>Please generate content and an image for the &apos;Post&apos; format before scheduling.</p>
                         </div>
                      )}
                 </div>
@@ -1398,7 +1403,7 @@ export default function Home() {
                     <button onClick={handleSaveToList} className="export-button save-button">💾 Save</button>
                     <button onClick={handleOpenSocialModal} className="export-button social-button">🗓️ Schedule Post</button>
                     <button onClick={handleDownloadTxt} className="export-button">Download .txt</button>
-                    {typeof navigator !== 'undefined' && navigator.share && <button onClick={handleShare} className="export-button">Share</button>}
+                    {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && <button onClick={handleShare} className="export-button">Share</button>}
                     <button onClick={handleClear} className="export-button clear-button">Clear</button>
                 </div>
             </div>
@@ -1477,7 +1482,7 @@ export default function Home() {
         ) : (
              <div className="empty-saved-page">
                 <h2>No Saved Ideas Yet</h2>
-                <p>Generate some content and click the "💾 Save" button to see your ideas here.</p>
+                <p>Generate some content and click the &quot;💾 Save&quot; button to see your ideas here.</p>
             </div>
         )}
     </div>
@@ -1524,7 +1529,7 @@ export default function Home() {
         ) : (
             <div className="empty-saved-page">
                 <h2>No Posts Scheduled</h2>
-                <p>Use the "🗓️ Schedule Post" button on the generator page to plan your content.</p>
+                <p>Use the &quot;🗓️ Schedule Post&quot; button on the generator page to plan your content.</p>
             </div>
         )}
     </div>

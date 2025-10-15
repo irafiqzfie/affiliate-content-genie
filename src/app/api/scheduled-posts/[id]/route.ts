@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server';
 
+// Reuse ScheduledPost type for clarity
+type ScheduledPost = {
+  id: number;
+  platform: 'Facebook' | 'Threads';
+  scheduledTime: string;
+  imageUrl: string;
+  caption: string;
+  status: 'Scheduled';
+};
+
 // This is a mock in-memory store. In a real app, use a database.
-let scheduledPosts: any[] = [];
+let scheduledPosts: ScheduledPost[] = [];
 
 export async function DELETE(
   request: Request,

@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server';
 
+// Lightweight ScheduledPost type used by this mock API
+type ScheduledPost = {
+  id: number;
+  platform: 'Facebook' | 'Threads';
+  scheduledTime: string;
+  imageUrl: string;
+  caption: string;
+  status: 'Scheduled';
+};
+
 // This is a mock in-memory store. In a real app, use a database.
-let scheduledPosts: any[] = [];
+const scheduledPosts: ScheduledPost[] = [];
 let nextId = 1;
 
 export async function GET() {
