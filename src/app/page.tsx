@@ -1115,7 +1115,15 @@ export default function Home() {
                     )}
                     {generatedImage && (
                         <div className="image-result-container">
-                            <Image src={generatedImage} alt={`Generated visual for ${title}, option ${selectedIndex + 1}`} className="generated-image" width={640} height={360} unoptimized />
+                            <img
+                                src={generatedImage}
+                                alt={`Generated visual for ${title}, option ${selectedIndex + 1}`}
+                                className="generated-image"
+                                onError={(e) => { console.error('Image failed to load', generatedImage); (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                            />
+                            <div className="image-fallback" style={{ position: 'absolute', bottom: 8, left: 8, right: 48, color: 'var(--secondary-text-color)', fontSize: '0.8rem' }}>
+                                <a href={generatedImage} target="_blank" rel="noreferrer">Open image in new tab</a>
+                            </div>
                             <a href={generatedImage} download={`${optionKey}-visualization.jpg`} className="download-media-button" aria-label="Download Image">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>

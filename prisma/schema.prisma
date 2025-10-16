@@ -1,0 +1,43 @@
+datasource db {
+  // Switched to PostgreSQL for production. Local dev can use a local Postgres instance
+  // or a managed provider (Supabase, Neon). Set DATABASE_URL accordingly.
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  image     String?
+  createdAt DateTime @default(now())
+  savedItems SavedItem[]
+  scheduledPosts ScheduledPost[]
+}
+
+model SavedItem {
+  id         Int      @id @default(autoincrement())
+  userId     String?
+  title      String
+  productLink String
+  video      String
+  post       String
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+model ScheduledPost {
+  id            Int      @id @default(autoincrement())
+  userId        String?
+  platform      String
+  scheduledTime DateTime
+  imageUrl      String
+  caption       String
+  status        String
+  createdAt     DateTime @default(now())
+  user          User?    @relation(fields: [userId], references: [id])
+}
