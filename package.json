@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+  "build": "npm run prisma:generate && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-  "prisma:generate": "prisma generate",
-  "prisma:migrate": "prisma migrate dev --name init",
-  "prisma:deploy": "prisma migrate deploy"
+  "prisma:generate": "prisma generate --schema=prisma/schema.clean.prisma",
+  "prisma:migrate": "prisma migrate dev --name init --schema=prisma/schema.clean.prisma",
+  "prisma:deploy": "prisma migrate deploy --schema=prisma/schema.clean.prisma"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
