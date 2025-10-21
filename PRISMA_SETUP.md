@@ -42,6 +42,11 @@ Vercel deployment notes
 - Also set these env vars for production if you add OAuth later:
 	- `NEXTAUTH_SECRET` (random long string)
 	- OAuth provider client ids/secrets (e.g., `GOOGLE_ID`, `GOOGLE_SECRET`).
+If you plan to use our built-in OAuth callback route (Facebook / Threads placeholder), also add:
+- `FACEBOOK_CLIENT_ID`
+- `FACEBOOK_CLIENT_SECRET`
+- `THREADS_CLIENT_ID` (if available)
+- `THREADS_CLIENT_SECRET` (if available)
 - When you deploy, Vercel will run your build and the Prisma client will use the `DATABASE_URL` set in the environment.
 
 If you need to run migrations in production (not recommended via Vercel build step for safety), use a CI step or manual `prisma migrate deploy` against the production DB.

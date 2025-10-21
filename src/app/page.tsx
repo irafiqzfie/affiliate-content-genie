@@ -3,6 +3,8 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import AuthButton from './components/AuthButton';
+import BodyAttrDebugger from './components/BodyAttrDebugger';
 
 const API_URL = '/api';
 const LOCAL_STORAGE_KEY = 'affteContentGenieilia_savedContent_v2';
@@ -1113,13 +1115,16 @@ export default function Home() {
                             <span>Generating Image...</span>
                         </div>
                     )}
-                    {generatedImage && (
+                            {generatedImage && (
                         <div className="image-result-container">
-                            <img
+                            <Image
                                 src={generatedImage}
                                 alt={`Generated visual for ${title}, option ${selectedIndex + 1}`}
                                 className="generated-image"
-                                onError={(e) => { console.error('Image failed to load', generatedImage); (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                                width={480}
+                                height={270}
+                                unoptimized
+                                onError={() => { /* next/image doesn't expose event target easily; fallback link still provided */ }}
                             />
                             <div className="image-fallback" style={{ position: 'absolute', bottom: 8, left: 8, right: 48, color: 'var(--secondary-text-color)', fontSize: '0.8rem' }}>
                                 <a href={generatedImage} target="_blank" rel="noreferrer">Open image in new tab</a>
@@ -1565,10 +1570,14 @@ export default function Home() {
   return (
     <div className="app-container">
       <header className="header">
-        <div className="header-content">
-            <h1>Affiliate Content Genie</h1>
-            <p>Your AI assistant for viral Shopee & TikTok content</p>
-        </div>
+                <div className="header-content">
+                        <h1>Affiliate Content Genie</h1>
+                        <p>Your AI assistant for viral Shopee & TikTok content</p>
+                                    <div className="auth-area">
+                                        <AuthButton />
+                                        <BodyAttrDebugger />
+                                    </div>
+                </div>
         <nav className="header-nav">
             <button 
                 className={`nav-button ${currentPage === 'generator' ? 'active' : ''}`} 

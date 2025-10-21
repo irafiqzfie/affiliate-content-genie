@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '../auth/[...nextauth]/authOptions'
+import type { Session, NextAuthOptions } from 'next-auth'
 
 export async function GET() {
   try {
-    const posts = await prisma.scheduledPost.findMany({ orderBy: { scheduledTime: 'asc' } });
+  const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
+  if (!session) return NextResponse.json([])
+
+  const posts = await prisma.scheduledPost.findMany({ where: { userId: session.user?.id as string }, orderBy: { scheduledTime: 'asc' } });
     return NextResponse.json(posts);
   } catch (error) {
     console.error('GET /api/scheduled-posts error:', error);
@@ -13,6 +19,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+  const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
+  if (!session) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+
     const body = await request.json();
     const { platform, scheduledTime, imageUrl, caption, status } = body;
 
@@ -21,6 +30,7 @@ export async function POST(request: Request) {
     }
 
     const newPost = await prisma.scheduledPost.create({ data: {
+      userId: session.user?.id as string,
       platform,
       scheduledTime: new Date(scheduledTime),
       imageUrl,
