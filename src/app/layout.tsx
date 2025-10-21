@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 // FIX: Import React to make the React namespace available for type annotations like React.ReactNode.
 import React from "react";
+import Providers from './providers'
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], display: "swap" });
 
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body ap-style="" suppressHydrationWarning className={inter.className}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
