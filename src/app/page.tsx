@@ -1570,23 +1570,26 @@ export default function Home() {
   return (
     <div className="app-container">
       <header className="header">
-                <div className="header-content">
-                        <h1>Affiliate Content Genie</h1>
-                        <p>Your AI assistant for viral Shopee & TikTok content</p>
-                                    <div className="auth-area">
-                                        <AuthButton />
-                                        <BodyAttrDebugger />
-                                    </div>
-                </div>
+        <div className="header-top">
+          <div className="branding">
+            <h1>Affiliate Content Genie</h1>
+            <p>Your AI assistant for viral Shopee & TikTok content</p>
+          </div>
+          <div className="header-actions">
+            <AuthButton />
+            <BodyAttrDebugger />
+          </div>
+        </div>
         <nav className="header-nav">
+          <div className="nav-container">
             <button 
                 className={`nav-button ${currentPage === 'generator' ? 'active' : ''}`} 
                 onClick={() => setCurrentPage('generator')}
                 aria-label="Generator"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 1a.5.5 0 0 1 .5.5v2h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h.5v-2A.5.5 0 0 1 8 1zm3.5 4.004a.5.5 0 0 1 .5.5v2h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5zM.5 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 .5 8zm11.5 6.5a.5.5 0 0 1-.5-.5v-2h-.5a.5.5 0 0 1 0-1h2a.5.5 0 0 1 0 1h-.5v2a.5.5 0 0 1-.5.5z"/>
-                    <path d="M4.5 5.032A.5.5 0 0 1 5 5.5c.328 0 .618.108.852.295l.001.001.034.027c.27.213.495.493.65.827.122.26.19.553.19.883s-.068.623-.19.883c-.155.334-.38.614-.65.827l-.034.027-.001.001A1.734 1.734 0 0 1 5 10.5a.5.5 0 0 1 0-1c.54 0 1.053-.224 1.414-.586.36-.36.586-.874.586-1.414s-.226-1.054-.586-1.414A1.998 1.998 0 0 0 5 5.5a.5.5 0 0 1-.5-.468z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.292-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.292c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
                 </svg>
                 <span>Generator</span>
             </button>
@@ -1595,7 +1598,7 @@ export default function Home() {
                 onClick={() => setCurrentPage('saved')}
                 aria-label="Saved Ideas"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
                 </svg>
                 <span>Saved</span>
@@ -1606,13 +1609,14 @@ export default function Home() {
                 onClick={() => setCurrentPage('scheduler')}
                 aria-label="Scheduler"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                     <path d="M11 7.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5-.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
                 </svg>
                 <span>Scheduler</span>
                 {scheduledPosts.length > 0 && <span className="saved-count-badge">{scheduledPosts.length}</span>}
             </button>
+          </div>
         </nav>
       </header>
 
