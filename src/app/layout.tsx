@@ -22,7 +22,9 @@ export default function RootLayout({
     <html lang="en">
       <body ap-style="" suppressHydrationWarning className={inter.className}>
         <div className="app-wrapper">
-          <Providers>{children}</Providers>
+          <div className="app-container-wrapper">
+            <Providers>{children}</Providers>
+          </div>
         </div>
       </body>
     </html>

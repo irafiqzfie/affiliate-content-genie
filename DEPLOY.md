@@ -8,8 +8,7 @@ Required environment variables (Vercel - Production)
 
 - NEXTAUTH_URL — Your Vercel app URL, e.g. `https://affiliate-content-genie.vercel.app`
 - NEXTAUTH_SECRET — A long, random secret for NextAuth (32+ bytes, base64 recommended)
-- GITHUB_ID / GITHUB_SECRET — GitHub OAuth app credentials (if using GitHub provider)
-- FACEBOOK_CLIENT_ID / FACEBOOK_CLIENT_SECRET — Facebook OAuth app credentials (if using Facebook provider)
+- FACEBOOK_CLIENT_ID / FACEBOOK_CLIENT_SECRET — Facebook OAuth app credentials
 - API_KEY — External generative API key (Gemini / other)
 
 Set these in the Vercel dashboard under Project → Settings → Environment Variables. Add them for Production and Preview environments as appropriate.

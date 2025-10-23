@@ -75,6 +75,39 @@ The output MUST be in the following strict Markdown format. Start with the video
 ---POST END---
 `;
 
+// Retry function with exponential backoff
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+      
+      // Don't retry on client errors (4xx) except 429 (rate limit)
+      if (error instanceof Error && error.message.includes('400')) {
+        throw error;
+      }
+      
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+      
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = baseDelay * Math.pow(2, attempt - 1);
+      console.log(`Retry attempt ${attempt}/${maxRetries} in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw lastError!;
+}
+
 // This handles POST requests to /api/generate
 export async function POST(request: Request) {
   try {
@@ -98,29 +131,77 @@ export async function POST(request: Request) {
       }
     };
 
-    const fetchResponse = await fetch(GEMINI_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-    });
+    // Attempt API call with retry logic
+    const responseData = await retryWithBackoff(async () => {
+      console.log('🚀 Calling Gemini API...');
+      
+      const fetchResponse = await fetch(GEMINI_API_URL, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody)
+      });
 
-    if (!fetchResponse.ok) {
-        const errorData = await fetchResponse.json();
-        console.error("Gemini API Error:", errorData.error);
-        throw new Error(errorData.error?.message || 'Failed to fetch from Gemini API');
+      if (!fetchResponse.ok) {
+          const errorData = await fetchResponse.json().catch(() => ({}));
+          const errorMessage = errorData.error?.message || `HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`;
+          
+          console.error("❌ Gemini API Error:", {
+            status: fetchResponse.status,
+            statusText: fetchResponse.statusText,
+            error: errorData
+          });
+          
+          // Provide user-friendly error messages
+          if (fetchResponse.status === 429) {
+            throw new Error('The AI service is currently experiencing high demand. Please wait a moment and try again.');
+          } else if (fetchResponse.status >= 500) {
+            throw new Error('The AI service is temporarily unavailable. Please try again in a few moments.');
+          } else if (errorMessage.toLowerCase().includes('overloaded')) {
+            throw new Error('The AI service is currently overloaded. Please wait a moment and try again.');
+          } else if (errorMessage.toLowerCase().includes('quota')) {
+            throw new Error('API usage limit reached. Please try again later.');
+          } else {
+            throw new Error(`AI service error: ${errorMessage}`);
+          }
+      }
+
+      return await fetchResponse.json();
+    }, 3, 2000); // 3 retries with 2s base delay
+
+    const content = responseData.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    
+    if (!content) {
+      throw new Error('No content was generated. Please try again with a different product or adjust your settings.');
     }
 
-    const responseData = await fetchResponse.json();
-    const content = responseData.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-
-    // Send the response back to the client
+    console.log('✅ Content generated successfully');
     return NextResponse.json({ content });
 
   } catch (error: unknown) {
-    console.error('Error in /api/generate:', error);
-    const message = (typeof error === 'object' && error !== null && 'message' in error) ? (error as { message: unknown }).message : null;
-    return NextResponse.json({ message: typeof message === 'string' ? message : 'Error generating content' }, { status: 500 });
+    console.error('❌ Error in /api/generate:', error);
+    
+    // Extract error message safely
+    let errorMessage = 'Failed to generate content. Please try again.';
+    
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+      const message = (error as { message: unknown }).message;
+      if (typeof message === 'string') {
+        errorMessage = message;
+      }
+    }
+    
+    // Provide helpful suggestions based on error type
+    if (errorMessage.toLowerCase().includes('overloaded') || errorMessage.toLowerCase().includes('high demand')) {
+      errorMessage += ' The AI service is experiencing high traffic. Try again in 30-60 seconds.';
+    } else if (errorMessage.toLowerCase().includes('quota') || errorMessage.toLowerCase().includes('limit')) {
+      errorMessage += ' Please check your API usage or try again later.';
+    }
+    
+    return NextResponse.json({ 
+      message: errorMessage,
+      suggestion: 'If this persists, try simplifying your product description or check your internet connection.'
+    }, { status: 500 });
   }
 }

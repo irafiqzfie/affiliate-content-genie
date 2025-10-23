@@ -16,6 +16,10 @@
   --success-color: #48bb78;
 
   --border-radius: 16px;
+  
+  /* Layout Variables - Adjust these for different content widths */
+  --content-max-width: 1200px; /* Main content container width */
+  --content-padding: 1.5rem;   /* Horizontal padding inside content area */
 }
 
 html {
@@ -61,6 +65,22 @@ body {
 .app-wrapper {
   min-height: 100vh;
   padding: 1.5rem;
+  /* Full-width background continues to cover entire viewport */
+}
+
+.app-container-wrapper {
+  width: 100%;
+  max-width: var(--content-max-width); /* Use CSS variable for easy adjustment */
+  margin: 0 auto; /* Centers the content horizontally */
+  padding: 0 var(--content-padding); /* Additional padding inside the centered container */
+  
+  /* 
+   * Layout Customization Guide:
+   * - To make content wider: increase --content-max-width (e.g., 1400px)
+   * - To make content narrower: decrease --content-max-width (e.g., 1000px)
+   * - To adjust side padding: change --content-padding (e.g., 2rem for more spacing, 1rem for less)
+   * - Background continues to cover full width regardless of content width
+   */
 }
 
 #root {
@@ -602,12 +622,52 @@ body {
 }
 
 .error-message {
-  background-color: rgba(229, 62, 62, 0.1);
-  color: var(--error-color);
-  border: 1px solid var(--error-color);
-  padding: 1rem;
+  background: rgba(229, 62, 62, 0.1);
+  border: 2px solid var(--error-color);
   border-radius: var(--border-radius);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px 0 rgba(229, 62, 62, 0.2);
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.error-text {
+  color: var(--error-color);
   text-align: center;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.retry-button {
+  background: linear-gradient(135deg, #e53e3e, #c53030);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+}
+
+.retry-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c53030, #a02929);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(229, 62, 62, 0.4);
+}
+
+.retry-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .output-controls {
@@ -1759,9 +1819,20 @@ body {
 
 
 /* --- Responsive Styles --- */
+@media (max-width: 1300px) {
+  .app-container-wrapper {
+    max-width: calc(var(--content-max-width) - 200px); /* Slightly narrower on medium screens */
+  }
+}
+
 @media (max-width: 1200px) {
   .app-wrapper {
     padding: 1rem;
+  }
+  
+  .app-container-wrapper {
+    max-width: calc(var(--content-max-width) - 300px);
+    padding: 0 1rem; /* Reduce side padding on smaller screens */
   }
   
   .advanced-options-grid {
@@ -1804,6 +1875,11 @@ body {
 @media (max-width: 768px) {
   .app-wrapper {
     padding: 0.75rem;
+  }
+  
+  .app-container-wrapper {
+    max-width: none; /* Full width on mobile with wrapper padding */
+    padding: 0 0.75rem;
   }
   
   .app-container {
@@ -1899,6 +1975,10 @@ body {
 @media (max-width: 480px) {
   .app-wrapper {
     padding: 0.5rem;
+  }
+  
+  .app-container-wrapper {
+    padding: 0 0.5rem; /* Minimal padding on very small screens */
   }
   
   .header {
