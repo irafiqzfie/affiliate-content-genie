@@ -1,4 +1,10 @@
-datasource db {
+﻿datasource db {
+  // For production we use PostgreSQL. In local development you can still
+  // point DATABASE_URL at a SQLite file (file:./dev.db) but ensure you
+  // generate / apply migrations against the intended database when
+  // deploying to production.
+  // Set DATABASE_URL (in Vercel) to a postgres:// URL and run
+  // `npx prisma migrate deploy` during your build or CI.
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
@@ -41,6 +47,8 @@ model ScheduledPost {
   user          User?    @relation(fields: [userId], references: [id])
 }
 
+// OAuth accounts for storing provider tokens. userId is optional for now; once you wire
+// authentication (NextAuth or similar) you should associate accounts with users.
 model Account {
   id                String   @id @default(cuid())
   userId            String?
@@ -127,5 +135,6 @@ model Account {
 
   @@unique([provider, providerAccountId])
 }
+
 
 

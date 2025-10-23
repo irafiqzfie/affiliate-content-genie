@@ -465,17 +465,33 @@ export default function Home() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Content generation request failed' }));
-        throw new Error(errorData.message);
+        console.error('❌ Generate API Error:', errorData);
+        
+        // Show user-friendly error message
+        let userMessage = errorData.message || 'Content generation failed';
+        if (errorData.suggestion) {
+          userMessage += ` ${errorData.suggestion}`;
+        }
+        
+        throw new Error(userMessage);
       }
       
       const data = await response.json();
       const content = data.content;
+      
+      if (!content) {
+        throw new Error('No content was generated. Please try again with a different product link.');
+      }
       
       const videoContentMatch = content.match(/---VIDEO START---([\s\S]*?)---VIDEO END---/);
       const postContentMatch = content.match(/---POST START---([\s\S]*?)---POST END---/);
 
       const videoContent = videoContentMatch ? videoContentMatch[1].trim() : '';
       const postContent = postContentMatch ? postContentMatch[1].trim() : '';
+      
+      if (!videoContent && !postContent) {
+        throw new Error('Generated content was in an unexpected format. Please try again.');
+      }
       
       const newGenerated = { video: videoContent, post: postContent };
       setGeneratedContent(newGenerated);
@@ -487,36 +503,72 @@ export default function Home() {
       initializeOptionIndexes();
 
         } catch (err: unknown) {
-            console.error(err);
+            console.error('❌ Content generation error:', err);
             const message = extractErrorMessage(err);
-            setError(message || 'Failed to generate content. Please check the link and try again.');
+            
+            // Provide helpful error message with retry suggestion
+            let errorMessage = message || 'Failed to generate content. Please try again.';
+            
+            // Add specific suggestions based on error type
+            if (errorMessage.toLowerCase().includes('overloaded') || errorMessage.toLowerCase().includes('high demand')) {
+              errorMessage = '🚦 The AI service is busy right now. Please wait 30-60 seconds and try again.';
+            } else if (errorMessage.toLowerCase().includes('quota') || errorMessage.toLowerCase().includes('limit')) {
+              errorMessage = '📊 API usage limit reached. Please try again in a few minutes.';
+            } else if (errorMessage.toLowerCase().includes('network') || errorMessage.toLowerCase().includes('connection')) {
+              errorMessage = '🌐 Connection issue detected. Please check your internet and try again.';
+            }
+            
+            setError(errorMessage);
         } finally {
       setIsLoading(false);
     }
   };
   
   const handleGenerateImage = useCallback(async (key: string, promptText: string) => {
+    console.log('🎨 Generating image for key:', key, 'with prompt:', promptText.substring(0, 100) + '...');
     setImageLoadingStates(prev => ({ ...prev, [key]: true }));
     setError(null);
     try {
+        // Send the AI-generated image prompt directly without modification
+        // The AI already provides detailed, optimized prompts for image generation
+        const requestBody = { prompt: promptText };
+        console.log('📡 Sending enhanced request to /api/visualize/image with body:', requestBody);
+        
         const response = await fetch(`${API_URL}/visualize/image`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: `A cinematic, high-quality visual for a short-form video based on this idea: ${promptText}` }),
+            body: JSON.stringify(requestBody),
         });
+
+        console.log('📥 Response status:', response.status, response.statusText);
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: 'Image generation failed' }));
+            console.error('❌ API Error:', errorData);
             throw new Error(errorData.message);
         }
 
-        const { imageUrl } = await response.json();
+        const responseData = await response.json();
+        console.log('✅ Enhanced API Response:', responseData);
+        
+        const { imageUrl, analysis } = responseData;
+        
+        // Log the analysis results for debugging
+        if (analysis) {
+            console.log('🎯 Image Analysis:', analysis);
+        }
+        
+        if (!imageUrl) {
+            throw new Error('No image URL returned from API');
+        }
+        
+        console.log('🖼️ Setting image URL:', imageUrl);
         setGeneratedImages(prev => ({ ...prev, [key]: imageUrl }));
 
     } catch (err: unknown) {
-        console.error('Image generation failed:', err);
-    const message = extractErrorMessage(err);
-    setError(message || 'Failed to generate image. Please try again.');
+        console.error('❌ Image generation failed:', err);
+        const message = extractErrorMessage(err);
+        setError(message || 'Failed to generate image. Please try again.');
     } finally {
         setImageLoadingStates(prev => ({ ...prev, [key]: false }));
     }
@@ -1411,7 +1463,25 @@ export default function Home() {
         </div>
       )}
 
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="error-message">
+          <div className="error-content">
+            <div className="error-text">{error}</div>
+            <button 
+              className="retry-button" 
+              onClick={() => {
+                setError(null);
+                if (productLink) {
+                  handleGenerate(new Event('submit') as any);
+                }
+              }}
+              disabled={isLoading || !productLink}
+            >
+              🔄 Try Again
+            </button>
+          </div>
+        </div>
+      )}
       
       {(generatedContent.video || generatedContent.post || (!isLoading && !error)) && (
         <>
