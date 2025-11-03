@@ -15,7 +15,7 @@
   --error-color: #e53e3e;
   --success-color: #48bb78;
 
-  --border-radius: 16px;
+  --border-radius: 0;
   
   /* Layout Variables - Adjust these for different content widths */
   --content-max-width: 1600px; /* Main content container width */
@@ -506,7 +506,7 @@ body {
   position: relative;
   height: 32px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   border: 1px solid var(--glass-border);
 }
@@ -517,7 +517,7 @@ body {
   left: 0;
   height: 100%;
   background: var(--primary-gradient);
-  border-radius: 16px;
+  border-radius: 0;
   transition: width 0.5s ease;
 }
 
@@ -584,7 +584,7 @@ body {
     transform: translateX(-50%) translateY(-8px);
     background: rgba(13, 15, 27, 0.95);
     border: 1px solid var(--glass-border);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
     font-weight: 400;
@@ -734,7 +734,7 @@ body {
 .potential-badge {
     display: inline-block;
     padding: 0.3rem 0.8rem;
-    border-radius: 9999px;
+    border-radius: 0;
     font-weight: 600;
     font-size: 0.9rem;
     text-align: center;
@@ -785,7 +785,7 @@ body {
     border-top: 1px solid var(--glass-border);
     margin-top: 1rem;
     background: linear-gradient(90deg, rgba(255, 123, 0, 0.05), rgba(0, 170, 255, 0.05));
-    border-radius: 8px;
+    border-radius: 0;
     padding: 0.5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -807,7 +807,7 @@ body {
     position: relative;
     height: 2.25rem;
     background-color: rgba(0,0,0,0.2);
-    border-radius: 8px;
+    border-radius: 0;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -821,7 +821,7 @@ body {
     left: 0;
     height: 100%;
     background: var(--primary-gradient);
-    border-radius: 8px;
+    border-radius: 0;
     transition: width 0.5s ease-in-out;
 }
 
@@ -839,7 +839,7 @@ body {
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   border: none;
-  border-radius: 16px;
+  border-radius: 0;
   background-image: var(--primary-gradient);
   color: #ffffff;
   cursor: pointer;
@@ -1085,7 +1085,7 @@ body {
   border: none;
   background: transparent;
   color: var(--secondary-text-color);
-  border-radius: 8px;
+  border-radius: 0;
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
@@ -1205,7 +1205,7 @@ body {
     display: flex;
     background: rgba(0, 0, 0, 0.3);
     border: 2px solid var(--glass-border);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 6px;
     width: 100%;
     max-width: 420px;
@@ -1369,7 +1369,7 @@ body {
   top: 0.75rem;
   bottom: 0.75rem;
   width: 4px;
-  border-radius: 4px 0 0 4px;
+  border-radius: 0;
   background: linear-gradient(180deg, var(--gradient-orange), var(--gradient-blue));
   opacity: 0.9;
 }
@@ -1548,7 +1548,7 @@ body {
 .visualize-button, .generate-video-button {
     background: transparent;
     padding: 0.5rem 1rem;
-    border-radius: 8px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 0.875rem;
     font-family: 'Inter', sans-serif;
@@ -1621,7 +1621,7 @@ body {
     background-color: var(--primary-text-color);
     color: var(--app-bg);
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 0.75rem;
     white-space: nowrap;
     opacity: 0;
@@ -1643,7 +1643,7 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: rgba(0,0,0,0.2);
     border: 1px solid var(--glass-border);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--primary-text-color);
     transition: border-color 0.3s, box-shadow 0.3s;
     resize: vertical;
@@ -1659,7 +1659,7 @@ body {
     gap: 0.25rem;
     padding: 0.5rem;
     background-color: var(--glass-bg-hover);
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid var(--glass-border);
     margin-bottom: -0.5rem; /* Overlap with editor border */
 }
@@ -1670,7 +1670,7 @@ body {
     color: var(--secondary-text-color);
     width: 32px;
     height: 32px;
-    border-radius: 6px;
+    border-radius: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1701,7 +1701,7 @@ body {
     line-height: 1.7;
     background-color: rgba(13, 15, 27, 0.7);
     border: 1px solid var(--glass-border);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--primary-text-color);
     transition: border-color 0.3s, box-shadow 0.3s;
     resize: vertical;
@@ -1729,7 +1729,7 @@ body {
     font-size: 0.9rem;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
-    border-radius: 8px;
+    border-radius: 0;
     cursor: pointer;
     border: 1px solid;
     transition: all 0.2s;
@@ -1809,7 +1809,7 @@ body {
 
 .video-loading-indicator {
     background-color: var(--glass-bg-hover);
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid var(--glass-border);
     color: var(--secondary-text-color);
     font-size: 0.9rem;
@@ -1818,7 +1818,7 @@ body {
 
 .image-result-container, .video-result-container {
     position: relative;
-    border-radius: 8px;
+    border-radius: 0;
     overflow: hidden;
     border: 1px solid var(--glass-border);
     max-width: 400px;
@@ -1990,7 +1990,7 @@ body {
     background: rgba(0,0,0,0.3);
     border: 1px solid var(--glass-border);
     color: var(--primary-text-color);
-    border-radius: 12px;
+    border-radius: 0;
     font-family: 'Inter', sans-serif;
     font-size: 0.95rem;
     transition: all 0.3s ease;
@@ -2035,7 +2035,7 @@ body {
     align-items: center;
     padding: 1.5rem 1.75rem;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
-    border-radius: 12px;
+    border-radius: 0;
     border: 1px solid var(--glass-border);
     gap: 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2127,7 +2127,7 @@ body {
 .saved-item-button {
     padding: 0.625rem 1.25rem;
     font-size: 0.875rem;
-    border-radius: 8px;
+    border-radius: 0;
     cursor: pointer;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
@@ -2185,7 +2185,7 @@ body {
     padding: 3rem 1rem;
     font-size: 1.05rem;
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
+    border-radius: 0;
     border: 1px dashed var(--glass-border);
 }
 
@@ -2220,7 +2220,7 @@ body {
     display: flex;
     flex-direction: column;
     background-color: var(--glass-bg);
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid var(--glass-border);
     overflow: hidden;
 }
@@ -2254,7 +2254,7 @@ body {
 
 .platform-tag {
     padding: 0.2rem 0.6rem;
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 0.8rem;
     font-weight: 500;
     color: #fff;
@@ -2290,7 +2290,7 @@ body {
     border: 1px solid var(--glass-border);
     color: var(--secondary-text-color);
     padding: 0.5rem 1rem;
-    border-radius: 8px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 0.8rem;
     font-weight: 500;
@@ -2385,7 +2385,7 @@ body {
 
 .modal-preview {
     border: 1px solid var(--glass-border);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1rem;
     background-color: rgba(0,0,0,0.2);
 }
@@ -2401,14 +2401,14 @@ body {
     width: 100%;
     max-height: 250px;
     object-fit: contain;
-    border-radius: 8px;
+    border-radius: 0;
     margin-bottom: 1rem;
 }
 
 .modal-preview-image-placeholder {
     width: 100%;
     height: 150px;
-    border-radius: 8px;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2432,7 +2432,7 @@ body {
     border: 1px solid var(--gradient-blue);
     color: #cceeff;
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 0;
     font-size: 0.9rem;
     line-height: 1.6;
 }
@@ -2464,7 +2464,7 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: rgba(13, 15, 27, 0.7);
     border: 1px solid var(--glass-border);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--primary-text-color);
 }
 .schedule-input:focus {
@@ -2483,7 +2483,7 @@ body {
 
 .modal-footer-button {
     padding: 0.6rem 1.2rem;
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid;
     font-weight: 500;
     font-family: 'Inter', sans-serif;
@@ -2511,7 +2511,7 @@ body {
 
 .social-platform-button {
     padding: 0.6rem 1.2rem;
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid;
     font-weight: 500;
     font-family: 'Inter', sans-serif;
@@ -2579,7 +2579,7 @@ body {
     width: 120px;
     height: 3px;
     background: var(--primary-gradient);
-    border-radius: 3px;
+    border-radius: 0;
 }
 
 .privacy-header h1 {
@@ -2627,7 +2627,7 @@ body {
     width: 4px;
     height: 1.5rem;
     background: var(--primary-gradient);
-    border-radius: 2px;
+    border-radius: 0;
     flex-shrink: 0;
 }
 
@@ -2675,7 +2675,7 @@ body {
     padding: 1rem 1.5rem;
     background: linear-gradient(135deg, rgba(255, 123, 0, 0.1), rgba(0, 170, 255, 0.1));
     border-left: 4px solid var(--gradient-orange);
-    border-radius: 8px;
+    border-radius: 0;
     font-weight: 500;
     margin: 1.5rem 0;
 }
@@ -2713,7 +2713,7 @@ body {
     background: var(--primary-gradient);
     color: #ffffff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 0;
     font-weight: 600;
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -3072,3 +3072,4 @@ body {
     width: 100%;
   }
 }
+
