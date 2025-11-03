@@ -389,13 +389,18 @@ export default function Home() {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         if (productLink && !isLoading && !isAnalyzing) {
-          handleGenerate(new Event('submit') as React.FormEvent);
+          const fakeEvent = {
+            preventDefault: () => {},
+            stopPropagation: () => {},
+          } as React.FormEvent;
+          handleGenerate(fakeEvent);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productLink, isLoading, isAnalyzing]);
 
   // Auto-collapse form when output is generated
