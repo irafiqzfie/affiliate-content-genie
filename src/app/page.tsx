@@ -26,10 +26,15 @@ interface SavedItem {
   id: number;
   title: string;
   productLink: string;
-  content: {
-    video: string;
-    post: string;
-  };
+  video: string;
+  post: string;
+}
+
+interface ShopeeProductInfo {
+  title: string;
+  price: string;
+  image: string;
+  description: string;
 }
 
 interface ScheduledPost {
@@ -182,11 +187,11 @@ const sectionsConfigVideo = [
 ];
 
 const sectionsConfigPost = [
-    { key: 'hook', title: 'Hook', icon: '✍️' },
-    { key: 'body', title: 'Post Body', icon: '📄' },
-    { key: 'cta', title: 'Call to Action', icon: '🔗' },
-    { key: 'hashtags', title: 'Hashtags', icon: '🔖' },
-    { key: 'imagePrompt', title: 'Image Prompt', icon: '🖼️' },
+  { key: 'body', title: 'Post Body', icon: '📄' },
+  { key: 'imagePrompt', title: 'Image Prompt', icon: '🖼️' },
+  { key: 'hook', title: 'Hook', icon: '✍️' },
+  { key: 'hashtags', title: 'Hashtags', icon: '🔖' },
+  { key: 'cta', title: 'Call to Action', icon: '🔗' },
 ];
 
 
@@ -212,8 +217,8 @@ export default function Home() {
   const [savedSortOrder, setSavedSortOrder] = useState('newest');
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [isAnalysisCollapsed, setIsAnalysisCollapsed] = useState(false);
-  const [currentPage, setCurrentPage] = useState('generator');
-  const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post'>('video');
+  const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler'>('generator');
+  const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post' | 'info'>('video');
   const [trendscore, setTrendscore] = useState<number | null>(null);
   const [productSummary, setProductSummary] = useState<string | null>(null);
   const [productFeatures, setProductFeatures] = useState<string[] | null>(null);
@@ -223,6 +228,9 @@ export default function Home() {
   const [schedulingPlatform, setSchedulingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [scheduleDate, setScheduleDate] = useState('');
   const [scheduleTime, setScheduleTime] = useState('');
+  const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [shopeeProductInfo, setShopeeProductInfo] = useState<ShopeeProductInfo | null>(null);
+  const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
 
@@ -376,13 +384,37 @@ export default function Home() {
     initializeOptionIndexes();
   }, [initializeOptionIndexes]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ctrl+Enter to generate
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (productLink && !isLoading && !isAnalyzing) {
+          handleGenerate(new Event('submit') as any);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [productLink, isLoading, isAnalyzing]);
+
+  // Auto-collapse form when output is generated
+  useEffect(() => {
+    if (generatedContent.video || generatedContent.post) {
+      setIsFormCollapsed(true);
+    }
+  }, [generatedContent]);
+
   const handleProductLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProductLink(e.target.value);
-    if (trendscore !== null || productSummary || affiliatePotential || productFeatures) {
+    if (trendscore !== null || productSummary || affiliatePotential || productFeatures || shopeeProductInfo) {
         setTrendscore(null);
         setProductSummary(null);
         setProductFeatures(null);
         setAffiliatePotential(null);
+        setShopeeProductInfo(null);
     }
   };
 
@@ -410,6 +442,7 @@ export default function Home() {
     setProductSummary(null);
     setProductFeatures(null);
     setAffiliatePotential(null);
+    setShopeeProductInfo(null);
 
     try {
         const response = await fetch(`${API_URL}/analyze`, {
@@ -432,6 +465,7 @@ export default function Home() {
         setProductSummary(suggestions.productSummary);
         setProductFeatures(suggestions.productFeatures);
         setAffiliatePotential(suggestions.affiliatePotential);
+        setShopeeProductInfo(suggestions.shopeeProductInfo || null);
         setIsAnalysisCollapsed(false);
 
     } catch (err: unknown) {
@@ -447,6 +481,9 @@ export default function Home() {
     e.preventDefault();
     if (!productLink || isLoading) return;
 
+    // mark that user attempted generation so UI shows output area (even if empty/loading)
+    setHasGeneratedAttempt(true);
+
     setIsLoading(true);
     setError(null);
     setGeneratedContent({ video: null, post: null });
@@ -457,6 +494,27 @@ export default function Home() {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     
     try {
+      // If shopeeProductInfo doesn't exist yet, call analyze first to get product data
+      if (!shopeeProductInfo) {
+        console.log('🔍 No product info found, analyzing first...');
+        try {
+          const analyzeResponse = await fetch(`${API_URL}/analyze`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productLink }),
+          });
+          
+          if (analyzeResponse.ok) {
+            const suggestions = await analyzeResponse.json();
+            setShopeeProductInfo(suggestions.shopeeProductInfo || null);
+            console.log('✅ Product info retrieved');
+          }
+        } catch (analyzeError) {
+          console.warn('⚠️ Could not fetch product info, continuing with generation:', analyzeError);
+          // Continue with generation even if analyze fails
+        }
+      }
+      
       const response = await fetch(`${API_URL}/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -766,37 +824,86 @@ export default function Home() {
     setProductFeatures(null);
     setAffiliatePotential(null);
     setActiveOutputTab('video');
+    setHasGeneratedAttempt(false);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
   };
 
   const handleSaveToList = async () => {
     if (!generatedContent.video && !generatedContent.post) return;
+    
+    setSaveButtonState('loading');
+    
+    // Validate productLink
+    if (!productLink || productLink.trim() === '') {
+      setError('Product link is required. Please enter a Shopee product URL.');
+      setSaveButtonState('error');
+      setTimeout(() => setSaveButtonState('idle'), 2000);
+      return;
+    }
+    
     const titleSource = editableContent.video?.title?.[0] || editableContent.post?.hook?.[0];
     const title = titleSource || `Saved Idea - ${new Date().toLocaleString()}`;
+
+    // Ensure we always send non-empty strings for content
+    const videoContent = generatedContent.video || '';
+    const postContent = generatedContent.post || '';
+    
+    // Don't save if both are empty
+    if (!videoContent && !postContent) {
+      setError('No content to save. Please generate content first.');
+      setSaveButtonState('error');
+      setTimeout(() => setSaveButtonState('idle'), 2000);
+      return;
+    }
 
     const newItemPayload = {
       title,
       productLink,
       content: {
-          video: generatedContent.video || '',
-          post: generatedContent.post || '',
+          video: videoContent,
+          post: postContent,
       },
     };
 
     try {
+        console.log('📤 Attempting to save item:', newItemPayload);
+        console.log('📤 Stringified payload:', JSON.stringify(newItemPayload, null, 2));
+        
         const response = await fetch(`${API_URL}/saved-items`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newItemPayload)
         });
-        if (!response.ok) throw new Error('Failed to save item.');
+        
+        console.log('📥 Save response status:', response.status);
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+            console.error('❌ Save failed:', errorData);
+            throw new Error(errorData.message || `Failed to save item. Status: ${response.status}`);
+        }
 
         const savedItem = await response.json();
-        setSavedList(prevList => [savedItem, ...prevList]);
+        console.log('✅ Item saved successfully:', savedItem);
         
+        setSavedList(prevList => [savedItem, ...prevList]);
+        setSaveButtonState('success');
+        
+        // Reset to idle after 2 seconds
+        setTimeout(() => setSaveButtonState('idle'), 2000);
     } catch (err) {
-        console.error(err);
-        setError('Could not save the item. Please try again.');
+        console.error('❌ Save error:', err);
+        if (err instanceof TypeError && err.message === 'Failed to fetch') {
+            console.error('Network error detected. Check CORS and API endpoint availability.');
+            setError('Network error: Cannot reach the server. Please check your connection.');
+        } else {
+            const errorMessage = err instanceof Error ? err.message : 'Could not save the item. Please try again.';
+            setError(errorMessage);
+        }
+        setSaveButtonState('error');
+        
+        // Reset to idle after 3 seconds
+        setTimeout(() => setSaveButtonState('idle'), 3000);
     }
   };
 
@@ -806,32 +913,52 @@ export default function Home() {
     setSavedList(updatedList);
 
     try {
+        console.log(`🗑️  Deleting saved item ${id}...`);
         const response = await fetch(`${API_URL}/saved-items/${id}`, { method: 'DELETE' });
+        
         if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+            console.error('❌ Delete failed:', errorData);
             setSavedList(originalList);
-            throw new Error('Failed to delete item from server.');
+            
+            // Provide specific error messages
+            if (response.status === 401) {
+                throw new Error('You need to be signed in to delete items.');
+            } else if (response.status === 404) {
+                throw new Error('Item not found or already deleted.');
+            } else {
+                throw new Error(errorData.details || errorData.message || 'Failed to delete item from server.');
+            }
         }
+        
+        console.log(`✅ Item ${id} deleted successfully`);
     } catch (err) {
-        console.error(err);
-        setError('Could not delete the item. Please try again.');
+        console.error('Delete error:', err);
+        const errorMsg = err instanceof Error ? err.message : 'Could not delete the item. Please try again.';
+        setError(errorMsg);
         setSavedList(originalList);
     }
   };
 
   const handleLoadSavedItem = (item: SavedItem) => {
     setProductLink(item.productLink);
-    setGeneratedContent(item.content);
+    setGeneratedContent({
+      video: item.video,
+      post: item.post,
+    });
     setEditableContent({
-        video: parseContent(item.content.video),
-        post: parseContent(item.content.post),
+        video: parseContent(item.video),
+        post: parseContent(item.post),
     });
     setActiveOutputTab('video');
     setTrendscore(null);
     setProductSummary(null);
     setProductFeatures(null);
     setAffiliatePotential(null);
+    setShopeeProductInfo(null);
     initializeOptionIndexes();
     setCurrentPage('generator');
+    setHasGeneratedAttempt(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
@@ -846,6 +973,7 @@ export default function Home() {
   };
 
   const handleSaveEdit = (sectionKey: string, index: number) => {
+    if (activeOutputTab === 'info') return;
     if (!editableContent[activeOutputTab]) return;
     const newEditableContent = JSON.parse(JSON.stringify(editableContent));
     newEditableContent[activeOutputTab]![sectionKey as keyof ParsedContent]![index] = editText;
@@ -908,7 +1036,11 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newPostPayload)
         });
-        if (!response.ok) throw new Error('Failed to schedule post.');
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.details || errorData.message || 'Failed to schedule post.');
+        }
 
         const scheduledPost = await response.json();
         const updatedPosts = [...scheduledPosts, scheduledPost].sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime());
@@ -917,7 +1049,8 @@ export default function Home() {
         handleCloseSocialModal();
     } catch (err) {
         console.error(err);
-        setError('Could not schedule the post. Please try again.');
+        const errorMsg = err instanceof Error ? err.message : 'Could not schedule the post. Please try again.';
+        setError(errorMsg);
     }
   };
   
@@ -1036,7 +1169,7 @@ export default function Home() {
   const renderGeneratorPage = () => {
     const visualizableKeys = new Set(
         activeOutputTab === 'video' 
-        ? ['idea', 'broll'] 
+        ? [] 
         : ['imagePrompt']
     );
 
@@ -1056,7 +1189,7 @@ export default function Home() {
         }, [] as ({ key: string; title: string; icon: string; })[][]);
 
     const renderPromptCard = (section: {key: string; title: string; icon: string;}, isVisual = false) => {
-        if (!section) return <div/>;
+        if (!section || activeOutputTab === 'info') return <div/>;
         
         const { key, title, icon } = section;
         const richTextFields = new Set(['body', 'caption']);
@@ -1261,11 +1394,25 @@ export default function Home() {
     <>
       <div className="form-card">
         <button className="accordion-header" onClick={() => setIsFormCollapsed(!isFormCollapsed)} aria-expanded={!isFormCollapsed}>
-            <h3>Generation Settings</h3>
+            <h3 className="input-title">
+              <span className="pill-icon" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" fill="url(#g2)" />
+                  <defs>
+                    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stopColor="#ff7b00" />
+                      <stop offset="1" stopColor="#00aaff" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </span>
+              <span className="pill-text">Input Settings</span>
+            </h3>
             <span className={`accordion-icon ${!isFormCollapsed ? 'open' : ''}`} aria-hidden="true"></span>
         </button>
         <div className={`accordion-content ${!isFormCollapsed ? 'open' : ''}`}>
-            <div className="accordion-content-inner">
+            <div className="accordion-content-inner form-with-analysis">
+                <div className="form-column">
                 <form className="input-form" onSubmit={handleGenerate}>
                     <div className="form-group">
                         <div className="label-with-action">
@@ -1294,8 +1441,13 @@ export default function Home() {
                     
                     <fieldset className="advanced-options-fieldset" disabled={isAnalyzing}>
                         <div className="advanced-options-grid">
-                            <div className="form-group full-width">
-                                <label htmlFor="goal" className="input-label">Content Goal</label>
+                            <div className="form-group">
+                                <div className="tooltip-wrapper">
+                                  <label htmlFor="goal" className="input-label">Content Goal</label>
+                                  <span className="tooltip-icon" tabIndex={0}>?
+                                    <span className="tooltip-content">Choose your primary objective for this content</span>
+                                  </span>
+                                </div>
                                 <select id="goal" name="goal" className="select-field" value={advancedInputs.goal} onChange={handleAdvancedInputChange}>
                                     <option>Awareness</option>
                                     <option>Engagement</option>
@@ -1305,18 +1457,12 @@ export default function Home() {
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label htmlFor="platform" className="input-label">Platform</label>
-                                <select id="platform" name="platform" className="select-field" value={advancedInputs.platform} onChange={handleAdvancedInputChange}>
-                                    <option>TikTok</option>
-                                    <option>Shopee Video</option>
-                                    <option>Instagram Reels</option>
-                                    <option>YouTube Shorts</option>
-                                    <option>Facebook</option>
-                                    <option>Threads</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="audienceBuyerType" className="input-label">Buyer Type</label>
+                                <div className="tooltip-wrapper">
+                                  <label htmlFor="audienceBuyerType" className="input-label">Buyer Type</label>
+                                  <span className="tooltip-icon" tabIndex={0}>?
+                                    <span className="tooltip-content">Who is your target customer?</span>
+                                  </span>
+                                </div>
                                 <input type="text" id="audienceBuyerType" name="audienceBuyerType" className="input-field" value={advancedInputs.audienceBuyerType} onChange={handleAdvancedInputChange} placeholder="e.g., Budget-conscious"/>
                             </div>
                             <div className="form-group">
@@ -1335,11 +1481,6 @@ export default function Home() {
                                     <option>30s</option>
                                     <option>40s+</option>
                                 </select>
-                            </div>
-
-                            <div className="form-group subtitle full-width">
-                                <h4>Creative Direction</h4>
-                                <p>Auto-filled based on your Content Goal. Feel free to customize!</p>
                             </div>
 
                             <div className="form-group">
@@ -1407,59 +1548,74 @@ export default function Home() {
                       {isLoading ? 'Generating...' : '✨ Generate Content'}
                     </button>
                 </form>
+                </div>
+                
+                {(trendscore !== null || productSummary || affiliatePotential || productFeatures) && (
+                  <div className="analysis-column">
+                    <div className="analysis-inline-section">
+                      <div className="analysis-inline-header">
+                        <span>📊</span>
+                        <h3>AI Analysis</h3>
+                      </div>
+                      
+                      <div className="analysis-inline-content">
+                        {trendscore !== null && (
+                          <div className="analysis-inline-item">
+                            <h4>Trend Score</h4>
+                            <div className="trend-score-display">
+                              <div className="trend-score-fill" style={{ width: `${trendscore}%` }}></div>
+                              <span className="trend-score-label">{trendscore}/100</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {affiliatePotential && (
+                          <div className="analysis-inline-item">
+                            <h4>Affiliate Potential</h4>
+                            <span className={`potential-badge potential-${affiliatePotential.toLowerCase()}`}>
+                              {affiliatePotential}
+                            </span>
+                          </div>
+                        )}
+
+                        {productSummary && (
+                          <div className="analysis-inline-item">
+                            <h4>Product Summary</h4>
+                            <div className="analysis-content">{productSummary}</div>
+                          </div>
+                        )}
+
+                        {productFeatures && productFeatures.length > 0 && (
+                          <div className="analysis-inline-item">
+                            <h4>Key Features</h4>
+                            <ul className="features-list">
+                              {productFeatures.map((feature, index) => (
+                                <li key={index}>{feature}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
             </div>
         </div>
       </div>
-       {(productSummary || affiliatePotential || trendscore !== null) && (
-        <div className="form-card">
-            <button className="accordion-header" onClick={() => setIsAnalysisCollapsed(!isAnalysisCollapsed)} aria-expanded={!isAnalysisCollapsed}>
-                <h3>🤖 AI Analysis Preview</h3>
-                <span className={`accordion-icon ${!isAnalysisCollapsed ? 'open' : ''}`} aria-hidden="true"></span>
-            </button>
-            <div className={`accordion-content ${!isAnalysisCollapsed ? 'open' : ''}`}>
-                 <div className="accordion-content-inner">
-                    <div className="preview-grid">
-                        <div className="preview-section">
-                            <h5>Product Summary</h5>
-                            <p>{productSummary}</p>
-                            {productFeatures && productFeatures.length > 0 && (
-                                <>
-                                    <h5 style={{marginTop: '1.25rem'}}>Specifications & Features</h5>
-                                    <ul className="features-list">
-                                        {productFeatures.map((feature, index) => (
-                                            <li key={index}>{feature}</li>
-                                        ))}
-                                    </ul>
-                                </>
-                            )}
-                        </div>
-                        <div className="preview-section">
-                            <h5>🔥 Trend Score</h5>
-                            {trendscore !== null && (
-                                <div className="trendscore-bar">
-                                    <div className="trendscore-bar-fill" style={{ width: `${trendscore}%` }}></div>
-                                    <span className="trendscore-label">{trendscore} / 100</span>
-                                </div>
-                            )}
-                        </div>
-                        <div className="preview-section">
-                            <h5>📈 Affiliate Potential</h5>
-                            {affiliatePotential && (
-                                <span className={`potential-badge potential-${affiliatePotential.toLowerCase()}`}>
-                                    {affiliatePotential}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )}
 
       {isLoading && !generatedContent.video && (
         <div className="loading-indicator">
           <div className="spinner"></div>
-          <p>Generating your content...</p>
+          <div className="loading-progress">
+            <p className="loading-title">✨ Creating your content...</p>
+            <p className="loading-subtitle">This may take 20-40 seconds</p>
+            <div className="loading-steps">
+              <div className="step">🤖 Analyzing product...</div>
+              <div className="step">📝 Crafting video script...</div>
+              <div className="step">✍️ Writing social post...</div>
+              <div className="step">🎨 Finalizing content...</div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1482,36 +1638,146 @@ export default function Home() {
           </div>
         </div>
       )}
-      
-      {(generatedContent.video || generatedContent.post || (!isLoading && !error)) && (
-        <>
-        {(generatedContent.video || generatedContent.post) && (
-            <>
-            <div className="output-controls">
-                <div className="segmented-control">
-                    <button type="button" className={activeOutputTab === 'video' ? 'active' : ''} onClick={() => setActiveOutputTab('video')}>🎬 Short-form Video</button>
-                    <button type="button" className={activeOutputTab === 'post' ? 'active' : ''} onClick={() => setActiveOutputTab('post')}>✍️ Threads / FB Post</button>
-                </div>
-                <div className="export-actions">
-                    <button onClick={handleSaveToList} className="export-button save-button">💾 Save</button>
-                    <button onClick={handleOpenSocialModal} className="export-button social-button">🗓️ Schedule Post</button>
-                    <button onClick={handleDownloadTxt} className="export-button">Download .txt</button>
-                    {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && <button onClick={handleShare} className="export-button">Share</button>}
-                    <button onClick={handleClear} className="export-button clear-button">Clear</button>
-                </div>
+
+      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || shopeeProductInfo || error)) && (
+        <div className="output-actions-section-top">
+          <div className="output-actions-left">
+            <span className="output-title">
+              <span className="pill-icon" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" fill="url(#g)" />
+                  <defs>
+                    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stopColor="#ff7b00" />
+                      <stop offset="1" stopColor="#00aaff" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </span>
+              <span className="pill-text">Output</span>
+            </span>
+            <div className="output-tab-selector">
+              <button 
+                type="button" 
+                className={`output-tab-btn ${activeOutputTab === 'video' ? 'active' : ''}`} 
+                onClick={() => setActiveOutputTab('video')}
+                disabled={!generatedContent.video && !generatedContent.post}
+              >
+                🎬 Video
+              </button>
+              <button 
+                type="button" 
+                className={`output-tab-btn ${activeOutputTab === 'post' ? 'active' : ''}`} 
+                onClick={() => setActiveOutputTab('post')}
+                disabled={!generatedContent.video && !generatedContent.post}
+              >
+                ✍️ Post
+              </button>
+              <button 
+                type="button" 
+                className={`output-tab-btn ${activeOutputTab === 'info' ? 'active' : ''}`} 
+                onClick={() => setActiveOutputTab('info')}
+                disabled={!shopeeProductInfo}
+              >
+                ℹ️ Info
+              </button>
             </div>
-            </>
-        )}
-        <div className="output-container">
-            {visualizableSections.map(section => 
-                 React.cloneElement(renderPromptCard(section, true), { key: section.key })
+          </div>
+          <div className="output-actions-group">
+            <button 
+              onClick={handleSaveToList} 
+              className={`output-action-btn primary ${saveButtonState}`}
+              disabled={saveButtonState === 'loading'}
+            >
+              💾 {saveButtonState === 'idle' && 'Save'}
+              {saveButtonState === 'loading' && 'Saving...'}
+              {saveButtonState === 'success' && 'Saved!'}
+              {saveButtonState === 'error' && 'Failed'}
+            </button>
+            <button onClick={handleOpenSocialModal} className="output-action-btn primary">
+              🗓️ Schedule
+            </button>
+            <button onClick={handleDownloadTxt} className="output-action-btn">
+              ⬇️ Download
+            </button>
+            {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
+              <button onClick={handleShare} className="output-action-btn">
+                🔗 Share
+              </button>
             )}
-            {chunkedNonVisualizableSections.map((pair, index) => (
-                <div key={index} className="standard-section-row">
-                    {renderPromptCard(pair[0])}
-                    {pair[1] ? renderPromptCard(pair[1]) : <div />}
+            <button onClick={handleClear} className="output-action-btn clear">
+              🗑️ Clear
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || shopeeProductInfo || error)) && (
+        <>
+        <div className="output-container">
+            {activeOutputTab === 'info' && shopeeProductInfo ? (
+              <div className="shopee-info-card">
+                <div className="card-header">
+                  <h3>📦 Product Information</h3>
                 </div>
-            ))}
+                <div className="shopee-info-content">
+                  <div className="shopee-info-image">
+                    <Image 
+                      src={shopeeProductInfo.image} 
+                      alt={shopeeProductInfo.title}
+                      width={400}
+                      height={400}
+                      unoptimized
+                      className="product-image"
+                    />
+                  </div>
+                  <div className="shopee-info-details">
+                    <div className="info-field">
+                      <h4>🏷️ Title</h4>
+                      <p>{shopeeProductInfo.title}</p>
+                    </div>
+                    <div className="info-field">
+                      <h4>💰 Price</h4>
+                      <p className="price-text">{shopeeProductInfo.price}</p>
+                    </div>
+                    <div className="info-field">
+                      <h4>📄 Description</h4>
+                      <p>{shopeeProductInfo.description}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                {activeOutputTab === 'post' ? (
+                  <>
+                    {/* Row 1: Body + Image Prompt */}
+                    <div className="standard-section-row">
+                      {renderPromptCard(sectionsConfig.find(s => s.key === 'body')!)}
+                      {renderPromptCard(sectionsConfig.find(s => s.key === 'imagePrompt')!, true)}
+                    </div>
+                    {/* Row 2: Hook + Hashtags + CTA */}
+                    <div className="three-column-row">
+                      {renderPromptCard(sectionsConfig.find(s => s.key === 'hook')!)}
+                      {renderPromptCard(sectionsConfig.find(s => s.key === 'hashtags')!)}
+                      {renderPromptCard(sectionsConfig.find(s => s.key === 'cta')!)}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {visualizableSections.map(section => 
+                         React.cloneElement(renderPromptCard(section, true), { key: section.key })
+                    )}
+                    {chunkedNonVisualizableSections.map((pair, index) => (
+                        <div key={index} className="standard-section-row">
+                            {renderPromptCard(pair[0])}
+                            {pair[1] ? renderPromptCard(pair[1]) : <div />}
+                        </div>
+                    ))}
+                  </>
+                )}
+              </>
+            )}
         </div>
         </>
       )}
@@ -1557,7 +1823,13 @@ export default function Home() {
                                     <span className="saved-item-link">{item.productLink}</span>
                                 </div>
                                 <div className="saved-item-actions">
-                                    <button onClick={() => handleLoadSavedItem(item)} className="saved-item-button load-button">Load</button>
+                                    <button onClick={() => handleLoadSavedItem(item)} className="saved-item-button load-button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                            <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                                        </svg>
+                                        Load
+                                    </button>
                                     <button onClick={() => handleDeleteSavedItem(item.id)} className="saved-item-button delete-button" aria-label="Delete saved item">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                             <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
@@ -1640,54 +1912,39 @@ export default function Home() {
   return (
     <div className="app-container">
       <header className="header">
-        <div className="header-top">
+        <div className="header-left">
           <div className="branding">
             <h1>Affiliate Content Genie</h1>
             <p>Your AI assistant for viral Shopee & TikTok content</p>
           </div>
-          <div className="header-actions">
-            <AuthButton />
-            <BodyAttrDebugger />
-          </div>
         </div>
-        <nav className="header-nav">
-          <div className="nav-container">
+        
+        <div className="header-center">
+          <nav className="header-nav">
             <button 
-                className={`nav-button ${currentPage === 'generator' ? 'active' : ''}`} 
-                onClick={() => setCurrentPage('generator')}
-                aria-label="Generator"
+              className={`header-nav-button ${currentPage === 'generator' ? 'active' : ''}`} 
+              onClick={() => setCurrentPage('generator')}
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.292-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.292c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
-                </svg>
-                <span>Generator</span>
+              Generator
             </button>
             <button 
-                className={`nav-button ${currentPage === 'saved' ? 'active' : ''}`} 
-                onClick={() => setCurrentPage('saved')}
-                aria-label="Saved Ideas"
+              className={`header-nav-button ${currentPage === 'saved' ? 'active' : ''}`} 
+              onClick={() => setCurrentPage('saved')}
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
-                </svg>
-                <span>Saved</span>
-                {savedList.length > 0 && <span className="saved-count-badge">{savedList.length}</span>}
+              Saved {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
             </button>
             <button 
-                className={`nav-button ${currentPage === 'scheduler' ? 'active' : ''}`} 
-                onClick={() => setCurrentPage('scheduler')}
-                aria-label="Scheduler"
+              className={`header-nav-button ${currentPage === 'scheduler' ? 'active' : ''}`} 
+              onClick={() => setCurrentPage('scheduler')}
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
-                    <path d="M11 7.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5-.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
-                </svg>
-                <span>Scheduler</span>
-                {scheduledPosts.length > 0 && <span className="saved-count-badge">{scheduledPosts.length}</span>}
+              Scheduler {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
             </button>
-          </div>
-        </nav>
+          </nav>
+        </div>
+        
+        <div className="header-right">
+          <AuthButton />
+        </div>
       </header>
 
       <main className="main-content">
@@ -1695,7 +1952,18 @@ export default function Home() {
         {currentPage === 'saved' && renderSavedPage()}
         {currentPage === 'scheduler' && renderSchedulerPage()}
       </main>
-      
+
+      <footer className="app-footer">
+        <div className="footer-content">
+          <p className="footer-text">
+            © {new Date().getFullYear()} Affiliate Content Genie. All rights reserved.
+          </p>
+          <div className="footer-links">
+            <a href="/privacy" className="footer-link">Privacy Policy</a>
+            <a href="/terms" className="footer-link">Terms of Service</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
