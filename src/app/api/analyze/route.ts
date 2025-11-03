@@ -82,7 +82,7 @@ Provide ONLY valid JSON, no additional text.`;
       } else {
         throw new Error('No JSON found in response');
       }
-    } catch (parseError) {
+    } catch {
       console.error('Failed to parse AI response:', aiResponse);
       // Fallback to basic analysis
       analysisResult = {
@@ -115,7 +115,10 @@ Provide ONLY valid JSON, no additional text.`;
     return NextResponse.json(finalResponse);
 
   } catch (error) {
-    console.error('❌ Analysis API error:', error);
-    return NextResponse.json({ message: 'Error analyzing product. Please try again.' }, { status: 500 });
+    console.error('❌ Error in analyze route:', error);
+    return NextResponse.json(
+      { error: 'Failed to analyze product' },
+      { status: 500 }
+    );
   }
 }

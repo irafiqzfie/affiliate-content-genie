@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function PrivacyPage() {
   return (
     <div className="privacy-page">
@@ -82,7 +84,7 @@ export default function PrivacyPage() {
         </div>
 
         <footer className="privacy-footer">
-          <a href="/" className="back-link">← Back to Home</a>
+          <Link href="/" className="back-link">← Back to Home</Link>
         </footer>
       </div>
     </div>

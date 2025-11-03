@@ -4,7 +4,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import AuthButton from './components/AuthButton';
-import BodyAttrDebugger from './components/BodyAttrDebugger';
 
 const API_URL = '/api';
 const LOCAL_STORAGE_KEY = 'affteContentGenieilia_savedContent_v2';
@@ -216,7 +215,6 @@ export default function Home() {
   const [savedSearchTerm, setSavedSearchTerm] = useState('');
   const [savedSortOrder, setSavedSortOrder] = useState('newest');
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
-  const [isAnalysisCollapsed, setIsAnalysisCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler'>('generator');
   const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post' | 'info'>('video');
   const [trendscore, setTrendscore] = useState<number | null>(null);
@@ -391,7 +389,7 @@ export default function Home() {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         if (productLink && !isLoading && !isAnalyzing) {
-          handleGenerate(new Event('submit') as any);
+          handleGenerate(new Event('submit') as React.FormEvent);
         }
       }
     };
@@ -466,7 +464,6 @@ export default function Home() {
         setProductFeatures(suggestions.productFeatures);
         setAffiliatePotential(suggestions.affiliatePotential);
         setShopeeProductInfo(suggestions.shopeeProductInfo || null);
-        setIsAnalysisCollapsed(false);
 
     } catch (err: unknown) {
         console.error('Analysis failed:', err);
@@ -477,7 +474,7 @@ export default function Home() {
     }
   };
 
-  const handleGenerate = async (e: React.FormEvent) => {
+  const handleGenerate = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productLink || isLoading) return;
 
@@ -580,7 +577,7 @@ export default function Home() {
         } finally {
       setIsLoading(false);
     }
-  };
+  }, [productLink, isLoading, shopeeProductInfo, advancedInputs, initializeOptionIndexes, parseContent]);
   
   const handleGenerateImage = useCallback(async (key: string, promptText: string) => {
     console.log('🎨 Generating image for key:', key, 'with prompt:', promptText.substring(0, 100) + '...');
@@ -1628,7 +1625,11 @@ export default function Home() {
               onClick={() => {
                 setError(null);
                 if (productLink) {
-                  handleGenerate(new Event('submit') as any);
+                  const fakeEvent = {
+                    preventDefault: () => {},
+                    stopPropagation: () => {},
+                  } as React.FormEvent;
+                  handleGenerate(fakeEvent);
                 }
               }}
               disabled={isLoading || !productLink}

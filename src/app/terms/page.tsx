@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function TermsPage() {
   return (
     <div className="privacy-page">
@@ -76,7 +78,7 @@ export default function TermsPage() {
         </div>
 
         <footer className="privacy-footer">
-          <a href="/" className="back-link">← Back to Home</a>
+          <Link href="/" className="back-link">← Back to Home</Link>
         </footer>
       </div>
     </div>
