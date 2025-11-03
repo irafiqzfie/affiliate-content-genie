@@ -16,10 +16,41 @@
   --success-color: #48bb78;
 
   --border-radius: 0;
+  --button-radius: 9999px; /* Pill-style buttons */
   
   /* Layout Variables - Adjust these for different content widths */
   --content-max-width: 1600px; /* Main content container width */
   --content-padding: 0.5rem;   /* Horizontal padding inside content area */
+}
+
+/* Universal button pill style */
+button,
+.auth-button,
+.nav-button,
+.header-nav-button,
+.analyze-button,
+.generate-button,
+.retry-button,
+.export-button,
+.save-button,
+.social-button,
+.clear-button,
+.visualize-button,
+.generate-video-button,
+.copy-button,
+.edit-button,
+.rte-button,
+.save-edit-button,
+.cancel-edit-button,
+.download-media-button,
+.saved-item-button,
+.load-button,
+.delete-button,
+.modal-close-button,
+.modal-footer-button,
+.social-platform-button,
+.back-button {
+  border-radius: var(--button-radius) !important;
 }
 
 html {
@@ -174,41 +205,41 @@ body {
   transition: all 0.3s ease;
   border: 1px solid transparent;
   white-space: nowrap;
-}
+  border-radius: 9999px;}
 
 .auth-button svg {
   width: 16px;
   height: 16px;
-}
+  border-radius: 9999px;}
 
 .auth-button-signin {
   background: var(--primary-gradient);
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(255, 127, 0, 0.25);
-}
+  border-radius: 9999px;}
 
 .auth-button-signin:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 127, 0, 0.35);
-}
+  border-radius: 9999px;}
 
 .auth-button-signin:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(255, 127, 0, 0.2);
-}
+  border-radius: 9999px;}
 
 .auth-button-signout {
   background: var(--glass-bg);
   color: var(--primary-text-color);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
-}
+  border-radius: 9999px;}
 
 .auth-button-signout:hover {
   background: var(--glass-bg-hover);
   border-color: var(--accent-orange);
   transform: translateY(-1px);
-}
+  border-radius: 9999px;}
 
 .auth-signed-in {
   display: flex;
@@ -270,14 +301,14 @@ body {
     transition: all 0.25s ease-in-out;
     position: relative;
     border: 1px solid transparent;
-}
+  border-radius: 9999px;}
 
 .nav-button:hover {
     color: var(--primary-text-color);
     background-color: var(--glass-bg-hover);
     border-color: var(--glass-border);
     transform: translateY(-1px);
-}
+  border-radius: 9999px;}
 
 .nav-button.active {
     color: var(--primary-text-color);
@@ -287,17 +318,17 @@ body {
     background-image: linear-gradient(var(--glass-bg-hover), var(--glass-bg-hover)), var(--primary-gradient);
     background-origin: border-box;
     background-clip: padding-box, border-box;
-}
+  border-radius: 9999px;}
 
 .nav-button svg {
     width: 20px;
     height: 20px;
     transition: transform 0.25s ease;
-}
+  border-radius: 9999px;}
 
 .nav-button.active svg {
     transform: scale(1.1);
-}
+  border-radius: 9999px;}
 
 .saved-count-badge {
     position: absolute;
@@ -333,14 +364,14 @@ body {
     transition: all 0.25s ease;
     position: relative;
     border: 1px solid transparent;
-}
+  border-radius: 9999px;}
 
 .header-nav-button:hover {
     color: var(--primary-text-color);
     background-color: var(--glass-bg-hover);
     border-color: var(--glass-border);
     transform: translateY(-1px);
-}
+  border-radius: 9999px;}
 
 .header-nav-button.active {
     color: var(--primary-text-color);
@@ -350,7 +381,7 @@ body {
     background-image: linear-gradient(var(--glass-bg-hover), var(--glass-bg-hover)), var(--primary-gradient);
     background-origin: border-box;
     background-clip: padding-box, border-box;
-}
+  border-radius: 9999px;}
 
 .count-badge {
     background: var(--primary-gradient);
@@ -618,7 +649,7 @@ body {
     white-space: nowrap;
     transition: all 0.3s ease;
     backdrop-filter: blur(8px);
-}
+  border-radius: 9999px;}
 
 .analyze-button:hover:not(:disabled) {
     background-image: var(--primary-gradient);
@@ -626,13 +657,13 @@ body {
     color: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 123, 0, 0.3);
-}
+  border-radius: 9999px;}
 
 .analyze-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
-}
+  border-radius: 9999px;}
 
 .input-field, .select-field {
   width: 100%;
@@ -848,7 +879,7 @@ body {
   box-shadow: 0 8px 25px rgba(255, 123, 0, 0.3);
   position: relative;
   overflow: hidden;
-}
+  border-radius: 9999px;}
 
 .generate-button::before {
   content: '';
@@ -859,27 +890,27 @@ body {
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s;
-}
+  border-radius: 9999px;}
 
 .generate-button:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 12px 35px rgba(255, 123, 0, 0.4);
   background-image: var(--primary-gradient-hover);
-}
+  border-radius: 9999px;}
 
 .generate-button:hover:not(:disabled)::before {
   left: 100%;
-}
+  border-radius: 9999px;}
 
 .generate-button:active:not(:disabled) {
   transform: translateY(-1px);
-}
+  border-radius: 9999px;}
 
 .generate-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-}
+  border-radius: 9999px;}
 
 .loading-indicator {
   display: flex;
@@ -1014,19 +1045,19 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
-}
+  border-radius: 9999px;}
 
 .retry-button:hover:not(:disabled) {
   background: linear-gradient(135deg, #c53030, #a02929);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(229, 62, 62, 0.4);
-}
+  border-radius: 9999px;}
 
 .retry-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-}
+  border-radius: 9999px;}
 
 /* Output Actions Section (Top bar with tabs and action buttons) */
 .output-actions-section-top {
@@ -1225,7 +1256,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     position: relative;
-}
+  border-radius: 9999px;}
 
 .segmented-control button.active {
     background-image: var(--primary-gradient);
@@ -1233,7 +1264,7 @@ body {
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(255, 123, 0, 0.3);
     transform: scale(1.02);
-}
+  border-radius: 9999px;}
 
 .export-actions {
     display: flex;
@@ -1254,7 +1285,7 @@ body {
     transition: all 0.3s ease;
     backdrop-filter: blur(8px);
     white-space: nowrap;
-}
+  border-radius: 9999px;}
 
 .export-button:hover {
     color: var(--primary-text-color);
@@ -1262,7 +1293,7 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-}
+  border-radius: 9999px;}
 
 .save-button {
     position: relative;
@@ -1271,35 +1302,35 @@ body {
     background-origin: border-box;
     background-clip: padding-box, border-box;
     color: var(--primary-text-color);
-}
+  border-radius: 9999px;}
 .save-button:hover {
     background-image: var(--primary-gradient);
     background-clip: border-box;
     color: #ffffff;
-}
+  border-radius: 9999px;}
 
 .social-button {
     background-image: var(--primary-gradient);
     border: 1px solid transparent;
     color: #ffffff;
     font-weight: 500;
-}
+  border-radius: 9999px;}
 
 .social-button:hover {
     background-image: var(--primary-gradient-hover);
     border-color: transparent;
     color: #ffffff;
-}
+  border-radius: 9999px;}
 
 .clear-button {
     border-color: var(--error-color);
     color: var(--error-color);
-}
+  border-radius: 9999px;}
 .clear-button:hover {
     background-color: var(--error-color);
     border-color: var(--error-color);
     color: #ffffff;
-}
+  border-radius: 9999px;}
 
 .output-container {
   display: flex;
@@ -1556,34 +1587,34 @@ body {
     transition: all 0.2s;
     white-space: nowrap;
     border: 1px solid transparent;
-}
+  border-radius: 9999px;}
 
 .visualize-button {
     background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), var(--primary-gradient);
     background-origin: border-box;
     background-clip: padding-box, border-box;
     color: var(--primary-text-color);
-}
+  border-radius: 9999px;}
 .visualize-button:hover:not(:disabled) {
     background-image: var(--primary-gradient);
     background-clip: border-box;
-}
+  border-radius: 9999px;}
 
 .generate-video-button {
     background-image: linear-gradient(var(--glass-bg), var(--glass-bg)), var(--primary-gradient);
     background-origin: border-box;
     background-clip: padding-box, border-box;
     color: var(--primary-text-color);
-}
+  border-radius: 9999px;}
 .generate-video-button:hover:not(:disabled) {
     background-image: var(--primary-gradient);
     background-clip: border-box;
-}
+  border-radius: 9999px;}
 
 .visualize-button:disabled, .generate-video-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-}
+  border-radius: 9999px;}
 
 .copy-button, .edit-button {
     position: relative;
@@ -1598,12 +1629,12 @@ body {
     justify-content: center;
     transition: all 0.3s ease;
     backdrop-filter: blur(8px);
-}
+  border-radius: 9999px;}
 
 .copy-button svg, .edit-button svg {
     width: 18px;
     height: 18px;
-}
+  border-radius: 9999px;}
 
 .copy-button:hover, .edit-button:hover {
     color: var(--primary-text-color);
@@ -1611,7 +1642,7 @@ body {
     background: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
+  border-radius: 9999px;}
 
 .copy-tooltip {
     position: absolute;
@@ -1632,7 +1663,7 @@ body {
 .copy-button:hover .copy-tooltip {
     opacity: 1;
     visibility: visible;
-}
+  border-radius: 9999px;}
 
 .editable-textarea {
     width: 100%;
@@ -1676,22 +1707,22 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-}
+  border-radius: 9999px;}
 
 .rte-button:hover {
     background-color: var(--glass-bg);
     color: var(--primary-text-color);
-}
+  border-radius: 9999px;}
 
 .rte-button.active {
     background-image: var(--primary-gradient);
     color: #fff;
-}
+  border-radius: 9999px;}
 
 .rte-button svg {
     width: 16px;
     height: 16px;
-}
+  border-radius: 9999px;}
 
 .editable-div {
     width: 100%;
@@ -1733,25 +1764,25 @@ body {
     cursor: pointer;
     border: 1px solid;
     transition: all 0.2s;
-}
+  border-radius: 9999px;}
 
 .cancel-edit-button {
     background-color: transparent;
     border-color: var(--glass-border);
     color: var(--secondary-text-color);
-}
+  border-radius: 9999px;}
 .cancel-edit-button:hover {
     background-color: var(--glass-bg-hover);
-}
+  border-radius: 9999px;}
 
 .save-edit-button {
     background-image: var(--primary-gradient);
     border-color: transparent;
     color: #ffffff;
-}
+  border-radius: 9999px;}
 .save-edit-button:hover {
     background-image: var(--primary-gradient-hover);
-}
+  border-radius: 9999px;}
 
 .visual-card-body {
     display: grid;
@@ -1856,11 +1887,11 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: background-color 0.2s;
-}
+  border-radius: 9999px;}
 
 .download-media-button:hover {
     background-color: rgba(45, 55, 72, 0.9);
-}
+  border-radius: 9999px;}
 
 .skeleton-loader {
     width: 100%;
@@ -2136,48 +2167,48 @@ body {
     align-items: center;
     gap: 0.5rem;
     white-space: nowrap;
-}
+  border-radius: 9999px;}
 
 .load-button {
     background: var(--primary-gradient);
     border: none;
     color: #ffffff;
     box-shadow: 0 2px 8px rgba(255, 123, 0, 0.25);
-}
+  border-radius: 9999px;}
 
 .load-button:hover {
     background: var(--primary-gradient-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(255, 123, 0, 0.4);
-}
+  border-radius: 9999px;}
 
 .load-button:active {
     transform: translateY(0);
-}
+  border-radius: 9999px;}
 
 .delete-button {
     background: rgba(229, 62, 62, 0.1);
     border: 1px solid rgba(229, 62, 62, 0.3);
     color: var(--secondary-text-color);
     padding: 0.625rem;
-}
+  border-radius: 9999px;}
 
 .delete-button svg {
     display: block;
     width: 18px;
     height: 18px;
-}
+  border-radius: 9999px;}
 
 .delete-button:hover {
     border-color: var(--error-color);
     color: var(--error-color);
     background: rgba(229, 62, 62, 0.2);
     transform: scale(1.05);
-}
+  border-radius: 9999px;}
 
 .delete-button:active {
     transform: scale(0.98);
-}
+  border-radius: 9999px;}
 
 .no-results-message {
     text-align: center;
@@ -2300,12 +2331,12 @@ body {
     align-items: center;
     gap: 0.5rem;
     margin-left: auto;
-}
+  border-radius: 9999px;}
 .scheduled-item-button.cancel-button:hover {
     border-color: var(--error-color);
     color: var(--error-color);
     background-color: var(--glass-bg-hover);
-}
+  border-radius: 9999px;}
 
 /* --- Modal Styles --- */
 .modal-overlay {
@@ -2369,11 +2400,11 @@ body {
     line-height: 1;
     cursor: pointer;
     transition: color 0.2s;
-}
+  border-radius: 9999px;}
 
 .modal-close-button:hover {
     color: var(--primary-text-color);
-}
+  border-radius: 9999px;}
 
 .modal-body {
     padding: 0.5rem;
@@ -2489,24 +2520,24 @@ body {
     font-family: 'Inter', sans-serif;
     cursor: pointer;
     transition: all 0.2s;
-}
+  border-radius: 9999px;}
 .modal-footer-button.secondary {
     background: none;
     border-color: var(--glass-border);
     color: var(--secondary-text-color);
-}
+  border-radius: 9999px;}
 .modal-footer-button.secondary:hover {
     background-color: var(--glass-bg-hover);
     color: var(--primary-text-color);
-}
+  border-radius: 9999px;}
 .modal-footer-button.primary {
     background-image: var(--primary-gradient);
     border-color: transparent;
     color: #fff;
-}
+  border-radius: 9999px;}
 .modal-footer-button.primary:hover {
     background-image: var(--primary-gradient-hover);
-}
+  border-radius: 9999px;}
 
 
 .social-platform-button {
@@ -2518,30 +2549,30 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     flex: 1;
-}
+  border-radius: 9999px;}
 
 .social-platform-button.facebook {
     background-color: #1877F2;
     border-color: #1877F2;
     color: white;
-}
+  border-radius: 9999px;}
 .social-platform-button.facebook:hover:not(:disabled) {
     background-color: #4091ff;
-}
+  border-radius: 9999px;}
 
 .social-platform-button.threads {
     background-color: #1c1e21;
     border-color: #8a8d91;
     color: white;
-}
+  border-radius: 9999px;}
 .social-platform-button.threads:hover:not(:disabled) {
     border-color: #fff;
-}
+  border-radius: 9999px;}
 
 .social-platform-button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-}
+  border-radius: 9999px;}
 
 /* --- Privacy Page Styles --- */
 .privacy-page {
@@ -2915,7 +2946,7 @@ body {
     flex: 1;
     min-width: 120px;
     padding: 0.75rem 1rem;
-  }
+    border-radius: 9999px;}
 }
 
 @media (max-width: 768px) {
@@ -2948,12 +2979,12 @@ body {
     font-size: 0.875rem;
     padding: 0.75rem 0.875rem;
     gap: 0.5rem;
-  }
+    border-radius: 9999px;}
   
   .nav-button svg {
     width: 18px;
     height: 18px;
-  }
+    border-radius: 9999px;}
   
   .output-controls {
     flex-direction: column;
@@ -2975,7 +3006,7 @@ body {
     flex: 1;
     min-width: 120px;
     text-align: center;
-  }
+    border-radius: 9999px;}
   
   .saved-list-header {
     flex-direction: column;
@@ -3047,7 +3078,7 @@ body {
   .nav-button {
     width: 100%;
     justify-content: center;
-  }
+    border-radius: 9999px;}
   
   .label-with-action {
     flex-direction: column;
@@ -3058,7 +3089,7 @@ body {
   .analyze-button {
     width: 100%;
     text-align: center;
-  }
+    border-radius: 9999px;}
   
   .option-selector {
     justify-content: center;
@@ -3070,6 +3101,7 @@ body {
   
   .export-button {
     width: 100%;
-  }
+    border-radius: 9999px;}
 }
+
 
