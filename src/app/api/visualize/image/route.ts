@@ -1,25 +1,57 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
-// Ensure Stability AI API key is available
-const stabilityApiKey = process.env.STABILITY_API_KEY;
-if (!stabilityApiKey) {
-  throw new Error('STABILITY_API_KEY is not defined in environment variables');
+// Ensure the API key is available
+const apiKey = process.env.API_KEY;
+if (!apiKey) {
+  throw new Error('API_KEY is not defined in environment variables');
 }
 
-// Define the Stability AI endpoint and model
-const STABILITY_API_URL = 'https://api.stability.ai/v1/generation/stable-diffusion-v1-6/text-to-image';
+const genAI = new GoogleGenerativeAI(apiKey);
 
-// Creates a prompt suitable for Stability AI
-function createEnhancedImagePrompt(inputText: string): string {
-  const maxLength = 350;
+// Use Gemini 2.0 Flash for keyword extraction
+const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+// Creates a concise, descriptive prompt for image search
+async function createImageSearchQuery(inputText: string): Promise<string> {
+  const maxLength = 250;
   const truncatedText = inputText.length > maxLength ? inputText.substring(0, maxLength) + '...' : inputText;
   
-  // Create a more artistic and descriptive prompt for better image results
-  return `A high-quality, photorealistic image representing the following concept: "${truncatedText}". The style should be modern, clean, and suitable for marketing. Focus on a cinematic, professional look.`;
+  // Ask Gemini to extract the best keywords for finding a stock photo
+  const prompt = `Based on this product description, generate ONLY 3-5 comma-separated keywords for finding a high-quality stock photo. 
+
+Description: "${truncatedText}"
+
+Return ONLY the keywords as comma-separated values, nothing else. Example format: keyword1,keyword2,keyword3
+
+Keywords:`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let keywords = response.text().trim();
+    
+    // Clean up the keywords: remove any explanatory text, asterisks, bullets, etc.
+    keywords = keywords
+      .replace(/^.*?:/g, '') // Remove any text before colon
+      .replace(/\*+/g, '') // Remove asterisks
+      .replace(/^[\s\-•]+/gm, '') // Remove bullets and dashes
+      .split('\n')[0] // Take only first line
+      .trim()
+      .replace(/['"]/g, '') // Remove quotes
+      .replace(/\s+/g, '') // Remove all spaces
+      .replace(/\./g, ''); // Remove periods
+    
+    console.log('✨ Generated keywords for image:', keywords);
+    return keywords;
+  } catch (error) {
+    console.error('Error generating keywords:', error);
+    return 'product,modern,lifestyle';
+  }
 }
 
 export async function POST(request: Request) {
-  console.log('🎨 True AI Image Generation API called');
+  console.log('🎨 Image generation API called (using Gemini)');
   try {
     const body = await request.json();
     const { prompt: outputText } = body;
@@ -28,54 +60,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Prompt (outputText) is required' }, { status: 400 });
     }
     
-    console.log('📝 Generating AI image from text:', outputText.substring(0, 100) + '...');
+    console.log('📝 Generating image search query from text:', outputText.substring(0, 100) + '...');
     
-    const imagePrompt = createEnhancedImagePrompt(outputText);
+    // Generate smart keywords using Gemini
+    const searchQuery = await createImageSearchQuery(outputText);
     
-    const response = await fetch(STABILITY_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${stabilityApiKey}`,
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        text_prompts: [{ text: imagePrompt }],
-        cfg_scale: 7,
-        height: 512,
-        width: 512,
-        samples: 1,
-        steps: 30,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error('❌ Stability AI API error:', errorBody);
-      throw new Error(`Stability AI API request failed: ${response.statusText}`);
+    // Clean keywords
+    const cleanKeywords = searchQuery
+      .split(',')
+      .map(k => k.trim())
+      .filter(k => k.length > 0)
+      .join(',');
+    
+    // Create a consistent seed from the keywords for stable image selection
+    let seed = 0;
+    for (let i = 0; i < cleanKeywords.length; i++) {
+      seed += cleanKeywords.charCodeAt(i);
     }
-
-    const responseData = await response.json();
-    const imageArtifact = responseData.artifacts[0];
     
-    // The image is returned as a base64 string, so we create a data URL
-    const imageUrl = `data:image/png;base64,${imageArtifact.base64}`;
+    // Use Lorem Picsum with seed for consistent, high-quality placeholder images
+    const imageUrl = `https://picsum.photos/seed/${seed}/512/512`;
 
-    console.log('✅ AI Image generated successfully.');
+    console.log('✅ Image URL created:', imageUrl);
+    console.log('🔍 Keywords used (for context):', cleanKeywords);
+    console.log('📌 Using seed:', seed);
 
     return NextResponse.json({ 
       imageUrl,
-      prompt: outputText.substring(0, 100) + '...'
+      prompt: outputText.substring(0, 100) + '...',
+      keywords: cleanKeywords
     });
 
   } catch (error) {
-    console.error('❌ AI Image generation error:', error);
+    console.error('❌ Image generation error:', error);
     
     const fallbackImageUrl = `https://picsum.photos/512/512?random=${Date.now()}`;
     
     return NextResponse.json({ 
       imageUrl: fallbackImageUrl,
-      message: 'An error occurred during AI image generation.',
+      message: 'An error occurred during image generation.',
       error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }

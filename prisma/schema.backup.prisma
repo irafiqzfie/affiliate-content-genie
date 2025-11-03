@@ -1,0 +1,131 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  image     String?
+  createdAt DateTime @default(now())
+  accounts  Account[]
+  savedItems SavedItem[]
+  scheduledPosts ScheduledPost[]
+}
+
+model SavedItem {
+  id         Int      @id @default(autoincrement())
+  userId     String?
+  title      String
+  productLink String
+  video      String
+  post       String
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+model ScheduledPost {
+  id            Int      @id @default(autoincrement())
+  userId        String?
+  platform      String
+  scheduledTime DateTime
+  imageUrl      String
+  caption       String
+  status        String
+  createdAt     DateTime @default(now())
+  user          User?    @relation(fields: [userId], references: [id])
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String?
+  provider          String
+  providerAccountId String
+  access_token      String?
+  refresh_token     String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+datasource db {
+  // For production we use PostgreSQL. In local development you can still
+  // point DATABASE_URL at a SQLite file (file:./dev.db) but ensure you
+  // generate / apply migrations against the intended database when
+  // deploying to production.
+  // Set DATABASE_URL (in Vercel) to a postgres:// URL and run
+  // `npx prisma migrate deploy` during your build or CI.
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  image     String?
+  createdAt DateTime @default(now())
+  accounts  Account[]
+  savedItems SavedItem[]
+  scheduledPosts ScheduledPost[]
+}
+
+model SavedItem {
+  id         Int      @id @default(autoincrement())
+  userId     String?
+  title      String
+  productLink String
+  video      String
+  post       String
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+model ScheduledPost {
+  id            Int      @id @default(autoincrement())
+  userId        String?
+  platform      String
+  scheduledTime DateTime
+  imageUrl      String
+  caption       String
+  status        String
+  createdAt     DateTime @default(now())
+  user          User?    @relation(fields: [userId], references: [id])
+}
+
+// OAuth accounts for storing provider tokens. userId is optional for now; once you wire
+// authentication (NextAuth or similar) you should associate accounts with users.
+model Account {
+  id                String   @id @default(cuid())
+  userId            String?
+  provider          String
+  providerAccountId String
+  access_token      String?
+  refresh_token     String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+

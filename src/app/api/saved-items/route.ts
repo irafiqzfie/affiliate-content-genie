@@ -7,12 +7,16 @@ import type { Session, NextAuthOptions } from 'next-auth'
 export async function GET() {
   try {
   const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
-    if (!session) {
-      // If the user is not authenticated, return an empty list instead of failing the request.
+    
+    // For development: use test user ID if not authenticated
+    const userId = session?.user?.id || 'dev-user-localhost';
+    
+    if (!session && process.env.NODE_ENV !== 'development') {
+      // If the user is not authenticated in production, return an empty list
       return NextResponse.json([])
     }
 
-  const items = await prisma.savedItem.findMany({ where: { userId: session.user?.id as string }, orderBy: { id: 'desc' } });
+  const items = await prisma.savedItem.findMany({ where: { userId: userId }, orderBy: { id: 'desc' } });
     return NextResponse.json(items);
   } catch (error) {
     console.error('GET /api/saved-items error:', error);
@@ -22,27 +26,62 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-  const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
-    if (!session) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    console.log('📥 POST /api/saved-items - Request received');
+    
+    const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
+    console.log('🔐 Session:', session ? 'Authenticated' : 'Not authenticated');
+    
+    // For development: allow saving without authentication using a test user ID
+    const userId = session?.user?.id || 'dev-user-localhost';
+    console.log('👤 User ID:', userId);
+    
+    if (!session && process.env.NODE_ENV !== 'development') {
+      console.log('⚠️ Unauthorized access in production mode');
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return NextResponse.json({ message: 'Invalid JSON in request body' }, { status: 400 });
+    }
+
+    console.log('📦 Request body:', { title: body.title, productLink: body.productLink, hasContent: !!body.content });
+    console.log('📦 Full request body:', JSON.stringify(body, null, 2));
+    
     const { title, productLink, content } = body;
 
     if (!title || !productLink || !content) {
-      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+      console.log('❌ Missing required fields:', { title: !!title, productLink: !!productLink, content: !!content });
+      return NextResponse.json({ message: 'Missing required fields: title, productLink, and content are required' }, { status: 400 });
     }
 
+    if (typeof title !== 'string' || typeof productLink !== 'string') {
+      console.log('❌ Invalid field types');
+      return NextResponse.json({ message: 'Invalid field types: title and productLink must be strings' }, { status: 400 });
+    }
+
+    if (typeof content !== 'object' || !content.video || !content.post) {
+      console.log('❌ Invalid content structure:', { contentType: typeof content, hasVideo: content?.video, hasPost: content?.post });
+      return NextResponse.json({ message: 'Invalid content structure: content must have video and post properties' }, { status: 400 });
+    }
+
+    console.log('💾 Attempting to save to database...');
     const newItem = await prisma.savedItem.create({ data: {
-      userId: session.user?.id as string,
+      userId: userId,
       title,
       productLink,
       video: content.video || '',
       post: content.post || ''
     }});
 
+    console.log('✅ Item saved successfully:', newItem.id);
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
-    console.error('POST /api/saved-items error:', error);
-    return NextResponse.json({ message: 'Error saving item' }, { status: 500 });
+    console.error('❌ POST /api/saved-items error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Error saving item';
+    return NextResponse.json({ message: errorMessage, details: String(error) }, { status: 500 });
   }
 }
