@@ -8,11 +8,14 @@ export async function GET() {
   try {
   const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     
-    // Use authenticated user ID or fallback to guest user
-    const userId = session?.user?.id || 'guest-user';
+    // Use authenticated user ID or null for unauthenticated users
+    const userId = session?.user?.id || null;
     console.log('👤 GET User ID:', userId);
 
-  const items = await prisma.savedItem.findMany({ where: { userId: userId }, orderBy: { id: 'desc' } });
+  const items = await prisma.savedItem.findMany({ 
+    where: userId ? { userId } : { userId: null }, 
+    orderBy: { id: 'desc' } 
+  });
     return NextResponse.json(items);
   } catch (error) {
     console.error('GET /api/saved-items error:', error);
@@ -27,8 +30,8 @@ export async function POST(request: Request) {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     console.log('🔐 Session:', session ? 'Authenticated' : 'Not authenticated');
     
-    // Use authenticated user ID or fallback to guest user
-    const userId = session?.user?.id || 'guest-user';
+    // Use authenticated user ID or null for unauthenticated users
+    const userId = session?.user?.id || null;
     console.log('👤 User ID:', userId);
 
     let body;
