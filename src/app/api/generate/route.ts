@@ -10,6 +10,12 @@ const API_KEY = process.env.API_KEY;
 const COMBINED_SYSTEM_INSTRUCTION = `You are an AI assistant that helps affiliate creators generate engaging and optimized content.
 Your task is to take a Shopee product link and a set of detailed parameters to create content for TWO formats: a short-form video and a text-based post.
 
+IMPORTANT: When product images are provided along with the product link, use them as the PRIMARY VISUAL REFERENCE.
+- The uploaded images show the actual product appearance, styling, and context
+- Your Image Prompts should describe enhancements or variations of the uploaded images
+- DO NOT generate prompts for completely different or unrelated images
+- Maintain consistency with the product shown in the uploaded images
+
 You MUST adhere to ALL of the following parameters provided by the user in the prompt, including the CREATIVE DIRECTION section.
 You MUST provide exactly THREE distinct options for each of the sections in both formats. Each option should be on a new line, formatted as a numbered list.
 
@@ -37,9 +43,14 @@ The output MUST be in the following strict Markdown format. Start with the video
 3. [Third Hashtags Option]
 
 💡 Video Idea:
-1. [First Video Idea Option]
-2. [Second Video Idea Option]
-3. [Third Video Idea Option]
+1. [First Video Idea Option - Provide a structured breakdown with timestamps/duration guide in this format:
+   • 0:00-0:03 (3s): [Opening shot/hook description]
+   • 0:03-0:08 (5s): [Key feature showcase/action]
+   • 0:08-0:15 (7s): [Benefit demonstration/proof]
+   • 0:15-0:20 (5s): [Call to action/closing]
+   Use clear, actionable descriptions for each segment]
+2. [Second Video Idea Option - Same structured format with timestamps]
+3. [Third Video Idea Option - Same structured format with timestamps]
 
 🎥 B-roll Suggestions:
 1. [First B-roll Option]
@@ -69,9 +80,9 @@ The output MUST be in the following strict Markdown format. Start with the video
 3. [Third Hashtags Option]
 
 🖼️ Image Prompt:
-1. [First Image Prompt - A descriptive prompt for an AI image generator to create a visually appealing product image]
-2. [Second Image Prompt]
-3. [Third Image Prompt]
+1. [First Image Prompt - If product images are uploaded: Describe modifications/enhancements to the uploaded image (e.g., "Transform the uploaded image by increasing vibrancy and adding a lifestyle background while keeping the product identical"). If no images uploaded: Create a descriptive prompt for an AI image generator to create a visually appealing product image from scratch]
+2. [Second Image Prompt - Follow the same rule: enhance uploaded images OR generate from scratch]
+3. [Third Image Prompt - Follow the same rule: enhance uploaded images OR generate from scratch]
 ---POST END---
 `;
 
@@ -112,10 +123,15 @@ async function retryWithBackoff<T>(
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { productLink, advancedInputs } = body;
+    const { productLink, advancedInputs, productImages } = body;
 
     if (!productLink || !advancedInputs) {
       return NextResponse.json({ message: 'Missing product link or advanced inputs' }, { status: 400 });
+    }
+
+    // Log if product images are included
+    if (productImages && productImages.length > 0) {
+      console.log(`📸 ${productImages.length} product image(s) included for context`);
     }
 
     const prompt = `Here is the product link: ${productLink}\n\nAnd here are the parameters for the content I want you to create:\n${JSON.stringify(advancedInputs, null, 2)}`;

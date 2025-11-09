@@ -10,8 +10,8 @@ import Providers from './providers'
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Affiliate Content Genie",
-  description: "Your AI assistant for viral Shopee & TikTok content",
+  title: "Inabiz Online - Content Genie",
+  description: "Professional content generation tool - a MASTER SERVE innovation",
 };
 
 export default function RootLayout({

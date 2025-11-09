@@ -4,6 +4,10 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import AuthButton from './components/AuthButton';
+import { SavedItemsList } from '@/app/components/SavedContent';
+import { ScheduledPostsList } from '@/app/components/Scheduler';
+import { ProductInfoCard } from '@/app/components/ContentGeneration';
+// import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
 const LOCAL_STORAGE_KEY = 'affteContentGenieilia_savedContent_v2';
@@ -197,6 +201,15 @@ const sectionsConfigPost = [
 export default function Home() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [productLink, setProductLink] = useState('');
+  // New fields for manual product input
+  const [productTitle, setProductTitle] = useState('');
+  const [productImages, setProductImages] = useState<File[]>([]);
+  const [productImagePreviews, setProductImagePreviews] = useState<string[]>([]);
+  const [customDescription, setCustomDescription] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [imageUrlInput, setImageUrlInput] = useState('');
+  // Future optimization: Apply debouncing to productLink for better performance
+  // const debouncedProductLink = useDebounce(productLink, 500);
   const [advancedInputs, setAdvancedInputs] = useState(initialAdvancedInputs);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -212,8 +225,6 @@ export default function Home() {
   const [generatedVideos, setGeneratedVideos] = useState<Record<string, string | null>>({});
   const [savedList, setSavedList] = useState<SavedItem[]>([]);
   const [selectedOptionIndexes, setSelectedOptionIndexes] = useState<Record<string, number>>({});
-  const [savedSearchTerm, setSavedSearchTerm] = useState('');
-  const [savedSortOrder, setSavedSortOrder] = useState('newest');
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler'>('generator');
   const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post' | 'info'>('video');
@@ -421,6 +432,179 @@ export default function Home() {
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    // Validate file types and sizes
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxFiles = 5; // Maximum 5 images
+    
+    // Check if adding these files would exceed the limit
+    if (productImages.length + files.length > maxFiles) {
+      setError(`You can only upload up to ${maxFiles} images`);
+      return;
+    }
+    
+    const validFiles: File[] = [];
+    const previews: string[] = [];
+    
+    for (const file of files) {
+      // Validate file type
+      if (!validTypes.includes(file.type)) {
+        setError(`Invalid file type: ${file.name}. Please upload JPG, PNG, or WEBP only.`);
+        continue;
+      }
+      
+      // Validate file size
+      if (file.size > maxSize) {
+        setError(`File too large: ${file.name}. Maximum size is 5MB.`);
+        continue;
+      }
+      
+      validFiles.push(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        previews.push(reader.result as string);
+        if (previews.length === validFiles.length) {
+          setProductImagePreviews(prev => [...prev, ...previews]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    if (validFiles.length > 0) {
+      setProductImages(prev => [...prev, ...validFiles]);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setProductImages(prev => prev.filter((_, i) => i !== index));
+    setProductImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const maxFiles = 5;
+    if (productImages.length >= maxFiles) {
+      setError(`You can only upload up to ${maxFiles} images`);
+      return;
+    }
+
+    const files = Array.from(e.dataTransfer.files);
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (productImages.length + files.length > maxFiles) {
+      setError(`You can only upload up to ${maxFiles} images`);
+      return;
+    }
+
+    const validFiles: File[] = [];
+    const previews: string[] = [];
+
+    for (const file of files) {
+      if (!validTypes.includes(file.type)) {
+        setError(`Invalid file type: ${file.name}. Please upload JPG, PNG, or WEBP only.`);
+        continue;
+      }
+
+      if (file.size > maxSize) {
+        setError(`File too large: ${file.name}. Maximum size is 5MB.`);
+        continue;
+      }
+
+      validFiles.push(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        previews.push(reader.result as string);
+        if (previews.length === validFiles.length) {
+          setProductImagePreviews(prev => [...prev, ...previews]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    if (validFiles.length > 0) {
+      setProductImages(prev => [...prev, ...validFiles]);
+    }
+  };
+
+  const handleAddImageFromUrl = async () => {
+    if (!imageUrlInput.trim()) return;
+
+    const maxFiles = 5;
+    if (productImages.length >= maxFiles) {
+      setError(`You can only upload up to ${maxFiles} images`);
+      setImageUrlInput('');
+      return;
+    }
+
+    try {
+      // Validate URL
+      const url = new URL(imageUrlInput.trim());
+      
+      // Fetch the image
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        throw new Error('Failed to fetch image from URL');
+      }
+
+      const blob = await response.blob();
+      
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(blob.type)) {
+        setError('Invalid image type. Please use JPG, PNG, or WEBP.');
+        return;
+      }
+
+      // Validate file size
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (blob.size > maxSize) {
+        setError('Image too large. Maximum size is 5MB.');
+        return;
+      }
+
+      // Create File from blob
+      const file = new File([blob], `image-${Date.now()}.${blob.type.split('/')[1]}`, { type: blob.type });
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProductImagePreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+
+      setProductImages(prev => [...prev, file]);
+      setImageUrlInput('');
+      setError(null);
+
+    } catch (err) {
+      console.error('Error loading image from URL:', err);
+      setError('Failed to load image from URL. Please check the URL and try again.');
+    }
+  };
+
   const handleAdvancedInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
@@ -437,7 +621,8 @@ export default function Home() {
   };
 
   const handleAnalyze = async () => {
-    if (!productLink || isAnalyzing || isLoading) return;
+    // Require at least one input: productLink, productTitle, or customDescription
+    if ((!productLink && !productTitle && !customDescription) || isAnalyzing || isLoading) return;
 
     setIsAnalyzing(true);
     setError(null);
@@ -451,7 +636,11 @@ export default function Home() {
         const response = await fetch(`${API_URL}/analyze`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productLink }),
+            body: JSON.stringify({ 
+              productLink,
+              productTitle: productTitle || undefined,
+              customDescription: customDescription || undefined
+            }),
         });
 
         if (!response.ok) {
@@ -481,7 +670,17 @@ export default function Home() {
 
   const handleGenerate = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!productLink || isLoading) return;
+    
+    // Validation: Either productLink OR (productTitle + productImages) must be provided
+    const hasManualInput = productTitle.trim() && productImagePreviews.length > 0;
+    const hasProductLink = productLink.trim();
+    
+    if (!hasProductLink && !hasManualInput) {
+      setError('Please provide either a Shopee product link, or both product title and images');
+      return;
+    }
+    
+    if (isLoading) return;
 
     // mark that user attempted generation so UI shows output area (even if empty/loading)
     setHasGeneratedAttempt(true);
@@ -496,8 +695,8 @@ export default function Home() {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     
     try {
-      // If shopeeProductInfo doesn't exist yet, call analyze first to get product data
-      if (!shopeeProductInfo) {
+      // If shopeeProductInfo doesn't exist yet and we have a product link, call analyze first
+      if (hasProductLink && !shopeeProductInfo) {
         console.log('🔍 No product info found, analyzing first...');
         try {
           const analyzeResponse = await fetch(`${API_URL}/analyze`, {
@@ -520,7 +719,12 @@ export default function Home() {
       const response = await fetch(`${API_URL}/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productLink, advancedInputs }),
+            body: JSON.stringify({ 
+              productLink: productLink || productTitle, // Use title as fallback
+              productTitle: productTitle || undefined,
+              advancedInputs,
+              productImages: productImagePreviews // Send base64 encoded images
+            }),
         });
 
       if (!response.ok) {
@@ -582,17 +786,30 @@ export default function Home() {
         } finally {
       setIsLoading(false);
     }
-  }, [productLink, isLoading, shopeeProductInfo, advancedInputs, initializeOptionIndexes, parseContent]);
+  }, [productLink, productTitle, productImagePreviews, isLoading, shopeeProductInfo, advancedInputs, initializeOptionIndexes, parseContent]);
   
   const handleGenerateImage = useCallback(async (key: string, promptText: string) => {
     console.log('🎨 Generating image for key:', key, 'with prompt:', promptText.substring(0, 100) + '...');
     setImageLoadingStates(prev => ({ ...prev, [key]: true }));
     setError(null);
     try {
+        // Check if we have uploaded product images to use as conditioning
+        const hasUploadedImages = productImagePreviews.length > 0;
+        const conditionImage = hasUploadedImages ? productImagePreviews[0] : null; // Use first image as primary
+        
+        if (hasUploadedImages) {
+          console.log('🖼️ Using uploaded image as reference for image generation');
+        }
+        
         // Send the AI-generated image prompt directly without modification
         // The AI already provides detailed, optimized prompts for image generation
-        const requestBody = { prompt: promptText };
-        console.log('📡 Sending enhanced request to /api/visualize/image with body:', requestBody);
+        const requestBody = { 
+          prompt: promptText,
+          conditionImage, // Include the uploaded image if available
+          transformation: hasUploadedImages ? 'enhance' : 'generate' // Indicate transformation type
+        };
+        console.log('📡 Sending enhanced request to /api/visualize/image with body:', 
+          { ...requestBody, conditionImage: conditionImage ? '[IMAGE_DATA]' : null });
         
         const response = await fetch(`${API_URL}/visualize/image`, {
             method: 'POST',
@@ -632,7 +849,7 @@ export default function Home() {
     } finally {
         setImageLoadingStates(prev => ({ ...prev, [key]: false }));
     }
-  }, []);
+  }, [productImagePreviews]);
   
   const handleGenerateVideo = async (key: string, promptText: string) => {
     setVideoLoadingStates(prev => ({
@@ -740,6 +957,103 @@ export default function Home() {
     setEditingKey(null);
   };
 
+  const handleRefreshSection = useCallback(async (sectionKey: string) => {
+    // Check if we have the necessary data to regenerate
+    if (isLoading) {
+      console.warn('⚠️ Already loading, skipping refresh');
+      return;
+    }
+    
+    if (!productLink && !productTitle) {
+      setError('Product link or title is required to refresh content');
+      return;
+    }
+    
+    console.log(`🔄 Refreshing section: ${sectionKey} for tab: ${activeOutputTab}`);
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`${API_URL}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          productLink: productLink || productTitle, // Use title as fallback
+          advancedInputs,
+          productImages: productImagePreviews
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Content regeneration failed' }));
+        throw new Error(errorData.message || 'Failed to regenerate content');
+      }
+      
+      const data = await response.json();
+      const content = data.content;
+      
+      if (!content) {
+        throw new Error('No content was generated. Please try again.');
+      }
+      
+      const videoContentMatch = content.match(/---VIDEO START---([\s\S]*?)---VIDEO END---/);
+      const postContentMatch = content.match(/---POST START---([\s\S]*?)---POST END---/);
+
+      const videoContent = videoContentMatch ? videoContentMatch[1].trim() : '';
+      const postContent = postContentMatch ? postContentMatch[1].trim() : '';
+      
+      // Parse the new content
+      const newParsedVideo = parseContent(videoContent);
+      const newParsedPost = parseContent(postContent);
+      
+      console.log(`🔍 Parsed content for ${sectionKey}:`, {
+        videoSection: newParsedVideo[sectionKey as keyof ParsedContent],
+        postSection: newParsedPost[sectionKey as keyof ParsedContent],
+        activeTab: activeOutputTab
+      });
+      
+      // Update only the specific section that was refreshed
+      setEditableContent(prev => {
+        console.log('📝 Previous state:', prev);
+        
+        if (activeOutputTab === 'video') {
+          const updated = {
+            ...prev,
+            video: {
+              ...(prev.video || {}),
+              [sectionKey]: newParsedVideo[sectionKey as keyof ParsedContent]
+            } as ParsedContent
+          };
+          console.log('📝 Updated state for video:', updated);
+          return updated;
+        } else if (activeOutputTab === 'post') {
+          const updated = {
+            ...prev,
+            post: {
+              ...(prev.post || {}),
+              [sectionKey]: newParsedPost[sectionKey as keyof ParsedContent]
+            } as ParsedContent
+          };
+          console.log('📝 Updated state for post:', updated);
+          return updated;
+        }
+        return prev;
+      });
+      
+      // Reset the selected option index for this section to show the first new option
+      setSelectedOptionIndexes(prev => ({ ...prev, [sectionKey]: 0 }));
+      
+      console.log(`✅ Section ${sectionKey} refreshed successfully`);
+      
+    } catch (err: unknown) {
+      console.error('❌ Section refresh error:', err);
+      const message = extractErrorMessage(err);
+      setError(message || 'Failed to refresh section. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [productLink, productTitle, advancedInputs, productImagePreviews, isLoading, activeOutputTab, parseContent]);
+
   const stripHtml = (html: string): string => {
     if (typeof document === 'undefined') return html; // Guard for server-side
     const tmp = document.createElement("DIV");
@@ -752,7 +1066,7 @@ export default function Home() {
 
   const formatContentForExport = () => {
     if (!editableContent) return '';
-    let text = 'Affiliate Content Genie - Generated Content\n===========================================\n\n';
+    let text = 'Inabiz Online - Generated Content\n===========================================\n\n';
     const richTextFields = new Set(['body', 'caption']);
     
     const formatSection = (title: string, content: ParsedContent | null, config: {key: string, title: string}[]) => {
@@ -1076,18 +1390,6 @@ export default function Home() {
     }
   };
 
-  const processedSavedList = savedList
-    .filter(item =>
-        item.title.toLowerCase().includes(savedSearchTerm.toLowerCase()) ||
-        item.productLink.toLowerCase().includes(savedSearchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-        if (savedSortOrder === 'newest') {
-            return b.id - a.id;
-        }
-        return a.id - b.id; // oldest
-    });
-
   const renderSocialModal = () => {
     if (!isSocialModalOpen) return null;
 
@@ -1270,20 +1572,36 @@ export default function Home() {
         const cardHeader = (
             <div className="card-header">
                 <h3>{icon} {title}</h3>
-                {content && content.length > 0 && (
-                    <div className="option-selector">
-                        {[0, 1, 2].map(index => (
+                <div className="card-header-actions">
+                    {content && content.length > 0 && (
+                        <>
                             <button
-                                key={index}
-                                className={`option-number ${selectedIndex === index ? 'active' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); handleOptionSelect(key, index); }}
-                                aria-label={`Select option ${index + 1}`}
+                                className="refresh-button"
+                                onClick={(e) => { e.stopPropagation(); handleRefreshSection(key); }}
+                                disabled={isLoading}
+                                aria-label={`Refresh ${title}`}
+                                title={`Regenerate ${title}`}
                             >
-                                {index + 1}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                                </svg>
                             </button>
-                        ))}
-                    </div>
-                )}
+                            <div className="option-selector">
+                                {[0, 1].map(index => (
+                                    <button
+                                        key={index}
+                                        className={`option-number ${selectedIndex === index ? 'active' : ''}`}
+                                        onClick={(e) => { e.stopPropagation(); handleOptionSelect(key, index); }}
+                                        aria-label={`Select option ${index + 1}`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         );
 
@@ -1416,16 +1734,155 @@ export default function Home() {
             <div className="accordion-content-inner form-with-analysis">
                 <div className="form-column">
                 <form className="input-form" onSubmit={handleGenerate}>
-                    <div className="form-group">
+                    {/* Product Input Section */}
+                    <div className="product-input-section">
+                      <div className="form-group">
+                        <label htmlFor="productTitle" className="input-label">Product Title</label>
+                        <input
+                          id="productTitle"
+                          name="productTitle"
+                          type="text"
+                          className="input-field"
+                          value={productTitle}
+                          onChange={(e) => setProductTitle(e.target.value)}
+                          placeholder="Enter product name or title..."
+                          aria-label="Product Title"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="productImage" className="input-label">
+                          Product Images {productImages.length > 0 && `(${productImages.length}/5)`}
+                        </label>
+                        <div className="image-upload-container">
+                          {/* Image Grid */}
+                          {productImagePreviews.length > 0 && (
+                            <div className="image-preview-grid">
+                              {productImagePreviews.map((preview, index) => (
+                                <div key={index} className="image-preview-item">
+                                  <Image 
+                                    src={preview} 
+                                    alt={`Product preview ${index + 1}`} 
+                                    className="image-preview"
+                                    width={200}
+                                    height={200}
+                                    unoptimized
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveImage(index)}
+                                    className="remove-image-button"
+                                    aria-label={`Remove image ${index + 1}`}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                                    </svg>
+                                  </button>
+                                  {index === 0 && (
+                                    <div className="primary-badge">Primary</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {/* Upload Area - Show only if less than 5 images */}
+                          {productImages.length < 5 && (
+                            <div
+                              className={`image-drop-zone ${isDragging ? 'dragging' : ''}`}
+                              onDragOver={handleDragOver}
+                              onDragLeave={handleDragLeave}
+                              onDrop={handleDrop}
+                            >
+                              <label htmlFor="productImage" className="image-upload-label">
+                                <div className="upload-placeholder">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                                  </svg>
+                                  <span className="upload-text">
+                                    {productImages.length > 0 ? 'Add more images' : 'Click to upload images'}
+                                  </span>
+                                  <span className="upload-hint">
+                                    {isDragging ? 'Drop images here' : 'JPG, PNG, or WEBP (max 5MB each, up to 5 images)'}
+                                  </span>
+                                </div>
+                                <input
+                                  id="productImage"
+                                  name="productImage"
+                                  type="file"
+                                  accept=".jpg,.jpeg,.png,.webp"
+                                  onChange={handleImageUpload}
+                                  style={{ display: 'none' }}
+                                  aria-label="Product Image Upload"
+                                  multiple
+                                />
+                              </label>
+                              
+                              {/* URL Input */}
+                              <div className="image-url-input-container">
+                                <div className="divider">
+                                  <span>or</span>
+                                </div>
+                                <div className="url-input-group">
+                                  <input
+                                    type="url"
+                                    className="url-input-field"
+                                    placeholder="Paste image URL here..."
+                                    value={imageUrlInput}
+                                    onChange={(e) => setImageUrlInput(e.target.value)}
+                                    onKeyPress={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleAddImageFromUrl();
+                                      }
+                                    }}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="url-add-button"
+                                    onClick={handleAddImageFromUrl}
+                                    disabled={!imageUrlInput.trim()}
+                                  >
+                                    Add
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="customDescription" className="input-label">Custom Description <span style={{ fontSize: '0.85rem', color: 'var(--secondary-text-color)', fontWeight: 'normal' }}>(Optional)</span></label>
+                        <textarea
+                          id="customDescription"
+                          name="customDescription"
+                          className="textarea-field"
+                          value={customDescription}
+                          onChange={(e) => setCustomDescription(e.target.value)}
+                          placeholder="Write your product description here..."
+                          aria-label="Custom Description"
+                          rows={4}
+                        />
+                      </div>
+
+                      <div className="or-divider">
+                        <span>OR</span>
+                      </div>
+
+                      <div className="form-group">
                         <div className="label-with-action">
-                            <label htmlFor="productLink" className="input-label">Shopee Product Link</label>
+                            <label htmlFor="productLink" className="input-label">
+                              Shopee Product Link <span style={{ fontSize: '0.85rem', color: 'var(--secondary-text-color)', fontWeight: 'normal' }}>(Optional if title & images provided)</span>
+                            </label>
                             <button 
                                 type="button" 
                                 className="analyze-button" 
                                 onClick={handleAnalyze} 
-                                disabled={!productLink || isAnalyzing || isLoading}
+                                disabled={(!productLink && !productTitle && !customDescription) || isAnalyzing || isLoading}
                             >
-                                {isAnalyzing ? 'Analyzing...' : '🤖 AI Analyze & Fill'}
+                                {isAnalyzing ? 'Analyzing...' : 'Analyze'}
                             </button>
                         </div>
                         <input
@@ -1435,10 +1892,10 @@ export default function Home() {
                         className="input-field"
                         value={productLink}
                         onChange={handleProductLinkChange}
-                        placeholder="Paste your Shopee product link here..."
+                        placeholder="Paste your Shopee product link here (or fill title & images below)..."
                         aria-label="Shopee Product Link"
-                        required
                         />
+                      </div>
                     </div>
                     
                     <fieldset className="advanced-options-fieldset" disabled={isAnalyzing}>
@@ -1546,7 +2003,7 @@ export default function Home() {
                             </div>
                         </div>
                     </fieldset>
-                    <button type="submit" className="generate-button" disabled={isLoading || isAnalyzing || !productLink}>
+                    <button type="submit" className="generate-button" disabled={isLoading || isAnalyzing || (!productLink && !productTitle)}>
                       {isLoading ? 'Generating...' : '✨ Generate Content'}
                     </button>
                 </form>
@@ -1722,37 +2179,7 @@ export default function Home() {
         <>
         <div className="output-container">
             {activeOutputTab === 'info' && shopeeProductInfo ? (
-              <div className="shopee-info-card">
-                <div className="card-header">
-                  <h3>📦 Product Information</h3>
-                </div>
-                <div className="shopee-info-content">
-                  <div className="shopee-info-image">
-                    <Image 
-                      src={shopeeProductInfo.image} 
-                      alt={shopeeProductInfo.title}
-                      width={400}
-                      height={400}
-                      unoptimized
-                      className="product-image"
-                    />
-                  </div>
-                  <div className="shopee-info-details">
-                    <div className="info-field">
-                      <h4>🏷️ Title</h4>
-                      <p>{shopeeProductInfo.title}</p>
-                    </div>
-                    <div className="info-field">
-                      <h4>💰 Price</h4>
-                      <p className="price-text">{shopeeProductInfo.price}</p>
-                    </div>
-                    <div className="info-field">
-                      <h4>📄 Description</h4>
-                      <p>{shopeeProductInfo.description}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ProductInfoCard productInfo={shopeeProductInfo} />
             ) : (
               <>
                 {activeOutputTab === 'post' ? (
@@ -1793,117 +2220,18 @@ export default function Home() {
   }
 
   const renderSavedPage = () => (
-    <div className="saved-page">
-        {savedList.length > 0 ? (
-            <div className="saved-list-container">
-                <div className="saved-list-header">
-                    <h2>Saved Ideas</h2>
-                    <div className="saved-list-controls">
-                        <input
-                            type="search"
-                            placeholder="Search by title or link..."
-                            className="search-input"
-                            value={savedSearchTerm}
-                            onChange={(e) => setSavedSearchTerm(e.target.value)}
-                            aria-label="Search saved ideas"
-                        />
-                        <select
-                            className="sort-select"
-                            value={savedSortOrder}
-                            onChange={(e) => setSavedSortOrder(e.target.value)}
-                            aria-label="Sort saved ideas"
-                        >
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                        </select>
-                    </div>
-                </div>
-
-                {processedSavedList.length > 0 ? (
-                    <ul className="saved-list">
-                        {processedSavedList.map(item => (
-                            <li key={item.id} className="saved-item">
-                                <div className="saved-item-info">
-                                    <span className="saved-item-type">🎬 Video + ✍️ Post</span>
-                                    <span className="saved-item-title">{item.title}</span>
-                                    <span className="saved-item-link">{item.productLink}</span>
-                                </div>
-                                <div className="saved-item-actions">
-                                    <button onClick={() => handleLoadSavedItem(item)} className="saved-item-button load-button">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                            <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
-                                        </svg>
-                                        Load
-                                    </button>
-                                    <button onClick={() => handleDeleteSavedItem(item.id)} className="saved-item-button delete-button" aria-label="Delete saved item">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                            <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="no-results-message">No saved ideas match your search.</p>
-                )}
-            </div>
-        ) : (
-             <div className="empty-saved-page">
-                <h2>No Saved Ideas Yet</h2>
-                <p>Generate some content and click the &quot;💾 Save&quot; button to see your ideas here.</p>
-            </div>
-        )}
-    </div>
+    <SavedItemsList 
+      savedList={savedList}
+      onLoadItem={handleLoadSavedItem}
+      onDeleteItem={handleDeleteSavedItem}
+    />
   );
   
   const renderSchedulerPage = () => (
-    <div className="scheduler-page">
-        {scheduledPosts.length > 0 ? (
-            <div className="scheduled-list-container">
-                <div className="scheduled-list-header">
-                    <h2>Scheduled Posts</h2>
-                </div>
-                <ul className="scheduled-list">
-                    {scheduledPosts.map(post => (
-                        <li key={post.id} className="scheduled-item">
-                            <div className="scheduled-item-preview">
-                                <Image src={post.imageUrl} alt="Scheduled post preview" width={120} height={80} unoptimized />
-                            </div>
-                            <div className="scheduled-item-details">
-                                <div className="scheduled-item-header">
-                                    <span className={`platform-tag ${post.platform.toLowerCase()}`}>{post.platform}</span>
-                                    <span className="scheduled-time">
-                                        {new Date(post.scheduledTime).toLocaleString(undefined, {
-                                            dateStyle: 'medium',
-                                            timeStyle: 'short'
-                                        })}
-                                    </span>
-                                </div>
-                                <p className="scheduled-item-caption">{post.caption}</p>
-                            </div>
-                            <div className="scheduled-item-actions">
-                                <button onClick={() => handleDeleteScheduledPost(post.id)} className="scheduled-item-button cancel-button" aria-label="Cancel scheduled post">
-                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                        <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                                    </svg>
-                                    <span>Cancel</span>
-                                </button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        ) : (
-            <div className="empty-saved-page">
-                <h2>No Posts Scheduled</h2>
-                <p>Use the &quot;🗓️ Schedule Post&quot; button on the generator page to plan your content.</p>
-            </div>
-        )}
-    </div>
+    <ScheduledPostsList 
+      scheduledPosts={scheduledPosts}
+      onDeletePost={handleDeleteScheduledPost}
+    />
   );
 
   if (isInitialLoading) {
@@ -1918,37 +2246,47 @@ export default function Home() {
   return (
     <div className="app-container">
       <header className="header">
-        <div className="header-left">
-          <div className="branding">
-            <h1>Affiliate Content Genie</h1>
-            <p>Your AI assistant for viral Shopee & TikTok content</p>
+        <div className="branding">
+          <div className="logo-container">
+            <img src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" />
+            <h1>Inabiz Online</h1>
           </div>
+          <p>a MASTER SERVE innovation</p>
         </div>
         
-        <div className="header-center">
-          <nav className="header-nav">
-            <button 
-              className={`header-nav-button ${currentPage === 'generator' ? 'active' : ''}`} 
-              onClick={() => setCurrentPage('generator')}
-            >
-              Generator
-            </button>
-            <button 
-              className={`header-nav-button ${currentPage === 'saved' ? 'active' : ''}`} 
-              onClick={() => setCurrentPage('saved')}
-            >
-              Saved {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
-            </button>
-            <button 
-              className={`header-nav-button ${currentPage === 'scheduler' ? 'active' : ''}`} 
-              onClick={() => setCurrentPage('scheduler')}
-            >
-              Scheduler {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
-            </button>
-          </nav>
-        </div>
+        <nav className="unified-tab-bar">
+          <button 
+            className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
+            onClick={() => setCurrentPage('generator')}
+          >
+            <span className="tab-icon">✨</span>
+            <span className="tab-label">Generator</span>
+          </button>
+          <button 
+            className={`unified-tab ${currentPage === 'saved' ? 'active' : ''}`} 
+            onClick={() => setCurrentPage('saved')}
+          >
+            <span className="tab-icon">💾</span>
+            <span className="tab-label">Saved</span>
+            {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
+          </button>
+          <button 
+            className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
+            onClick={() => setCurrentPage('scheduler')}
+          >
+            <span className="tab-icon">🗓️</span>
+            <span className="tab-label">Scheduler</span>
+            {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
+          </button>
+        </nav>
         
-        <div className="header-right">
+        <div className="header-auth">
+          <a href="/about" className="about-link">
+            ℹ️ About Us
+          </a>
+          <a href="/contact" className="about-link">
+            📧 Contact Us
+          </a>
           <AuthButton />
         </div>
       </header>
@@ -1962,7 +2300,7 @@ export default function Home() {
       <footer className="app-footer">
         <div className="footer-content">
           <p className="footer-text">
-            © {new Date().getFullYear()} Affiliate Content Genie. All rights reserved.
+            © {new Date().getFullYear()} Inabiz Online - MASTER SERVE ENTERPRISE. All rights reserved.
           </p>
           <div className="footer-links">
             <a href="/privacy" className="footer-link">Privacy Policy</a>
