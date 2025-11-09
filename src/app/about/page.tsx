@@ -132,7 +132,7 @@ export default function AboutPage() {
             <div className="about-section closing">
               <p className="closing-text">
                 Thank you for choosing <strong>Inabiz Online</strong>. For any inquiries, feel free to 
-                contact us—we're here to help.
+                contact us—we&apos;re here to help.
               </p>
             </div>
           </div>

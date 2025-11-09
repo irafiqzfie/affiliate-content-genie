@@ -2248,7 +2248,7 @@ export default function Home() {
       <header className="header">
         <div className="branding">
           <div className="logo-container">
-            <img src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" />
+            <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={52} height={52} />
             <h1>Inabiz Online</h1>
           </div>
           <p>a MASTER SERVE innovation</p>
