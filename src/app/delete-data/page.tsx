@@ -1,6 +1,5 @@
 'use client';
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import AuthButton from '../components/AuthButton';
 import { useState } from 'react';

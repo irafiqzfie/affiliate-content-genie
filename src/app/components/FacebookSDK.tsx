@@ -3,15 +3,30 @@
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 
+interface FBAuthResponse {
+  accessToken: string;
+  userID: string;
+  expiresIn: number;
+}
+
+interface FBStatusResponse {
+  status: 'connected' | 'not_authorized' | 'unknown';
+  authResponse?: FBAuthResponse;
+}
+
+interface FacebookSDK {
+  getLoginStatus: (callback: (response: FBStatusResponse) => void) => void;
+  login?: (callback: (response: FBStatusResponse) => void, options?: { scope: string }) => void;
+}
+
 declare global {
   interface Window {
-    FB: any;
-    fbAsyncInit: () => void;
+    FB: FacebookSDK;
   }
 }
 
 export default function FacebookSDK() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   useEffect(() => {
     // Skip FB status check if not on HTTPS (Facebook requires HTTPS for getLoginStatus)
@@ -27,7 +42,7 @@ export default function FacebookSDK() {
     // Wait for Facebook SDK to load
     const checkFBStatus = () => {
       if (typeof window.FB !== 'undefined') {
-        window.FB.getLoginStatus(function(response: any) {
+        window.FB.getLoginStatus(function(response: FBStatusResponse) {
           statusChangeCallback(response);
         });
       } else {
@@ -42,10 +57,10 @@ export default function FacebookSDK() {
     }
   }, [status]);
 
-  const statusChangeCallback = (response: any) => {
+  const statusChangeCallback = (response: FBStatusResponse) => {
     console.log('Facebook Login Status:', response);
     
-    if (response.status === 'connected') {
+    if (response.status === 'connected' && response.authResponse) {
       // The person is logged into Facebook and has logged into your app
       console.log('✅ Connected to Facebook');
       console.log('Access Token:', response.authResponse.accessToken);

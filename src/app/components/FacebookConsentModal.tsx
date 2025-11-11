@@ -8,9 +8,25 @@ interface FacebookConsentModalProps {
   onClose: () => void;
 }
 
+interface FBAuthResponse {
+  accessToken: string;
+  userID: string;
+  expiresIn: number;
+}
+
+interface FBStatusResponse {
+  status: 'connected' | 'not_authorized' | 'unknown';
+  authResponse?: FBAuthResponse;
+}
+
+interface FacebookSDK {
+  getLoginStatus: (callback: (response: FBStatusResponse) => void) => void;
+  login?: (callback: (response: FBStatusResponse) => void, options?: { scope: string }) => void;
+}
+
 declare global {
   interface Window {
-    FB: any;
+    FB: FacebookSDK;
     checkLoginState?: () => void;
   }
 }
@@ -23,7 +39,7 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
     // Define checkLoginState globally for Facebook button callback
     window.checkLoginState = function() {
       if (typeof window.FB !== 'undefined') {
-        window.FB.getLoginStatus(function(response: any) {
+        window.FB.getLoginStatus(function(response: FBStatusResponse) {
           statusChangeCallback(response);
         });
       }
@@ -37,7 +53,7 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
     };
   }, []);
 
-  const statusChangeCallback = (response: any) => {
+  const statusChangeCallback = (response: FBStatusResponse) => {
     console.log('Facebook Login Status from Button:', response);
     
     if (response.status === 'connected') {
