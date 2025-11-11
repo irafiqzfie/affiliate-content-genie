@@ -4144,4 +4144,99 @@ body {
   }
 }
 
+/* Delete Data Page Styles */
+.deletion-form {
+  background: rgba(255, 123, 0, 0.05);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 123, 0, 0.2);
+  margin: 1.5rem 0;
+}
+
+.deletion-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.deletion-form .form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--primary-text-color);
+}
+
+.deletion-form .form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(13, 15, 27, 0.6);
+  color: var(--primary-text-color);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.deletion-form .form-input:focus {
+  outline: none;
+  border-color: rgba(255, 123, 0, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.1);
+}
+
+.deletion-form .form-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deletion-form .submit-button {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #ff7b00 0%, #c98a3a 50%, #00aaff 100%);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.deletion-form .submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 123, 0, 0.3);
+}
+
+.deletion-form .submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.deletion-form .success-message {
+  padding: 1rem;
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  border-radius: 8px;
+  color: #4ade80;
+  margin-bottom: 1rem;
+}
+
+.deletion-form .error-message {
+  padding: 1rem;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  border-radius: 8px;
+  color: #f87171;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .deletion-form {
+    padding: 1.5rem;
+  }
+
+  .deletion-form .submit-button {
+    font-size: 0.95rem;
+  }
+}
+
+
 
