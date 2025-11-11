@@ -1,16 +1,52 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface FacebookConsentModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+declare global {
+  interface Window {
+    FB: any;
+    checkLoginState?: () => void;
+  }
+}
+
 export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsentModalProps) {
   const [isAccepted, setIsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Define checkLoginState globally for Facebook button callback
+    window.checkLoginState = function() {
+      if (typeof window.FB !== 'undefined') {
+        window.FB.getLoginStatus(function(response: any) {
+          statusChangeCallback(response);
+        });
+      }
+    };
+
+    return () => {
+      // Cleanup
+      if (window.checkLoginState) {
+        delete window.checkLoginState;
+      }
+    };
+  }, []);
+
+  const statusChangeCallback = (response: any) => {
+    console.log('Facebook Login Status from Button:', response);
+    
+    if (response.status === 'connected') {
+      console.log('✅ User logged in via Facebook button');
+      // Trigger NextAuth sign in with the Facebook token
+      setIsLoading(true);
+      signIn('facebook', { callbackUrl: '/' });
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -143,6 +179,8 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
           >
             Cancel
           </button>
+          
+          {/* Option 1: Custom styled button via NextAuth */}
           <button
             className="consent-btn consent-btn-accept"
             onClick={handleAccept}
@@ -150,6 +188,23 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
           >
             {isLoading ? 'Connecting...' : 'Accept & Continue with Facebook'}
           </button>
+
+          {/* Option 2: Official Facebook Login Button (hidden by default, shown if XFBML enabled) */}
+          {isAccepted && (
+            <div className="fb-login-button-container">
+              <div 
+                className="fb-login-button" 
+                data-width="300"
+                data-size="large"
+                data-button-type="continue_with"
+                data-layout="default"
+                data-auto-logout-link="false"
+                data-use-continue-as="true"
+                data-scope="public_profile,email"
+                data-onlogin="checkLoginState"
+              ></div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -422,6 +477,14 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
           opacity: 0.5;
           cursor: not-allowed;
           transform: none;
+        }
+
+        .fb-login-button-container {
+          margin-top: 1rem;
+          display: flex;
+          justify-content: center;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         @media (max-width: 768px) {

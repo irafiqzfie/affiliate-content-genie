@@ -1,6 +1,8 @@
 'use client';
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import AuthButton from '../components/AuthButton';
 import { useState } from 'react';
 
 export default function DeleteDataPage() {
@@ -25,22 +27,53 @@ export default function DeleteDataPage() {
   };
 
   return (
-    <div className="privacy-page">
-      <div className="privacy-container">
-        <header className="privacy-header">
-          <h1>🗑️ Data Deletion Request</h1>
-          <p className="last-updated">Request deletion of your personal data</p>
-        </header>
+    <div className="app-container">
+      <header className="header">
+        <div className="branding">
+          <div className="logo-container">
+            <img src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" />
+            <h1>Inabiz Online</h1>
+          </div>
+          <p>a MASTER SERVE innovation</p>
+        </div>
+        
+        <nav className="unified-tab-bar">
+          <Link href="/" className="unified-tab">
+            <span className="tab-icon">✨</span>
+            <span className="tab-label">Generator</span>
+          </Link>
+        </nav>
+        
+        <div className="header-auth">
+          <Link href="/about" className="about-link">
+            ℹ️ About Us
+          </Link>
+          <Link href="/contact" className="about-link">
+            📧 Contact Us
+          </Link>
+          <AuthButton />
+        </div>
+      </header>
 
-        <div className="privacy-content">
-          <section className="privacy-section">
+      <main className="main-content">
+        <div className="about-page-wrapper">
+          <div className="about-back-button-container">
+            <Link href="/" className="about-back-button">
+              ← Back to Home
+            </Link>
+          </div>
+          
+          <div className="about-content">
+            <h1>🗑️ Data Deletion Request</h1>
+            <p className="last-updated">Request deletion of your personal data</p>
+          <section className="about-section">
             <h2>How to Delete Your Data</h2>
             <p>
               We respect your right to have your personal data deleted. You can request data deletion through any of these methods:
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>Method 1: Through Facebook</h2>
             <p>If you signed in with Facebook:</p>
             <ol>
@@ -56,7 +89,7 @@ export default function DeleteDataPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>Method 2: Email Request</h2>
             <p>Send an email to us with your account details:</p>
             <div className="contact-info-box">
@@ -66,7 +99,7 @@ export default function DeleteDataPage() {
             </div>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>Method 3: Submit a Request Form</h2>
             <form onSubmit={handleSubmit} className="deletion-form">
               <div className="form-group">
@@ -107,7 +140,7 @@ export default function DeleteDataPage() {
             </form>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>What Data Will Be Deleted?</h2>
             <p>When you request data deletion, we will permanently remove:</p>
             <ul>
@@ -122,7 +155,7 @@ export default function DeleteDataPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>Need Help?</h2>
             <p>
               If you have questions about data deletion or need assistance, please contact us:
@@ -134,12 +167,22 @@ export default function DeleteDataPage() {
             </div>
           </section>
         </div>
-
-        <footer className="privacy-footer">
-          <Link href="/" className="back-link">← Back to Home</Link>
-          <Link href="/privacy" className="back-link">Privacy Policy</Link>
-        </footer>
       </div>
-    </div>
+    </main>
+
+    <footer className="app-footer">
+      <div className="footer-content">
+        <p className="footer-text">
+          © {new Date().getFullYear()} Inabiz Online - MASTER SERVE ENTERPRISE. All rights reserved.
+        </p>
+        <div className="footer-links">
+          <Link href="/privacy" className="footer-link">Privacy Policy</Link>
+          <Link href="/terms" className="footer-link">Terms of Service</Link>
+          <Link href="/delete-data" className="footer-link">Delete My Data</Link>
+        </div>
+      </div>
+    </footer>
+  </div>
   );
 }
+

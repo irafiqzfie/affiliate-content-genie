@@ -1,21 +1,57 @@
-'use client';
-
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import AuthButton from '../components/AuthButton';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | Inabiz Online',
+  description: 'Privacy Policy for Inabiz Online - Learn how we collect, use, and protect your personal information.',
+};
 
 export default function PrivacyPage() {
   return (
-    <div className="privacy-page">
-      <div className="privacy-container">
-        <header className="privacy-header">
-          <h1>🛡️ Privacy Policy</h1>
-          <p className="last-updated">Last updated: November 11, 2025</p>
-          <p className="sub-header">
-            Inabiz Online (formerly Affiliate Content Genie) - a MASTER SERVE ENTERPRISE service
-          </p>
-        </header>
+    <div className="app-container">
+      <header className="header">
+        <div className="branding">
+          <div className="logo-container">
+            <img src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" />
+            <h1>Inabiz Online</h1>
+          </div>
+          <p>a MASTER SERVE innovation</p>
+        </div>
+        
+        <nav className="unified-tab-bar">
+          <Link href="/" className="unified-tab">
+            <span className="tab-icon">✨</span>
+            <span className="tab-label">Generator</span>
+          </Link>
+        </nav>
+        
+        <div className="header-auth">
+          <Link href="/about" className="about-link">
+            ℹ️ About Us
+          </Link>
+          <Link href="/contact" className="about-link">
+            📧 Contact Us
+          </Link>
+          <AuthButton />
+        </div>
+      </header>
 
-        <div className="privacy-content">
-          <section className="privacy-section">
+      <main className="main-content">
+        <div className="about-page-wrapper">
+          <div className="about-back-button-container">
+            <Link href="/" className="about-back-button">
+              ← Back to Home
+            </Link>
+          </div>
+          
+          <div className="about-content">
+            <h1>🛡️ Privacy Policy</h1>
+            <p className="last-updated">Last updated: November 11, 2025</p>
+            <p className="sub-header">
+              Inabiz Online (formerly Affiliate Content Genie) - a MASTER SERVE ENTERPRISE service
+            </p>
+          <section className="about-section">
             <h2>1. Introduction</h2>
             <p>
               Inabiz Online (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) operated by MASTER SERVE ENTERPRISE (SSM: TR0276566-V) 
@@ -27,7 +63,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>2. Information We Collect</h2>
             
             <h3>2.1 Information You Provide</h3>
@@ -71,7 +107,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>3. How We Use Your Information</h2>
             <p>We use the collected information for the following purposes:</p>
             
@@ -110,7 +146,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>4. Data Sharing and Disclosure</h2>
             
             <h3>4.1 Third-Party Service Providers</h3>
@@ -145,7 +181,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>5. Data Storage and Security</h2>
             <p>
               We implement industry-standard security measures to protect your personal information:
@@ -163,7 +199,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>6. Facebook Platform Integration</h2>
             
             <h3>6.1 Facebook Login (OAuth)</h3>
@@ -223,7 +259,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>7. Your Rights and Choices</h2>
             
             <h3>7.1 Access Your Data</h3>
@@ -267,7 +303,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>8. Data Retention</h2>
             <p>
               We retain your personal data only as long as necessary to provide our services and fulfill the purposes outlined in this policy:
@@ -289,7 +325,7 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>9. Cookies and Tracking Technologies</h2>
             <p>
               We use cookies and similar technologies to enhance your experience:
@@ -312,7 +348,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>10. Children&apos;s Privacy</h2>
             <p>
               Our Service is not intended for users under the age of 13 (or 16 in the European Economic Area). 
@@ -325,7 +361,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>11. International Data Transfers</h2>
             <p>
               Your information may be transferred to and maintained on servers located outside of your country. 
@@ -334,7 +370,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>12. Changes to This Privacy Policy</h2>
             <p>
               We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. 
@@ -350,7 +386,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>13. Contact Us</h2>
             <p>
               If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us:
@@ -369,7 +405,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>14. Legal Compliance</h2>
             <p>This Privacy Policy is designed to comply with:</p>
             <ul>
@@ -428,116 +464,22 @@ export default function PrivacyPage() {
             </div>
           </section>
         </div>
-
-        <footer className="privacy-footer">
-          <div className="footer-links-grid">
-            <Link href="/" className="back-link">← Back to Home</Link>
-            <Link href="/delete-data" className="back-link">🗑️ Delete My Data</Link>
-            <Link href="/terms" className="back-link">📜 Terms of Service</Link>
-            <Link href="/contact" className="back-link">📧 Contact Us</Link>
-          </div>
-        </footer>
       </div>
+    </main>
 
-      <style jsx>{`
-        .sub-header {
-          font-size: 0.9rem;
-          color: var(--secondary-text-color);
-          margin-top: 0.5rem;
-        }
-
-        h3 {
-          font-size: 1.1rem;
-          color: var(--primary-text-color);
-          margin-top: 1.5rem;
-          margin-bottom: 0.75rem;
-        }
-
-        .contact-info-box {
-          background: rgba(255, 123, 0, 0.05);
-          border: 1px solid rgba(255, 123, 0, 0.2);
-          border-radius: 12px;
-          padding: 1.5rem;
-          margin: 1.5rem 0;
-        }
-
-        .contact-info-box p {
-          margin: 0.5rem 0;
-          line-height: 1.6;
-        }
-
-        .summary-section {
-          background: linear-gradient(135deg, rgba(255, 123, 0, 0.05), rgba(0, 170, 255, 0.05));
-          border: 2px solid rgba(255, 123, 0, 0.2);
-          border-radius: 16px;
-          padding: 2rem;
-          margin-top: 2rem;
-        }
-
-        .rights-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 1.5rem;
-          margin-top: 1.5rem;
-        }
-
-        .right-item {
-          display: flex;
-          gap: 1rem;
-          align-items: flex-start;
-          background: rgba(13, 15, 27, 0.6);
-          padding: 1rem;
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          transition: all 0.3s ease;
-        }
-
-        .right-item:hover {
-          border-color: rgba(255, 123, 0, 0.5);
-          transform: translateY(-2px);
-        }
-
-        .right-icon {
-          font-size: 2rem;
-          min-width: 2.5rem;
-        }
-
-        .right-content strong {
-          display: block;
-          color: var(--primary-text-color);
-          margin-bottom: 0.25rem;
-        }
-
-        .right-content p {
-          font-size: 0.9rem;
-          color: var(--secondary-text-color);
-          margin: 0;
-        }
-
-        .footer-links-grid {
-          display: flex;
-          gap: 2rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        @media (max-width: 768px) {
-          .rights-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-
-          .summary-section {
-            padding: 1.5rem;
-          }
-
-          .footer-links-grid {
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-          }
-        }
-      `}</style>
-    </div>
+    <footer className="app-footer">
+      <div className="footer-content">
+        <p className="footer-text">
+          © {new Date().getFullYear()} Inabiz Online - MASTER SERVE ENTERPRISE. All rights reserved.
+        </p>
+        <div className="footer-links">
+          <Link href="/privacy" className="footer-link">Privacy Policy</Link>
+          <Link href="/terms" className="footer-link">Terms of Service</Link>
+          <Link href="/delete-data" className="footer-link">Delete My Data</Link>
+        </div>
+      </div>
+    </footer>
+  </div>
   );
 }
+

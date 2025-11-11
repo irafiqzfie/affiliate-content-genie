@@ -1,21 +1,57 @@
-'use client';
-
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import AuthButton from '../components/AuthButton';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service | Inabiz Online',
+  description: 'Terms of Service for Inabiz Online - Please read our terms and conditions carefully.',
+};
 
 export default function TermsPage() {
   return (
-    <div className="privacy-page">
-      <div className="privacy-container">
-        <header className="privacy-header">
-          <h1>📜 Terms of Service</h1>
-          <p className="last-updated">Last updated: November 11, 2025</p>
-          <p className="sub-header">
-            Inabiz Online (formerly Affiliate Content Genie) - a MASTER SERVE ENTERPRISE service
-          </p>
-        </header>
+    <div className="app-container">
+      <header className="header">
+        <div className="branding">
+          <div className="logo-container">
+            <img src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" />
+            <h1>Inabiz Online</h1>
+          </div>
+          <p>a MASTER SERVE innovation</p>
+        </div>
+        
+        <nav className="unified-tab-bar">
+          <Link href="/" className="unified-tab">
+            <span className="tab-icon">✨</span>
+            <span className="tab-label">Generator</span>
+          </Link>
+        </nav>
+        
+        <div className="header-auth">
+          <Link href="/about" className="about-link">
+            ℹ️ About Us
+          </Link>
+          <Link href="/contact" className="about-link">
+            📧 Contact Us
+          </Link>
+          <AuthButton />
+        </div>
+      </header>
 
-        <div className="privacy-content">
-          <section className="privacy-section">
+      <main className="main-content">
+        <div className="about-page-wrapper">
+          <div className="about-back-button-container">
+            <Link href="/" className="about-back-button">
+              ← Back to Home
+            </Link>
+          </div>
+          
+          <div className="about-content">
+            <h1>📜 Terms of Service</h1>
+            <p className="last-updated">Last updated: November 11, 2025</p>
+            <p className="sub-header">
+              Inabiz Online (formerly Affiliate Content Genie) - a MASTER SERVE ENTERPRISE service
+            </p>
+          <section className="about-section">
             <h2>1. Agreement to Terms</h2>
             <p>
               Welcome to <strong>Inabiz Online</strong>, operated by MASTER SERVE ENTERPRISE (SSM: TR0276566-V). 
@@ -32,7 +68,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>2. Description of Service</h2>
             <p>
               Inabiz Online is a content automation and analysis platform that provides:
@@ -49,7 +85,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>3. Eligibility and Account Registration</h2>
             
             <h3>3.1 Age Requirements</h3>
@@ -80,7 +116,7 @@ export default function TermsPage() {
             </ul>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>4. Acceptable Use Policy</h2>
             
             <h3>4.1 Permitted Uses</h3>
@@ -117,7 +153,7 @@ export default function TermsPage() {
             </ul>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>5. Third-Party Platform Compliance</h2>
             
             <h3>5.1 Meta Platform Terms</h3>
@@ -165,7 +201,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>6. Intellectual Property Rights</h2>
             
             <h3>6.1 Our Intellectual Property</h3>
@@ -200,7 +236,7 @@ export default function TermsPage() {
             </ul>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>7. Payment and Subscription (If Applicable)</h2>
             
             <h3>7.1 Free and Paid Services</h3>
@@ -222,7 +258,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>8. Privacy and Data Protection</h2>
             <p>
               Your privacy is important to us. Our collection, use, and protection of your personal information is governed by our{' '}
@@ -240,7 +276,7 @@ export default function TermsPage() {
             </ul>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>9. Disclaimers and Limitations of Liability</h2>
             
             <h3>9.1 Service &quot;As Is&quot;</h3>
@@ -283,7 +319,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>10. Indemnification</h2>
             <p>
               You agree to indemnify, defend, and hold harmless MASTER SERVE ENTERPRISE, its officers, directors, employees, 
@@ -298,7 +334,7 @@ export default function TermsPage() {
             </ul>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>11. Termination and Suspension</h2>
             
             <h3>11.1 Termination by You</h3>
@@ -336,7 +372,7 @@ export default function TermsPage() {
             </ul>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>12. Changes to Terms</h2>
             <p>
               We reserve the right to modify these Terms at any time. When we make material changes:
@@ -349,7 +385,7 @@ export default function TermsPage() {
             </ul>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>13. Governing Law and Dispute Resolution</h2>
             
             <h3>13.1 Governing Law</h3>
@@ -374,7 +410,7 @@ export default function TermsPage() {
             </ol>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>14. Miscellaneous</h2>
             
             <h3>14.1 Entire Agreement</h3>
@@ -405,7 +441,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="privacy-section">
+          <section className="about-section">
             <h2>15. Contact Information</h2>
             <p>
               For questions about these Terms of Service, please contact:
@@ -477,142 +513,22 @@ export default function TermsPage() {
             </p>
           </div>
         </div>
-
-        <footer className="privacy-footer">
-          <div className="footer-links-grid">
-            <Link href="/" className="back-link">← Back to Home</Link>
-            <Link href="/privacy" className="back-link">🛡️ Privacy Policy</Link>
-            <Link href="/delete-data" className="back-link">🗑️ Delete My Data</Link>
-            <Link href="/contact" className="back-link">📧 Contact Us</Link>
-          </div>
-        </footer>
       </div>
+    </main>
 
-      <style jsx>{`
-        .sub-header {
-          font-size: 0.9rem;
-          color: var(--secondary-text-color);
-          margin-top: 0.5rem;
-        }
-
-        h3 {
-          font-size: 1.1rem;
-          color: var(--primary-text-color);
-          margin-top: 1.5rem;
-          margin-bottom: 0.75rem;
-        }
-
-        .contact-info-box {
-          background: rgba(255, 123, 0, 0.05);
-          border: 1px solid rgba(255, 123, 0, 0.2);
-          border-radius: 12px;
-          padding: 1.5rem;
-          margin: 1.5rem 0;
-        }
-
-        .contact-info-box p {
-          margin: 0.5rem 0;
-          line-height: 1.6;
-        }
-
-        .summary-section {
-          background: linear-gradient(135deg, rgba(255, 123, 0, 0.05), rgba(0, 170, 255, 0.05));
-          border: 2px solid rgba(255, 123, 0, 0.2);
-          border-radius: 16px;
-          padding: 2rem;
-          margin-top: 2rem;
-        }
-
-        .summary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 1.5rem;
-          margin-top: 1.5rem;
-        }
-
-        .summary-item {
-          display: flex;
-          gap: 1rem;
-          align-items: flex-start;
-          background: rgba(13, 15, 27, 0.6);
-          padding: 1.25rem;
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          transition: all 0.3s ease;
-        }
-
-        .summary-item:hover {
-          border-color: rgba(255, 123, 0, 0.5);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(255, 123, 0, 0.2);
-        }
-
-        .summary-icon {
-          font-size: 2rem;
-          min-width: 2.5rem;
-        }
-
-        .summary-content strong {
-          display: block;
-          color: var(--primary-text-color);
-          margin-bottom: 0.5rem;
-          font-size: 1rem;
-        }
-
-        .summary-content p {
-          font-size: 0.9rem;
-          color: var(--secondary-text-color);
-          margin: 0;
-          line-height: 1.5;
-        }
-
-        .acknowledgment-box {
-          background: rgba(255, 123, 0, 0.1);
-          border: 2px solid rgba(255, 123, 0, 0.4);
-          border-radius: 12px;
-          padding: 1.5rem;
-          margin: 2rem 0 1rem;
-          text-align: center;
-        }
-
-        .acknowledgment-box p {
-          margin: 0;
-          font-size: 0.95rem;
-          line-height: 1.6;
-        }
-
-        .footer-links-grid {
-          display: flex;
-          gap: 2rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        @media (max-width: 768px) {
-          .summary-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-
-          .summary-section {
-            padding: 1.5rem;
-          }
-
-          .summary-item {
-            padding: 1rem;
-          }
-
-          .acknowledgment-box {
-            padding: 1.25rem;
-          }
-
-          .footer-links-grid {
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-          }
-        }
-      `}</style>
-    </div>
+    <footer className="app-footer">
+      <div className="footer-content">
+        <p className="footer-text">
+          © {new Date().getFullYear()} Inabiz Online - MASTER SERVE ENTERPRISE. All rights reserved.
+        </p>
+        <div className="footer-links">
+          <Link href="/privacy" className="footer-link">Privacy Policy</Link>
+          <Link href="/terms" className="footer-link">Terms of Service</Link>
+          <Link href="/delete-data" className="footer-link">Delete My Data</Link>
+        </div>
+      </div>
+    </footer>
+  </div>
   );
 }
+
