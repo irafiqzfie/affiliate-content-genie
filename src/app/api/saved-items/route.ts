@@ -8,15 +8,14 @@ export async function GET() {
   try {
   const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     
-    // For development: use test user ID if not authenticated
-    const userId = session?.user?.id || 'dev-user-localhost';
-    
-    if (!session && process.env.NODE_ENV !== 'development') {
-      // If the user is not authenticated in production, return an empty list
-      return NextResponse.json([])
-    }
+    // Use authenticated user ID or null for unauthenticated users
+    const userId = session?.user?.id || null;
+    console.log('👤 GET User ID:', userId);
 
-  const items = await prisma.savedItem.findMany({ where: { userId: userId }, orderBy: { id: 'desc' } });
+  const items = await prisma.savedItem.findMany({ 
+    where: userId ? { userId } : { userId: null }, 
+    orderBy: { id: 'desc' } 
+  });
     return NextResponse.json(items);
   } catch (error) {
     console.error('GET /api/saved-items error:', error);
@@ -31,14 +30,9 @@ export async function POST(request: Request) {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     console.log('🔐 Session:', session ? 'Authenticated' : 'Not authenticated');
     
-    // For development: allow saving without authentication using a test user ID
-    const userId = session?.user?.id || 'dev-user-localhost';
+    // Use authenticated user ID or null for unauthenticated users
+    const userId = session?.user?.id || null;
     console.log('👤 User ID:', userId);
-    
-    if (!session && process.env.NODE_ENV !== 'development') {
-      console.log('⚠️ Unauthorized access in production mode');
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-    }
 
     let body;
     try {

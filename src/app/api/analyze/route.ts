@@ -9,34 +9,59 @@ if (!API_KEY) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { productLink } = body;
+    const { productLink, productTitle, customDescription } = body;
 
-    if (!productLink || !productLink.toLowerCase().includes('shopee')) {
-         return NextResponse.json({ message: 'Invalid or missing Shopee product link.' }, { status: 400 });
+    // Validate that at least one input is provided
+    if (!productLink && !productTitle && !customDescription) {
+      return NextResponse.json({ 
+        message: 'Please provide at least one of: Product Link, Product Title, or Custom Description.' 
+      }, { status: 400 });
     }
 
-    console.log('🔍 Analyzing product:', productLink);
+    console.log('🔍 Analyzing product with:', { 
+      hasLink: !!productLink, 
+      hasTitle: !!productTitle, 
+      hasDescription: !!customDescription 
+    });
 
-    // Parse Shopee product data
-    console.log('📦 Fetching public Shopee product data...');
-    const shopeeData = await parseShopeeProduct(productLink);
+    // Parse Shopee product data if link is provided
+    let shopeeData = null;
+    let productName = productTitle || '';
+    
+    if (productLink && productLink.toLowerCase().includes('shopee')) {
+      console.log('📦 Fetching public Shopee product data...');
+      try {
+        shopeeData = await parseShopeeProduct(productLink);
+      } catch (error) {
+        console.warn('⚠️ Failed to parse Shopee data:', error);
+      }
 
-    // Extract product name from URL for analysis
-    const urlParts = productLink.split('/');
-    const productSlug = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || '';
-    const productName = decodeURIComponent(productSlug)
-      .replace(/-/g, ' ')
-      .replace(/\?.*/, '')
-      .replace(/i\.\d+\.\d+/, '')
-      .trim();
+      // Extract product name from URL if not manually provided
+      if (!productName) {
+        const urlParts = productLink.split('/');
+        const productSlug = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || '';
+        productName = decodeURIComponent(productSlug)
+          .replace(/-/g, ' ')
+          .replace(/\?.*/, '')
+          .replace(/i\.\d+\.\d+/, '')
+          .trim();
+      }
+    }
 
-    // Use Gemini to analyze the product based on the URL and product name
-    const analysisPrompt = `Analyze this Shopee product and provide affiliate content recommendations:
+    // Build analysis prompt based on available information
+    let analysisPrompt = `Analyze this product and provide affiliate content recommendations:\n\n`;
+    
+    if (productLink) {
+      analysisPrompt += `Product URL: ${productLink}\n`;
+    }
+    if (productName) {
+      analysisPrompt += `Product Name/Title: ${productName}\n`;
+    }
+    if (customDescription) {
+      analysisPrompt += `Product Description: ${customDescription}\n`;
+    }
 
-Product URL: ${productLink}
-Product Name: ${productName}
-
-Based on the product name and URL, provide a JSON response with the following structure:
+    analysisPrompt += `\nBased on the provided information, provide a JSON response with the following structure:
 {
   "category": "one of: Tech, Home & Living, Beauty, Fashion, Kitchen, Sports, Baby, Books",
   "audienceBuyerType": "brief description of target buyer persona",
@@ -82,9 +107,15 @@ Provide ONLY valid JSON, no additional text.`;
       } else {
         throw new Error('No JSON found in response');
       }
-    } catch (parseError) {
+    } catch {
       console.error('Failed to parse AI response:', aiResponse);
       // Fallback to basic analysis
+      const fallbackSummary = customDescription 
+        ? customDescription 
+        : productName 
+          ? `This product offers great value for money: ${productName}` 
+          : 'This product offers great value for money.';
+      
       analysisResult = {
         category: 'Tech',
         audienceBuyerType: 'Tech enthusiasts, Value seekers',
@@ -94,7 +125,7 @@ Provide ONLY valid JSON, no additional text.`;
         narrativeStyle: 'Relatable, authentic style',
         callToActionStyle: 'Encourage viewers to check it out',
         trendscore: 75,
-        productSummary: `This product offers great value for money. Based on the URL, it appears to be a ${productName}.`,
+        productSummary: fallbackSummary,
         productFeatures: [
           'Quality construction',
           'Good user reviews',
@@ -115,7 +146,10 @@ Provide ONLY valid JSON, no additional text.`;
     return NextResponse.json(finalResponse);
 
   } catch (error) {
-    console.error('❌ Analysis API error:', error);
-    return NextResponse.json({ message: 'Error analyzing product. Please try again.' }, { status: 500 });
+    console.error('❌ Error in analyze route:', error);
+    return NextResponse.json(
+      { error: 'Failed to analyze product' },
+      { status: 500 }
+    );
   }
 }

@@ -78,7 +78,6 @@ export async function parseShopeeProduct(productUrl: string): Promise<ShopeeProd
 
     // Strategy 2: Try direct HTML fetch and parse SSR content
     let html = '';
-    let fetchSucceeded = false;
     
     try {
       const response = await fetch(productUrl, {
@@ -93,7 +92,6 @@ export async function parseShopeeProduct(productUrl: string): Promise<ShopeeProd
 
       if (response.ok) {
         html = await response.text();
-        fetchSucceeded = true;
         console.log('✅ Successfully fetched Shopee page HTML');
         
         // Try to extract from SSR data in HTML
