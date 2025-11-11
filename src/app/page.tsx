@@ -2305,6 +2305,7 @@ export default function Home() {
           <div className="footer-links">
             <a href="/privacy" className="footer-link">Privacy Policy</a>
             <a href="/terms" className="footer-link">Terms of Service</a>
+            <a href="/delete-data" className="footer-link">Delete My Data</a>
           </div>
         </div>
       </footer>
