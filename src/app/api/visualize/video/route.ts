@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { setOperation } from './status/[id]/route';
+import { setOperation } from './operationStore';
 
 export async function POST(request: Request) {
   try {

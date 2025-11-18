@@ -1,18 +1,12 @@
 import { NextResponse } from 'next/server';
-
-// In-memory store to track video generation status
-const operationStore = new Map<string, { startTime: number }>();
-
-export function setOperation(id: string) {
-    operationStore.set(id, { startTime: Date.now() });
-}
+import { getOperation, deleteOperation } from '../../operationStore';
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const parts = url.pathname.split('/').filter(Boolean);
     const operationId = parts[parts.length - 1];
-    const operation = operationStore.get(operationId);
+    const operation = getOperation(operationId);
 
     if (!operation) {
       return NextResponse.json({ message: 'Operation not found' }, { status: 404 });
@@ -22,7 +16,7 @@ export async function GET(request: Request) {
 
     // Simulate a 35-second generation time
     if (elapsedTime > 35000) {
-      operationStore.delete(operationId); // Clean up
+      deleteOperation(operationId); // Clean up
       return NextResponse.json({
         done: true,
         // Use a placeholder video
