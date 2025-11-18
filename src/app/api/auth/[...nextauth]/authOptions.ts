@@ -1,10 +1,19 @@
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import FacebookProvider from 'next-auth/providers/facebook'
 import { NextAuthOptions, Session, User as NextAuthUser } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 
+// Conditionally import PrismaAdapter
+let PrismaAdapter: any = null;
+try {
+  const adapterModule = require('@next-auth/prisma-adapter');
+  PrismaAdapter = adapterModule.PrismaAdapter;
+} catch (error) {
+  console.warn('⚠️ PrismaAdapter not available - using JWT sessions only');
+}
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Only use PrismaAdapter if available, otherwise rely on JWT
+  ...(PrismaAdapter && prisma ? { adapter: PrismaAdapter(prisma) } : {}),
   providers: [
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID || '',
