@@ -290,9 +290,11 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
           max-width: 600px;
           width: 100%;
           max-height: 90vh;
-          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
           animation: slideUp 0.3s ease-out;
+          overflow: hidden;
         }
 
         @keyframes slideUp {
@@ -312,6 +314,7 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
           display: flex;
           justify-content: space-between;
           align-items: center;
+          flex-shrink: 0;
         }
 
         .consent-modal-header h2 {
@@ -344,8 +347,9 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
 
         .consent-modal-content {
           padding: 1.5rem 2rem;
-          max-height: calc(90vh - 160px);
+          flex: 1;
           overflow-y: auto;
+          overflow-x: hidden;
         }
 
         .accordion-section {
@@ -566,6 +570,7 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
           display: flex;
           gap: 1rem;
           justify-content: flex-end;
+          flex-shrink: 0;
         }
 
         .consent-btn {
