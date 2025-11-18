@@ -15,8 +15,12 @@ function AccordionSection({ title, isOpen, onToggle, children }: AccordionSectio
     <div className="accordion-section">
       <button 
         className="accordion-header" 
-        onClick={onToggle}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
         aria-expanded={isOpen}
+        type="button"
       >
         <span>{title}</span>
         <span className={`accordion-icon ${isOpen ? 'open' : ''}`}>▼</span>
