@@ -3,11 +3,13 @@ import { NextAuthOptions, Session, User as NextAuthUser } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 
 // Conditionally import PrismaAdapter
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let PrismaAdapter: any = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const adapterModule = require('@next-auth/prisma-adapter');
   PrismaAdapter = adapterModule.PrismaAdapter;
-} catch (error) {
+} catch {
   console.warn('⚠️ PrismaAdapter not available - using JWT sessions only');
 }
 

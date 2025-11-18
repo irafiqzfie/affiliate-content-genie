@@ -1,11 +1,12 @@
 // Safe Prisma client import that handles missing client gracefully
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let PrismaClient: any;
-let prismaInstance: any = null;
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const prismaModule = require('@prisma/client');
   PrismaClient = prismaModule.PrismaClient;
-} catch (error) {
+} catch {
   console.warn('⚠️ Prisma Client not available - database features will be disabled');
   // Create a mock client that throws helpful errors
   PrismaClient = class MockPrismaClient {
@@ -16,6 +17,7 @@ try {
 }
 
 declare global {
+  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
   var prisma: any | undefined;
 }
 
