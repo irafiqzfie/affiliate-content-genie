@@ -34,7 +34,7 @@
   "env": {
     "DATABASE_URL": "file:./dev.db",
     "NEXTAUTH_SECRET": "su7olrbvoHb2MYsws3zJlY1xkvUWiWOqwNAKl6y8+as=",
-    "FACEBOOK_CLIENT_ID": "1457302132011854",
+    "FACEBOOK_CLIENT_ID": "1340853470991732",
     "FACEBOOK_CLIENT_SECRET": "aa31264345cd69a567013deb45f8dc83"
   }
 }

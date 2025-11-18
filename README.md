@@ -1,8 +1,73 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Affiliate Content Genie
+
+An AI-powered content generation tool for creating affiliate marketing content from Shopee product links. Supports automated content generation, image creation, and direct posting to Facebook and Threads.
+
+## Features
+
+- 🎨 **AI Content Generation**: Generate video scripts and social media posts from product links
+- 🖼️ **Image Generation**: Create product images using Stability AI and Replicate
+- 📱 **Social Media Integration**: Direct posting to Facebook and Threads
+- 🗓️ **Content Scheduling**: Schedule posts for optimal timing
+- 💾 **Content Management**: Save and manage generated content
+- 🔐 **OAuth Authentication**: Secure Facebook and Threads login with NextAuth
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# Google Gemini API Key (for content generation)
+API_KEY=your_gemini_api_key
+
+# Stability AI API Key (for image generation)
+STABILITY_API_KEY=your_stability_api_key
+
+# Replicate API Key (for image transformations)
+REPLICATE_API_KEY=your_replicate_api_key
+
+# Database (Prisma)
+DATABASE_URL=your_postgres_connection_string
+
+# Facebook OAuth
+FACEBOOK_CLIENT_ID=your_facebook_app_id
+FACEBOOK_CLIENT_SECRET=your_facebook_app_secret
+
+# Threads OAuth
+THREADS_APP_ID=your_threads_app_id
+THREADS_APP_SECRET=your_threads_app_secret
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret
+```
+
+### Getting API Keys
+
+1. **Google Gemini API**: Get from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. **Stability AI**: Sign up at [Stability AI](https://platform.stability.ai/)
+3. **Replicate**: Get API key from [Replicate](https://replicate.com/account/api-tokens)
+4. **Facebook App**: Create at [Meta for Developers](https://developers.facebook.com/)
+5. **Threads App**: Configure at [Meta for Developers](https://developers.facebook.com/)
+6. **Database**: Use [Prisma Postgres](https://www.prisma.io/) or any PostgreSQL database
+
 ## Getting Started
 
-First, run the development server:
+First, install dependencies:
+
+```bash
+npm install
+```
+
+Set up the database:
+
+```bash
+npm run prisma:generate
+npm run prisma:migrate
+```
+
+Run the development server:
 
 ```bash
 npm run dev
