@@ -6,20 +6,27 @@ import type { Session, NextAuthOptions } from 'next-auth'
 
 export async function GET() {
   try {
-  const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
+    const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     
     // Use authenticated user ID or null for unauthenticated users
     const userId = session?.user?.id || null;
     console.log('👤 GET User ID:', userId);
 
-  const items = await prisma.savedItem.findMany({ 
-    where: userId ? { userId } : { userId: null }, 
-    orderBy: { id: 'desc' } 
-  });
+    // Check if Prisma is available
+    if (!prisma) {
+      console.warn('⚠️ Prisma not available - returning empty array');
+      return NextResponse.json([]);
+    }
+
+    const items = await prisma.savedItem.findMany({ 
+      where: userId ? { userId } : { userId: null }, 
+      orderBy: { id: 'desc' } 
+    });
     return NextResponse.json(items);
   } catch (error) {
     console.error('GET /api/saved-items error:', error);
-    return NextResponse.json({ message: 'Error fetching saved items' }, { status: 500 });
+    // Return empty array instead of error when Prisma is unavailable
+    return NextResponse.json([]);
   }
 }
 
@@ -63,6 +70,15 @@ export async function POST(request: Request) {
     }
 
     console.log('💾 Attempting to save to database...');
+    
+    // Check if Prisma is available
+    if (!prisma) {
+      console.warn('⚠️ Prisma not available - cannot save item');
+      return NextResponse.json({ 
+        message: 'Database temporarily unavailable. Please try again later.' 
+      }, { status: 503 });
+    }
+    
     const newItem = await prisma.savedItem.create({ data: {
       userId: userId,
       title,
