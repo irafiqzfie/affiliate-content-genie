@@ -1,7 +1,8 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './ConsentModal.module.css';
 
 interface AccordionSectionProps {
@@ -39,6 +40,7 @@ interface ThreadsConsentModalProps {
 export default function ThreadsConsentModal({ isOpen, onClose }: ThreadsConsentModalProps) {
   const [isAccepted, setIsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [accordionStates, setAccordionStates] = useState({
     notAccess: false,
     twoColumn: false,
@@ -48,7 +50,13 @@ export default function ThreadsConsentModal({ isOpen, onClose }: ThreadsConsentM
     setAccordionStates(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   if (!isOpen) return null;
+  if (!mounted) return null;
 
   const handleAccept = async () => {
     if (!isAccepted) return;
@@ -62,7 +70,7 @@ export default function ThreadsConsentModal({ isOpen, onClose }: ThreadsConsentM
     }
   };
 
-  return (
+  const modalContent = (
     <div className={styles.consentModalOverlay} onClick={onClose}>
       <div className={styles.consentModal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.consentModalHeader}>
@@ -192,8 +200,9 @@ export default function ThreadsConsentModal({ isOpen, onClose }: ThreadsConsentM
         </div>
       </div>
 
-
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 

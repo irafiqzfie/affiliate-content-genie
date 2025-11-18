@@ -2,6 +2,7 @@
 
 import { signIn } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './ConsentModal.module.css';
 
 interface AccordionSectionProps {
@@ -66,6 +67,7 @@ declare global {
 export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsentModalProps) {
   const [isAccepted, setIsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [accordionStates, setAccordionStates] = useState({
     notAccess: false,
     twoColumn: false,
@@ -74,6 +76,11 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
   const toggleAccordion = (key: keyof typeof accordionStates) => {
     setAccordionStates(prev => ({ ...prev, [key]: !prev[key] }));
   };
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   useEffect(() => {
     // Define checkLoginState globally for Facebook button callback
@@ -118,7 +125,10 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
     }
   };
 
-  return (
+  if (!isOpen) return null;
+  if (!mounted) return null;
+
+  const modalContent = (
     <div className={styles.consentModalOverlay} onClick={onClose}>
       <div className={styles.consentModal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.consentModalHeader}>
@@ -272,4 +282,6 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
