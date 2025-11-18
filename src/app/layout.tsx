@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
-import  './globals.css';
+import './globals.css';
 import './shopee-info.css';
 // FIX: Import React to make the React namespace available for type annotations like React.ReactNode.
 import React from "react";
