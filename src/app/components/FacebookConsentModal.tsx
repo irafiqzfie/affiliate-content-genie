@@ -3,6 +3,36 @@
 import { signIn } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 
+interface AccordionSectionProps {
+  title: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+interface AccordionSectionProps {
+  title: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+function AccordionSection({ title, isOpen, onToggle, children }: AccordionSectionProps) {
+  return (
+    <div className="accordion-section">
+      <button 
+        className="accordion-header" 
+        onClick={onToggle}
+        aria-expanded={isOpen}
+      >
+        <span>{title}</span>
+        <span className={`accordion-icon ${isOpen ? 'open' : ''}`}>▼</span>
+      </button>
+      {isOpen && <div className="accordion-content">{children}</div>}
+    </div>
+  );
+}
+
 interface FacebookConsentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -34,6 +64,14 @@ declare global {
 export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsentModalProps) {
   const [isAccepted, setIsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [accordionStates, setAccordionStates] = useState({
+    notAccess: false,
+    twoColumn: false,
+  });
+
+  const toggleAccordion = (key: keyof typeof accordionStates) => {
+    setAccordionStates(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   useEffect(() => {
     // Define checkLoginState globally for Facebook button callback
@@ -115,8 +153,11 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
             </div>
           </div>
 
-          <div className="consent-section">
-            <h3>🚫 What We Will NOT Access</h3>
+          <AccordionSection
+            title="🚫 What We Will NOT Access"
+            isOpen={accordionStates.notAccess}
+            onToggle={() => toggleAccordion('notAccess')}
+          >
             <div className="permission-list">
               <div className="permission-item denied">
                 <div className="permission-icon">✗</div>
@@ -147,27 +188,34 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
                 </div>
               </div>
             </div>
-          </div>
+          </AccordionSection>
 
-          <div className="consent-section">
-            <h3>🔒 How We Use Your Data</h3>
-            <ul className="usage-list">
-              <li>Authenticate your identity securely</li>
-              <li>Display your name and profile picture in the app</li>
-              <li>Send important notifications to your email</li>
-              <li>Provide personalized content generation services</li>
-            </ul>
-          </div>
-
-          <div className="consent-section highlight-box">
-            <h3>🛡️ Your Privacy Rights</h3>
-            <ul className="privacy-rights-list">
-              <li>You can revoke access anytime through Facebook Settings → Apps and Websites</li>
-              <li>You can delete your account and all data through our <a href="/delete-data" target="_blank" rel="noopener noreferrer">Data Deletion page</a></li>
-              <li>We never sell your data to third parties</li>
-              <li>Read our full <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a></li>
-            </ul>
-          </div>
+          <AccordionSection
+            title="🔒 Compliance Information"
+            isOpen={accordionStates.twoColumn}
+            onToggle={() => toggleAccordion('twoColumn')}
+          >
+            <div className="two-column-layout">
+              <div className="column">
+                <h4>How We Use Your Data</h4>
+                <ul className="usage-list">
+                  <li>Authenticate your identity securely</li>
+                  <li>Display your name and profile picture in the app</li>
+                  <li>Send important notifications to your email</li>
+                  <li>Provide personalized content generation services</li>
+                </ul>
+              </div>
+              <div className="column">
+                <h4>🛡️ Your Privacy Rights</h4>
+                <ul className="privacy-rights-list">
+                  <li>You can revoke access anytime through Facebook Settings → Apps and Websites</li>
+                  <li>You can delete your account and all data through our <a href="/delete-data" target="_blank" rel="noopener noreferrer">Data Deletion page</a></li>
+                  <li>We never sell your data to third parties</li>
+                  <li>Read our full <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a></li>
+                </ul>
+              </div>
+            </div>
+          </AccordionSection>
 
           <div className="consent-checkbox">
             <label>
@@ -181,7 +229,6 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
                 <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
                 {' '}and{' '}
                 <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
-                {', '}and I consent to Inabiz Online accessing my Facebook public profile and email address.
               </span>
             </label>
           </div>
@@ -196,16 +243,14 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
             Cancel
           </button>
           
-          {/* Option 1: Custom styled button via NextAuth */}
           <button
             className="consent-btn consent-btn-accept"
             onClick={handleAccept}
             disabled={!isAccepted || isLoading}
           >
-            {isLoading ? 'Connecting...' : 'Accept & Continue with Facebook'}
+            {isLoading ? 'Connecting...' : 'Accept & Continue'}
           </button>
 
-          {/* Option 2: Official Facebook Login Button (hidden by default, shown if XFBML enabled) */}
           {isAccepted && (
             <div className="fb-login-button-container">
               <div 
@@ -302,8 +347,75 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
 
         .consent-modal-content {
           padding: 1.5rem 2rem;
-          max-height: calc(90vh - 180px);
+          max-height: calc(90vh - 160px);
           overflow-y: auto;
+        }
+
+        .accordion-section {
+          margin-bottom: 1rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          overflow: hidden;
+          background: rgba(255, 255, 255, 0.02);
+        }
+
+        .accordion-header {
+          width: 100%;
+          padding: 1rem 1.25rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: none;
+          color: var(--primary-text-color);
+          font-size: 1.05rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.2s ease;
+          text-align: left;
+        }
+
+        .accordion-header:hover {
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        .accordion-icon {
+          font-size: 0.75rem;
+          transition: transform 0.2s ease;
+          color: var(--secondary-text-color);
+        }
+
+        .accordion-icon.open {
+          transform: rotate(180deg);
+        }
+
+        .accordion-content {
+          padding: 1rem 1.25rem 1.25rem;
+          animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .two-column-layout {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 2rem;
+        }
+
+        .two-column-layout .column h4 {
+          font-size: 0.95rem;
+          color: var(--primary-text-color);
+          margin-bottom: 0.75rem;
+          font-weight: 600;
         }
 
         .consent-intro {
@@ -391,14 +503,15 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
         .usage-list,
         .privacy-rights-list {
           margin: 0;
-          padding-left: 1.5rem;
+          padding-left: 1.25rem;
           color: var(--secondary-text-color);
-          line-height: 1.8;
+          line-height: 1.6;
+          font-size: 0.875rem;
         }
 
         .usage-list li,
         .privacy-rights-list li {
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.4rem;
         }
 
         .highlight-box {
@@ -428,17 +541,17 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 12px;
-          padding: 1.25rem;
-          margin-top: 1.5rem;
+          padding: 1rem;
+          margin-top: 1rem;
         }
 
         .consent-checkbox label {
           display: flex;
-          gap: 1rem;
+          gap: 0.75rem;
           align-items: flex-start;
           cursor: pointer;
-          font-size: 0.9rem;
-          line-height: 1.6;
+          font-size: 0.85rem;
+          line-height: 1.5;
           color: var(--secondary-text-color);
         }
 
@@ -451,7 +564,7 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
         }
 
         .consent-modal-footer {
-          padding: 1.5rem 2rem 2rem;
+          padding: 1rem 2rem 1.5rem;
           border-top: 1px solid rgba(255, 255, 255, 0.1);
           display: flex;
           gap: 1rem;
@@ -508,6 +621,11 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
             max-width: 100%;
             border-radius: 20px 20px 0 0;
             max-height: 95vh;
+          }
+
+          .two-column-layout {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
           }
 
           .consent-modal-header,
