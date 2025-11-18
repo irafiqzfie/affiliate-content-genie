@@ -7,6 +7,7 @@
     "build": "npm run prisma:generate && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate --schema=prisma/schema.clean.prisma || echo 'Prisma generate failed, continuing...'",
     "prisma:generate": "prisma generate --schema=prisma/schema.clean.prisma",
     "prisma:migrate": "prisma migrate dev --name init --schema=prisma/schema.clean.prisma",
     "prisma:deploy": "prisma migrate deploy --schema=prisma/schema.clean.prisma"
