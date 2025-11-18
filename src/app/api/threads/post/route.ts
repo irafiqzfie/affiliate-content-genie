@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const userId = user.accounts[0].providerAccountId;
 
     // Step 1: Create a container (media post preparation)
-    let containerUrl = `https://graph.threads.net/v1.0/${userId}/threads`;
+    const containerUrl = `https://graph.threads.net/v1.0/${userId}/threads`;
     
     const containerParams: Record<string, string> = {
       media_type: mediaType,
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
  * 
  * Get user's Threads profile information and connection status
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     
@@ -175,7 +175,6 @@ export async function GET(request: NextRequest) {
     }
 
     const accessToken = user.accounts[0].access_token;
-    const userId = user.accounts[0].providerAccountId;
 
     // Fetch Threads profile info
     const profileResponse = await fetch(
