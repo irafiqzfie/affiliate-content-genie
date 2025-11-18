@@ -2256,36 +2256,43 @@ export default function Home() {
         
         <nav className="unified-tab-bar">
           <button 
-            className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
+            className={`unified-tab primary-action ${currentPage === 'generator' ? 'active' : ''}`} 
             onClick={() => setCurrentPage('generator')}
           >
             <span className="tab-icon">✨</span>
             <span className="tab-label">Generator</span>
           </button>
+          
+          <div className="nav-divider"></div>
+          
           <button 
-            className={`unified-tab ${currentPage === 'saved' ? 'active' : ''}`} 
+            className={`unified-tab secondary-nav ${currentPage === 'saved' ? 'active' : ''}`} 
             onClick={() => setCurrentPage('saved')}
+            title={`Saved Items (${savedList.length})`}
           >
             <span className="tab-icon">💾</span>
             <span className="tab-label">Saved</span>
-            {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
+            {savedList.length > 0 && <span className="notification-badge">{savedList.length}</span>}
           </button>
           <button 
-            className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
+            className={`unified-tab secondary-nav ${currentPage === 'scheduler' ? 'active' : ''}`} 
             onClick={() => setCurrentPage('scheduler')}
+            title={`Scheduled Posts (${scheduledPosts.length})`}
           >
             <span className="tab-icon">🗓️</span>
             <span className="tab-label">Scheduler</span>
-            {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
+            {scheduledPosts.length > 0 && <span className="notification-badge">{scheduledPosts.length}</span>}
           </button>
         </nav>
         
         <div className="header-auth">
-          <a href="/about" className="about-link">
-            ℹ️ About Us
+          <a href="/about" className="nav-icon-link" title="About Us">
+            <span className="icon-circle">ℹ️</span>
+            <span className="nav-label">About</span>
           </a>
-          <a href="/contact" className="about-link">
-            📧 Contact Us
+          <a href="/contact" className="nav-icon-link" title="Contact Us">
+            <span className="icon-circle">📧</span>
+            <span className="nav-label">Contact</span>
           </a>
           <AuthButton />
         </div>
