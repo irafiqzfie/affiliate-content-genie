@@ -29,6 +29,7 @@ if (!process.env.THREADS_APP_SECRET) {
 export const authOptions: NextAuthOptions = {
   // Only use PrismaAdapter if available, otherwise rely on JWT
   ...(PrismaAdapter && prisma ? { adapter: PrismaAdapter(prisma) } : {}),
+  debug: true, // Enable debug mode to see errors
   providers: [
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID || '',
@@ -90,10 +91,11 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.THREADS_APP_ID || '',
       clientSecret: process.env.THREADS_APP_SECRET || '',
       profile(profile) {
+        console.log('📱 Threads profile:', profile);
         return {
           id: profile.id,
           name: profile.name || profile.username,
-          email: null, // Threads doesn't provide email
+          email: `${profile.username}@threads.net`, // Generate fake email since Threads doesn't provide one
           image: profile.threads_profile_picture_url
         }
       }
@@ -103,11 +105,35 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt'
   },
+  pages: {
+    signIn: '/',
+    error: '/', // Redirect to home on error
+  },
   callbacks: {
     async session({ session, user }: { session: Session; user: NextAuthUser }) {
       // Attach the Prisma user id to the session object
       if (user) session.user = { ...session.user, id: user.id }
       return session
+    },
+    async signIn({ user, account, profile }) {
+      console.log('✅ Sign in callback:', { 
+        user: user?.id, 
+        provider: account?.provider,
+        profile: profile 
+      });
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      // Always redirect to home after sign in
+      return baseUrl;
+    }
+  },
+  events: {
+    async signIn({ user, account }) {
+      console.log('🔐 User signed in:', user?.email || user?.name, 'via', account?.provider);
+    },
+    async signOut({ session }) {
+      console.log('👋 User signed out');
     }
   }
 }
