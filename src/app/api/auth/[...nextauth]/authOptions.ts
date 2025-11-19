@@ -53,6 +53,12 @@ export const authOptions: NextAuthOptions = {
         async request(context) {
           const { client_id, client_secret, code, redirect_uri } = context.params;
           
+          console.log('🔄 Attempting token exchange with:', {
+            client_id,
+            redirect_uri,
+            code: code ? 'present' : 'missing'
+          });
+          
           // Threads API expects form-urlencoded POST
           const response = await fetch('https://graph.threads.net/oauth/access_token', {
             method: 'POST',
@@ -71,10 +77,11 @@ export const authOptions: NextAuthOptions = {
           const tokens = await response.json();
           
           if (!response.ok) {
-            console.error('Threads token error:', tokens);
-            throw new Error(tokens.error_message || 'Failed to get access token');
+            console.error('❌ Threads token error:', JSON.stringify(tokens, null, 2));
+            throw new Error(tokens.error?.message || tokens.error_message || 'Failed to get access token');
           }
 
+          console.log('✅ Token exchange successful');
           return { tokens };
         },
       },
