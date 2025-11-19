@@ -27,8 +27,8 @@ if (!process.env.THREADS_APP_SECRET) {
 }
 
 export const authOptions: NextAuthOptions = {
-  // Only use PrismaAdapter if available, otherwise rely on JWT
-  ...(PrismaAdapter && prisma ? { adapter: PrismaAdapter(prisma) } : {}),
+  // Disable PrismaAdapter - use JWT-only sessions
+  // ...(PrismaAdapter && prisma ? { adapter: PrismaAdapter(prisma) } : {}),
   debug: true, // Enable debug mode to see errors
   providers: [
     FacebookProvider({
