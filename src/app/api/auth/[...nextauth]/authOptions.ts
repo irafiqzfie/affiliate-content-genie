@@ -13,6 +13,19 @@ try {
   console.warn('⚠️ PrismaAdapter not available - using JWT sessions only');
 }
 
+// Validate required environment variables
+if (!process.env.NEXTAUTH_SECRET) {
+  console.error('❌ NEXTAUTH_SECRET is not set in environment variables');
+}
+
+if (!process.env.THREADS_APP_ID) {
+  console.warn('⚠️ THREADS_APP_ID is not set - Threads login will not work');
+}
+
+if (!process.env.THREADS_APP_SECRET) {
+  console.warn('⚠️ THREADS_APP_SECRET is not set - Threads login will not work');
+}
+
 export const authOptions: NextAuthOptions = {
   // Only use PrismaAdapter if available, otherwise rely on JWT
   ...(PrismaAdapter && prisma ? { adapter: PrismaAdapter(prisma) } : {}),
@@ -30,7 +43,8 @@ export const authOptions: NextAuthOptions = {
         url: 'https://threads.net/oauth/authorize',
         params: {
           scope: 'threads_basic,threads_content_publish',
-          response_type: 'code'
+          response_type: 'code',
+          client_id: process.env.THREADS_APP_ID || ''
         }
       },
       token: 'https://graph.threads.net/oauth/access_token',
