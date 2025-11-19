@@ -51,7 +51,11 @@ export const authOptions: NextAuthOptions = {
       token: {
         url: 'https://graph.threads.net/oauth/access_token',
         async request(context) {
-          const { client_id, client_secret, code, redirect_uri } = context.params;
+          // Extract from context.provider and context.params
+          const client_id = context.provider.clientId;
+          const client_secret = context.provider.clientSecret;
+          const code = context.params.code;
+          const redirect_uri = context.provider.callbackUrl;
           
           console.log('🔄 Attempting token exchange with:', {
             client_id,
