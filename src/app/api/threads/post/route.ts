@@ -49,6 +49,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate mediaUrl if provided
+    if (mediaUrl) {
+      try {
+        const url = new URL(mediaUrl);
+        if (!url.protocol.startsWith('http')) {
+          return NextResponse.json(
+            { error: 'Image URL must be a valid HTTP or HTTPS URL. Data URLs and relative paths are not supported by Threads API.' },
+            { status: 400 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { error: `Invalid image URL format: ${mediaUrl}. Must be a publicly accessible HTTP/HTTPS URL.` },
+          { status: 400 }
+        );
+      }
+      console.log('📸 Media URL:', mediaUrl);
+    }
+
     // Get access token from session (JWT-only, no database)
     const accessToken = session.accessToken;
     const userId = session.user.id;

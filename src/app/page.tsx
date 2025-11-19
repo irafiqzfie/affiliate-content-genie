@@ -1404,6 +1404,12 @@ export default function Home() {
 
       try {
         // Post to Threads
+        console.log('🚀 Posting to Threads with:', {
+          text: post.caption?.substring(0, 50) + '...',
+          mediaUrl: post.imageUrl,
+          mediaType: 'IMAGE'
+        });
+        
         const response = await fetch(`${API_URL}/threads/post`, {
           method: 'POST',
           headers: {
@@ -1419,7 +1425,8 @@ export default function Home() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to post to Threads');
+          console.error('❌ Threads API error:', data);
+          throw new Error(data.error || data.details?.error?.message || 'Failed to post to Threads');
         }
 
         // Remove from scheduled posts after successful posting
