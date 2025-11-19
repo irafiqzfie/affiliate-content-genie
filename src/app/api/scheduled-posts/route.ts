@@ -8,9 +8,9 @@ export async function GET() {
   try {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
   
-    // Use authenticated user ID or null for unauthenticated users
-    const userId = session?.user?.id || null;
-    console.log('👤 GET User ID:', userId);
+    // For JWT-only sessions, all posts have null userId
+    const userId = null;
+    console.log('👤 GET User ID (JWT mode):', userId);
 
     // Check if Prisma is available
     if (!prisma) {
@@ -18,8 +18,9 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
+    // Get all posts with null userId (JWT mode posts)
     const posts = await prisma.scheduledPost.findMany({ 
-      where: userId ? { userId } : { userId: null }, 
+      where: { userId: null }, 
       orderBy: { scheduledTime: 'asc' } 
     });
     return NextResponse.json(posts);
@@ -37,9 +38,9 @@ export async function POST(request: Request) {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     console.log('🔐 Session:', session ? 'Authenticated' : 'Not authenticated');
     
-    // Use authenticated user ID or null for unauthenticated users
-    const userId = session?.user?.id || null;
-    console.log('👤 User ID:', userId);
+    // For JWT-only sessions, userId doesn't exist in database, so set to null
+    const userId = null;
+    console.log('👤 User ID (JWT mode):', userId);
 
     const body = await request.json();
     console.log('📦 Request body:', { platform: body.platform, scheduledTime: body.scheduledTime, status: body.status });
