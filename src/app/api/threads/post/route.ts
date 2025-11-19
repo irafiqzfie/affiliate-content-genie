@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/authOptions';
-import { prisma } from '@/lib/prisma';
 
 /**
  * POST /api/threads/post
@@ -17,9 +16,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.email) {
+    if (!session?.user?.email || !session?.accessToken) {
       return NextResponse.json(
-        { error: 'Unauthorized. Please sign in.' },
+        { error: 'Unauthorized. Please sign in with Threads.' },
         { status: 401 }
       );
     }
@@ -34,25 +33,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's Threads access token from the database
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: {
-        accounts: {
-          where: { provider: 'threads' }
-        }
-      }
-    });
+    // Get access token from session (JWT-only, no database)
+    const accessToken = session.accessToken;
+    const userId = session.user.id;
 
-    if (!user?.accounts?.[0]?.access_token) {
-      return NextResponse.json(
-        { error: 'Threads account not connected. Please connect your Threads account first.' },
-        { status: 403 }
-      );
-    }
-
-    const accessToken = user.accounts[0].access_token;
-    const userId = user.accounts[0].providerAccountId;
+    console.log('📤 Posting to Threads:', { userId, hasToken: !!accessToken });
 
     // Step 1: Create a container (media post preparation)
     const containerUrl = `https://graph.threads.net/v1.0/${userId}/threads`;
@@ -94,6 +79,8 @@ export async function POST(request: NextRequest) {
     const containerData = await containerResponse.json();
     const creationId = containerData.id;
 
+    console.log('✅ Container created:', creationId);
+
     // Step 2: Publish the container
     const publishUrl = `https://graph.threads.net/v1.0/${userId}/threads_publish`;
     
@@ -121,6 +108,8 @@ export async function POST(request: NextRequest) {
     }
 
     const publishData = await publishResponse.json();
+
+    console.log('✅ Published to Threads:', publishData.id);
 
     return NextResponse.json({
       success: true,
@@ -156,16 +145,7 @@ export async function GET() {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: {
-        accounts: {
-          where: { provider: 'threads' }
-        }
-      }
-    });
-
-    const isConnected = !!user?.accounts?.[0]?.access_token;
+    const isConnected = !!session?.accessToken && session?.provider === 'threads';
 
     if (!isConnected) {
       return NextResponse.json({
@@ -174,7 +154,7 @@ export async function GET() {
       });
     }
 
-    const accessToken = user.accounts[0].access_token;
+    const accessToken = session.accessToken;
 
     // Fetch Threads profile info
     const profileResponse = await fetch(

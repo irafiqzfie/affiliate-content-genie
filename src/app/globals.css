@@ -2811,6 +2811,31 @@ body {
 .scheduled-item-actions {
     padding: 0 1rem 1rem;
     display: flex;
+    gap: 0.5rem;
+}
+
+.scheduled-item-button.post-now-button {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.scheduled-item-button.post-now-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    filter: brightness(1.1);
 }
 
 .scheduled-item-button.cancel-button {
@@ -2818,7 +2843,7 @@ body {
     border: 1px solid var(--glass-border);
     color: var(--secondary-text-color);
     padding: 0.5rem 1rem;
-    border-radius: 8px;
+    border-radius: 9999px;
     cursor: pointer;
     font-size: 0.8rem;
     font-weight: 500;
@@ -2827,13 +2852,13 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-left: auto;
-  border-radius: 9999px;}
+}
+
 .scheduled-item-button.cancel-button:hover {
     border-color: var(--error-color);
     color: var(--error-color);
     background-color: var(--glass-bg-hover);
-  border-radius: 9999px;}
+}
 
 /* --- Modal Styles --- */
 .modal-overlay {

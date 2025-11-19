@@ -121,10 +121,23 @@ export const authOptions: NextAuthOptions = {
     error: '/', // Redirect to home on error
   },
   callbacks: {
-    async session({ session, user }: { session: Session; user: NextAuthUser }) {
-      // Attach the Prisma user id to the session object
-      if (user) session.user = { ...session.user, id: user.id }
-      return session
+    async jwt({ token, account, user }) {
+      // Initial sign in - save access token to JWT
+      if (account && user) {
+        token.accessToken = account.access_token;
+        token.provider = account.provider;
+        token.userId = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Make access token and provider available in session
+      if (token) {
+        session.accessToken = token.accessToken as string;
+        session.provider = token.provider as string;
+        session.user.id = token.userId as string;
+      }
+      return session;
     },
     async signIn({ user, account, profile }) {
       console.log('✅ Sign in callback:', { 

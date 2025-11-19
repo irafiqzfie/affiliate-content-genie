@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
 import { SavedItemsList } from '@/app/components/SavedContent';
 import { ScheduledPostsList } from '@/app/components/Scheduler';
@@ -199,6 +200,7 @@ const sectionsConfigPost = [
 
 
 export default function Home() {
+  const { data: session } = useSession();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [productLink, setProductLink] = useState('');
   // New fields for manual product input
@@ -1390,6 +1392,54 @@ export default function Home() {
     }
   };
 
+  const handlePostNow = async (post: ScheduledPost) => {
+    if (!session) {
+      setError('Please sign in with Threads to post.');
+      return;
+    }
+
+    if (window.confirm("Post this content to Threads now?")) {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // Post to Threads
+        const response = await fetch(`${API_URL}/threads/post`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: post.caption,
+            mediaUrl: post.imageUrl,
+            mediaType: 'IMAGE'
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to post to Threads');
+        }
+
+        // Remove from scheduled posts after successful posting
+        const updatedPosts = scheduledPosts.filter(p => p.id !== post.id);
+        setScheduledPosts(updatedPosts);
+
+        // Delete from database
+        await fetch(`${API_URL}/scheduled-posts/${post.id}`, { method: 'DELETE' });
+
+        // Show success message using alert for now
+        alert('Successfully posted to Threads! 🎉');
+      } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : 'Failed to post to Threads. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const renderSocialModal = () => {
     if (!isSocialModalOpen) return null;
 
@@ -2231,6 +2281,7 @@ export default function Home() {
     <ScheduledPostsList 
       scheduledPosts={scheduledPosts}
       onDeletePost={handleDeleteScheduledPost}
+      onPostNow={handlePostNow}
     />
   );
 
@@ -2256,43 +2307,36 @@ export default function Home() {
         
         <nav className="unified-tab-bar">
           <button 
-            className={`unified-tab primary-action ${currentPage === 'generator' ? 'active' : ''}`} 
+            className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
             onClick={() => setCurrentPage('generator')}
           >
             <span className="tab-icon">✨</span>
             <span className="tab-label">Generator</span>
           </button>
-          
-          <div className="nav-divider"></div>
-          
           <button 
-            className={`unified-tab secondary-nav ${currentPage === 'saved' ? 'active' : ''}`} 
+            className={`unified-tab ${currentPage === 'saved' ? 'active' : ''}`} 
             onClick={() => setCurrentPage('saved')}
-            title={`Saved Items (${savedList.length})`}
           >
             <span className="tab-icon">💾</span>
             <span className="tab-label">Saved</span>
-            {savedList.length > 0 && <span className="notification-badge">{savedList.length}</span>}
+            {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
           </button>
           <button 
-            className={`unified-tab secondary-nav ${currentPage === 'scheduler' ? 'active' : ''}`} 
+            className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
             onClick={() => setCurrentPage('scheduler')}
-            title={`Scheduled Posts (${scheduledPosts.length})`}
           >
             <span className="tab-icon">🗓️</span>
             <span className="tab-label">Scheduler</span>
-            {scheduledPosts.length > 0 && <span className="notification-badge">{scheduledPosts.length}</span>}
+            {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
           </button>
         </nav>
         
         <div className="header-auth">
-          <a href="/about" className="nav-icon-link" title="About Us">
-            <span className="icon-circle">ℹ️</span>
-            <span className="nav-label">About</span>
+          <a href="/about" className="about-link">
+            ℹ️ About Us
           </a>
-          <a href="/contact" className="nav-icon-link" title="Contact Us">
-            <span className="icon-circle">📧</span>
-            <span className="nav-label">Contact</span>
+          <a href="/contact" className="about-link">
+            📧 Contact Us
           </a>
           <AuthButton />
         </div>
