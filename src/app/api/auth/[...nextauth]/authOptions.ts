@@ -47,8 +47,46 @@ export const authOptions: NextAuthOptions = {
           client_id: process.env.THREADS_APP_ID || ''
         }
       },
-      token: 'https://graph.threads.net/oauth/access_token',
-      userinfo: 'https://graph.threads.net/v1.0/me?fields=id,username,name,threads_profile_picture_url',
+      token: {
+        url: 'https://graph.threads.net/oauth/access_token',
+        async request(context) {
+          const { client_id, client_secret, code, redirect_uri } = context.params;
+          
+          // Threads API expects form-urlencoded POST
+          const response = await fetch('https://graph.threads.net/oauth/access_token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              client_id: client_id as string,
+              client_secret: client_secret as string,
+              grant_type: 'authorization_code',
+              redirect_uri: redirect_uri as string,
+              code: code as string,
+            }),
+          });
+
+          const tokens = await response.json();
+          
+          if (!response.ok) {
+            console.error('Threads token error:', tokens);
+            throw new Error(tokens.error_message || 'Failed to get access token');
+          }
+
+          return { tokens };
+        },
+      },
+      userinfo: {
+        url: 'https://graph.threads.net/v1.0/me',
+        async request(context) {
+          const response = await fetch(
+            `https://graph.threads.net/v1.0/me?fields=id,username,name,threads_profile_picture_url&access_token=${context.tokens.access_token}`
+          );
+          
+          return await response.json();
+        },
+      },
       clientId: process.env.THREADS_APP_ID || '',
       clientSecret: process.env.THREADS_APP_SECRET || '',
       profile(profile) {
