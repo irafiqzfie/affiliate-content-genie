@@ -14,13 +14,20 @@ export async function DELETE(request: Request) {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     
     // For development: use test user ID if not authenticated
-    const userId = session?.user?.id || 'dev-user-localhost';
+    const userId = session?.user?.email || session?.user?.id || 'dev-user-localhost';
     
     if (!session && process.env.NODE_ENV !== 'development') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    const deleted = await prisma.scheduledPost.deleteMany({ where: { id, userId: userId } });
+    // Check if Prisma is available
+    if (!prisma || typeof prisma.scheduledPost === 'undefined') {
+      console.warn('⚠️ Prisma not available - scheduled posts are in-memory only');
+      return NextResponse.json({ message: 'Database not available - posts are in-memory only' }, { status: 503 });
+    }
+
+    // Remove userId filter since JWT users aren't in database
+    const deleted = await prisma.scheduledPost.deleteMany({ where: { id } });
     if (deleted.count === 0) {
       return NextResponse.json({ message: 'Post not found or unauthorized' }, { status: 404 });
     }

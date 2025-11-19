@@ -25,10 +25,17 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     
-    const userId = session?.user?.id || 'dev-user-localhost';
+    const userId = session?.user?.email || session?.user?.id || 'dev-user-localhost';
     console.log(`🗑️  Attempting to delete saved item ${id} for user: ${userId}`);
 
-    const deleted = await prisma.savedItem.deleteMany({ where: { id, userId } });
+    // Check if Prisma is available
+    if (!prisma || typeof prisma.savedItem === 'undefined') {
+      console.warn('⚠️ Prisma not available - saved items are in-memory only');
+      return NextResponse.json({ message: 'Database not available - items are in-memory only' }, { status: 503 });
+    }
+
+    // Remove userId filter since JWT users aren't in database
+    const deleted = await prisma.savedItem.deleteMany({ where: { id } });
     
     if (deleted.count === 0) {
       console.log(`⚠️  Item ${id} not found or unauthorized for user ${userId}`);
