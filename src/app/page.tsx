@@ -1338,6 +1338,18 @@ export default function Home() {
         return;
     }
 
+    // Validate that the image URL is a valid HTTP/HTTPS URL
+    try {
+        const url = new URL(imageUrl);
+        if (!url.protocol.startsWith('http')) {
+            alert("Image must be a publicly accessible URL. Please generate the image using the 'Generate Image' button first.");
+            return;
+        }
+    } catch {
+        alert(`Invalid image URL. Please generate a new image using the 'Generate Image' button.`);
+        return;
+    }
+
     const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`).toISOString();
 
     const newPostPayload = {
@@ -1395,6 +1407,24 @@ export default function Home() {
   const handlePostNow = async (post: ScheduledPost) => {
     if (!session) {
       setError('Please sign in with Threads to post.');
+      return;
+    }
+
+    // Validate image URL before posting
+    if (!post.imageUrl) {
+      setError('No image available. Please generate an image first.');
+      return;
+    }
+
+    // Check if it's a valid HTTP/HTTPS URL
+    try {
+      const url = new URL(post.imageUrl);
+      if (!url.protocol.startsWith('http')) {
+        setError('Image must be uploaded and have a public URL. Data URLs are not supported by Threads.');
+        return;
+      }
+    } catch {
+      setError(`Invalid image URL: ${post.imageUrl}. Please generate a new image.`);
       return;
     }
 
