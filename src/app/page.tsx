@@ -1410,25 +1410,35 @@ export default function Home() {
       return;
     }
 
-    // Validate image URL before posting
-    if (!post.imageUrl) {
-      setError('No image available. Please generate an image first.');
-      return;
-    }
-
-    // Check if it's a valid HTTP/HTTPS URL
-    try {
-      const url = new URL(post.imageUrl);
-      if (!url.protocol.startsWith('http')) {
-        setError('Image must be uploaded and have a public URL. Data URLs are not supported by Threads.');
+    // Check if image URL is a data URL (base64) - Threads doesn't support these
+    let mediaUrl: string | null = post.imageUrl;
+    const isDataUrl = mediaUrl?.startsWith('data:');
+    
+    if (isDataUrl) {
+      // Ask user if they want to post without image
+      if (!window.confirm("The image is stored locally and cannot be posted to Threads directly. Post as text-only?")) {
         return;
       }
-    } catch {
-      setError(`Invalid image URL: ${post.imageUrl}. Please generate a new image.`);
-      return;
+      mediaUrl = null; // Post without image
+    } else if (mediaUrl) {
+      // Validate it's a proper HTTP/HTTPS URL
+      try {
+        const url = new URL(mediaUrl);
+        if (!url.protocol.startsWith('http')) {
+          if (!window.confirm("Image URL is invalid. Post as text-only?")) {
+            return;
+          }
+          mediaUrl = null;
+        }
+      } catch {
+        if (!window.confirm("Image URL is invalid. Post as text-only?")) {
+          return;
+        }
+        mediaUrl = null;
+      }
     }
 
-    if (window.confirm("Post this content to Threads now?")) {
+    if (window.confirm(mediaUrl ? "Post this content with image to Threads now?" : "Post this content (text-only) to Threads now?")) {
       setIsLoading(true);
       setError(null);
 
@@ -1436,8 +1446,8 @@ export default function Home() {
         // Post to Threads
         console.log('🚀 Posting to Threads with:', {
           text: post.caption?.substring(0, 50) + '...',
-          mediaUrl: post.imageUrl,
-          mediaType: 'IMAGE'
+          mediaUrl: mediaUrl || '(text-only)',
+          mediaType: mediaUrl ? 'IMAGE' : 'TEXT'
         });
         
         const response = await fetch(`${API_URL}/threads/post`, {
@@ -1447,8 +1457,7 @@ export default function Home() {
           },
           body: JSON.stringify({
             text: post.caption,
-            mediaUrl: post.imageUrl,
-            mediaType: 'IMAGE'
+            ...(mediaUrl && { mediaUrl, mediaType: 'IMAGE' })
           })
         });
 

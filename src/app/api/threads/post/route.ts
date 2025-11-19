@@ -72,17 +72,18 @@ export async function POST(request: NextRequest) {
     const accessToken = session.accessToken;
     const userId = session.user.id;
 
-    console.log('📤 Posting to Threads:', { userId, hasToken: !!accessToken });
+    console.log('📤 Posting to Threads:', { userId, hasToken: !!accessToken, hasMedia: !!mediaUrl });
 
     // Step 1: Create a container (media post preparation)
     const containerUrl = `https://graph.threads.net/v1.0/${userId}/threads`;
     
     const containerParams: Record<string, string> = {
-      media_type: mediaType,
+      media_type: mediaUrl ? mediaType : 'TEXT',
       text: text,
       access_token: accessToken
     };
 
+    // Only add image/video URL if provided
     if (mediaUrl) {
       if (mediaType === 'IMAGE') {
         containerParams.image_url = mediaUrl;
