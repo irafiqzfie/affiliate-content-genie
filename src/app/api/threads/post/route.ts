@@ -16,9 +16,25 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.email || !session?.accessToken) {
+    console.log('🔍 Session check:', {
+      hasSession: !!session,
+      hasEmail: !!session?.user?.email,
+      hasAccessToken: !!session?.accessToken,
+      provider: session?.provider,
+      userId: session?.user?.id
+    });
+    
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Unauthorized. Please sign in with Threads.' },
+        { status: 401 }
+      );
+    }
+
+    if (!session?.accessToken) {
+      console.error('❌ No access token in session. User needs to sign out and sign back in.');
+      return NextResponse.json(
+        { error: 'Session expired. Please sign out and sign back in with Threads to refresh your credentials.' },
         { status: 401 }
       );
     }
