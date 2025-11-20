@@ -63,7 +63,6 @@ export async function POST(request: Request) {
     }
     
     const newPost = await prisma.scheduledPost.create({ data: {
-      userId: userId,
       platform,
       scheduledTime: new Date(scheduledTime),
       imageUrl,
