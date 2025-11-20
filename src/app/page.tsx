@@ -1410,79 +1410,98 @@ export default function Home() {
       return;
     }
 
-    // Check if image URL is a data URL (base64) - Threads doesn't support these
-    let mediaUrl: string | null = post.imageUrl;
-    const isDataUrl = mediaUrl?.startsWith('data:');
-    
-    if (isDataUrl) {
-      // Ask user if they want to post without image
-      if (!window.confirm("The image is stored locally and cannot be posted to Threads directly. Post as text-only?")) {
-        return;
-      }
-      mediaUrl = null; // Post without image
-    } else if (mediaUrl) {
-      // Validate it's a proper HTTP/HTTPS URL
-      try {
-        const url = new URL(mediaUrl);
-        if (!url.protocol.startsWith('http')) {
-          if (!window.confirm("Image URL is invalid. Post as text-only?")) {
-            return;
-          }
-          mediaUrl = null;
-        }
-      } catch {
-        if (!window.confirm("Image URL is invalid. Post as text-only?")) {
-          return;
-        }
-        mediaUrl = null;
-      }
-    }
+    setIsLoading(true);
+    setError(null);
 
-    if (window.confirm(mediaUrl ? "Post this content with image to Threads now?" : "Post this content (text-only) to Threads now?")) {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // Post to Threads
-        console.log('🚀 Posting to Threads with:', {
-          text: post.caption?.substring(0, 50) + '...',
-          mediaUrl: mediaUrl || '(text-only)',
-          mediaType: mediaUrl ? 'IMAGE' : 'TEXT'
-        });
+    try {
+      // Check if image URL is a data URL (base64) - upload to Vercel Blob
+      let mediaUrl: string | null = post.imageUrl;
+      const isDataUrl = mediaUrl?.startsWith('data:');
+      
+      if (isDataUrl && mediaUrl) {
+        console.log('📤 Uploading base64 image to Vercel Blob...');
         
-        const response = await fetch(`${API_URL}/threads/post`, {
+        const uploadResponse = await fetch(`${API_URL}/upload-image`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            text: post.caption,
-            ...(mediaUrl && { mediaUrl, mediaType: 'IMAGE' })
-          })
+          body: JSON.stringify({ imageData: mediaUrl })
         });
 
-        const data = await response.json();
+        const uploadData = await uploadResponse.json();
 
-        if (!response.ok) {
-          console.error('❌ Threads API error:', data);
-          throw new Error(data.error || data.details?.error?.message || 'Failed to post to Threads');
+        if (!uploadResponse.ok) {
+          throw new Error(uploadData.error || 'Failed to upload image');
         }
 
-        // Remove from scheduled posts after successful posting
-        const updatedPosts = scheduledPosts.filter(p => p.id !== post.id);
-        setScheduledPosts(updatedPosts);
-
-        // Delete from database
-        await fetch(`${API_URL}/scheduled-posts/${post.id}`, { method: 'DELETE' });
-
-        // Show success message using alert for now
-        alert('Successfully posted to Threads! 🎉');
-      } catch (err) {
-        console.error(err);
-        setError(err instanceof Error ? err.message : 'Failed to post to Threads. Please try again.');
-      } finally {
-        setIsLoading(false);
+        mediaUrl = uploadData.url;
+        console.log('✅ Image uploaded to:', mediaUrl);
+      } else if (mediaUrl) {
+        // Validate it's a proper HTTP/HTTPS URL
+        try {
+          const url = new URL(mediaUrl);
+          if (!url.protocol.startsWith('http')) {
+            throw new Error('Invalid URL protocol');
+          }
+        } catch {
+          setError('Image URL is invalid. Cannot post to Threads.');
+          setIsLoading(false);
+          return;
+        }
       }
+
+      // Confirm before posting
+      const confirmMessage = mediaUrl 
+        ? "Post this content with image to Threads now?" 
+        : "No image available. Post text-only to Threads?";
+      
+      if (!window.confirm(confirmMessage)) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Post to Threads
+      console.log('🚀 Posting to Threads with:', {
+        text: post.caption?.substring(0, 50) + '...',
+        mediaUrl: mediaUrl || '(text-only)',
+        mediaType: mediaUrl ? 'IMAGE' : 'TEXT'
+      });
+      
+      const response = await fetch(`${API_URL}/threads/post`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: post.caption,
+          ...(mediaUrl && { mediaUrl, mediaType: 'IMAGE' })
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('❌ Threads API error:', data);
+        throw new Error(data.error || data.details?.error?.message || 'Failed to post to Threads');
+      }
+
+      console.log('✅ Successfully posted to Threads!');
+
+      // Remove from scheduled posts after successful posting
+      const updatedPosts = scheduledPosts.filter(p => p.id !== post.id);
+      setScheduledPosts(updatedPosts);
+
+      // Delete from database
+      await fetch(`${API_URL}/scheduled-posts/${post.id}`, { method: 'DELETE' });
+
+      // Show success message using alert for now
+      alert('Successfully posted to Threads! 🎉');
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to post to Threads. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
