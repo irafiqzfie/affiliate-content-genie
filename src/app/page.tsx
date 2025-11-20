@@ -7,7 +7,6 @@ import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
 import { SavedItemsList } from '@/app/components/SavedContent';
 import { ScheduledPostsList } from '@/app/components/Scheduler';
-import { ProductInfoCard } from '@/app/components/ContentGeneration';
 // import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
@@ -32,13 +31,6 @@ interface SavedItem {
   productLink: string;
   video: string;
   post: string;
-}
-
-interface ShopeeProductInfo {
-  title: string;
-  price: string;
-  image: string;
-  description: string;
 }
 
 interface ScheduledPost {
@@ -230,7 +222,7 @@ export default function Home() {
   const [selectedOptionIndexes, setSelectedOptionIndexes] = useState<Record<string, number>>({});
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler'>('generator');
-  const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post' | 'info'>('video');
+  const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post'>('video');
   const [trendscore, setTrendscore] = useState<number | null>(null);
   const [productSummary, setProductSummary] = useState<string | null>(null);
   const [productFeatures, setProductFeatures] = useState<string[] | null>(null);
@@ -242,7 +234,6 @@ export default function Home() {
   const [scheduleTime, setScheduleTime] = useState('');
   const [affiliateLink, setAffiliateLink] = useState('');
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [shopeeProductInfo, setShopeeProductInfo] = useState<ShopeeProductInfo | null>(null);
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
@@ -427,12 +418,11 @@ export default function Home() {
 
   const handleProductLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProductLink(e.target.value);
-    if (trendscore !== null || productSummary || affiliatePotential || productFeatures || shopeeProductInfo) {
+    if (trendscore !== null || productSummary || affiliatePotential || productFeatures) {
         setTrendscore(null);
         setProductSummary(null);
         setProductFeatures(null);
         setAffiliatePotential(null);
-        setShopeeProductInfo(null);
     }
   };
 
@@ -634,7 +624,6 @@ export default function Home() {
     setProductSummary(null);
     setProductFeatures(null);
     setAffiliatePotential(null);
-    setShopeeProductInfo(null);
 
     try {
         const response = await fetch(`${API_URL}/analyze`, {
@@ -661,7 +650,6 @@ export default function Home() {
         setProductSummary(suggestions.productSummary);
         setProductFeatures(suggestions.productFeatures);
         setAffiliatePotential(suggestions.affiliatePotential);
-        setShopeeProductInfo(suggestions.shopeeProductInfo || null);
 
     } catch (err: unknown) {
         console.error('Analysis failed:', err);
@@ -699,27 +687,6 @@ export default function Home() {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     
     try {
-      // If shopeeProductInfo doesn't exist yet and we have a product link, call analyze first
-      if (hasProductLink && !shopeeProductInfo) {
-        console.log('🔍 No product info found, analyzing first...');
-        try {
-          const analyzeResponse = await fetch(`${API_URL}/analyze`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productLink }),
-          });
-          
-          if (analyzeResponse.ok) {
-            const suggestions = await analyzeResponse.json();
-            setShopeeProductInfo(suggestions.shopeeProductInfo || null);
-            console.log('✅ Product info retrieved');
-          }
-        } catch (analyzeError) {
-          console.warn('⚠️ Could not fetch product info, continuing with generation:', analyzeError);
-          // Continue with generation even if analyze fails
-        }
-      }
-      
       const response = await fetch(`${API_URL}/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -790,7 +757,7 @@ export default function Home() {
         } finally {
       setIsLoading(false);
     }
-  }, [productLink, productTitle, productImagePreviews, isLoading, shopeeProductInfo, advancedInputs, initializeOptionIndexes, parseContent]);
+  }, [productLink, productTitle, productImagePreviews, isLoading, advancedInputs, initializeOptionIndexes, parseContent]);
   
   const handleGenerateImage = useCallback(async (key: string, promptText: string) => {
     console.log('🎨 Generating image for key:', key, 'with prompt:', promptText.substring(0, 100) + '...');
@@ -1275,7 +1242,6 @@ export default function Home() {
     setProductSummary(null);
     setProductFeatures(null);
     setAffiliatePotential(null);
-    setShopeeProductInfo(null);
     initializeOptionIndexes();
     setCurrentPage('generator');
     setHasGeneratedAttempt(true);
@@ -1293,7 +1259,6 @@ export default function Home() {
   };
 
   const handleSaveEdit = (sectionKey: string, index: number) => {
-    if (activeOutputTab === 'info') return;
     if (!editableContent[activeOutputTab]) return;
     const newEditableContent = JSON.parse(JSON.stringify(editableContent));
     newEditableContent[activeOutputTab]![sectionKey as keyof ParsedContent]![index] = editText;
@@ -1681,7 +1646,7 @@ export default function Home() {
         }, [] as ({ key: string; title: string; icon: string; })[][]);
 
     const renderPromptCard = (section: {key: string; title: string; icon: string;}, isVisual = false) => {
-        if (!section || activeOutputTab === 'info') return <div/>;
+        if (!section) return <div/>;
         
         const { key, title, icon } = section;
         const richTextFields = new Set(['body', 'caption']);
@@ -2290,7 +2255,7 @@ export default function Home() {
         </div>
       )}
 
-      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || shopeeProductInfo || error)) && (
+      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || error)) && (
         <div className="output-actions-section-top">
           <div className="output-actions-left">
             <span className="output-title">
@@ -2324,14 +2289,6 @@ export default function Home() {
               >
                 ✍️ Post
               </button>
-              <button 
-                type="button" 
-                className={`output-tab-btn ${activeOutputTab === 'info' ? 'active' : ''}`} 
-                onClick={() => setActiveOutputTab('info')}
-                disabled={!shopeeProductInfo}
-              >
-                ℹ️ Info
-              </button>
             </div>
           </div>
           <div className="output-actions-group">
@@ -2363,14 +2320,10 @@ export default function Home() {
         </div>
       )}
       
-      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || shopeeProductInfo || error)) && (
+      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || error)) && (
         <>
         <div className="output-container">
-            {activeOutputTab === 'info' && shopeeProductInfo ? (
-              <ProductInfoCard productInfo={shopeeProductInfo} />
-            ) : (
-              <>
-                {activeOutputTab === 'post' ? (
+            {activeOutputTab === 'post' ? (
                   <>
                     {/* Row 1: Body + Image Prompt */}
                     <div className="standard-section-row">
@@ -2397,8 +2350,6 @@ export default function Home() {
                     ))}
                   </>
                 )}
-              </>
-            )}
         </div>
         </>
       )}

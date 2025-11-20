@@ -23,7 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body ap-style="" suppressHydrationWarning className={inter.className}>
-        <div className="app-wrapper">
+        NEXTAUTH_SECRET=h7dxRRzHHZvnfbQFn4iPRfegjaHtqzkYKcmIE7MapXo=
+                        NEXTAUTH_SECRET = h7dxRRzHHZvnfbQFn4iPRfegjaHtqzkYKcmIE7MapXo=
+                NEXTAUTH_URL = https://www.inabiz.online
+                THREADS_APP_ID = 1303297011016524
+                THREADS_APP_SECRET = 3c3d66bd156fe1ddbbb722daaf62c5d        <div className="app-wrapper">
           <div className="app-container-wrapper">
             <Providers>{children}</Providers>
           </div>

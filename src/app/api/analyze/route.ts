@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { parseShopeeProduct } from '@/lib/shopeeParser';
 
 const API_KEY = process.env.API_KEY;
 if (!API_KEY) {
@@ -24,28 +23,17 @@ export async function POST(request: Request) {
       hasDescription: !!customDescription 
     });
 
-    // Parse Shopee product data if link is provided
-    let shopeeData = null;
+    // Extract product name from URL or use title
     let productName = productTitle || '';
     
-    if (productLink && productLink.toLowerCase().includes('shopee')) {
-      console.log('📦 Fetching public Shopee product data...');
-      try {
-        shopeeData = await parseShopeeProduct(productLink);
-      } catch (error) {
-        console.warn('⚠️ Failed to parse Shopee data:', error);
-      }
-
-      // Extract product name from URL if not manually provided
-      if (!productName) {
-        const urlParts = productLink.split('/');
-        const productSlug = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || '';
-        productName = decodeURIComponent(productSlug)
-          .replace(/-/g, ' ')
-          .replace(/\?.*/, '')
-          .replace(/i\.\d+\.\d+/, '')
-          .trim();
-      }
+    if (productLink && !productName) {
+      const urlParts = productLink.split('/');
+      const productSlug = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || '';
+      productName = decodeURIComponent(productSlug)
+        .replace(/-/g, ' ')
+        .replace(/\?.*/, '')
+        .replace(/i\.\d+\.\d+/, '')
+        .trim();
     }
 
     // Build analysis prompt based on available information
@@ -137,13 +125,7 @@ Provide ONLY valid JSON, no additional text.`;
 
     console.log('✅ Analysis completed:', analysisResult);
     
-    // Include parsed Shopee data in the response
-    const finalResponse = {
-      ...analysisResult,
-      shopeeProductInfo: shopeeData || undefined,
-    };
-    
-    return NextResponse.json(finalResponse);
+    return NextResponse.json(analysisResult);
 
   } catch (error) {
     console.error('❌ Error in analyze route:', error);
