@@ -43,9 +43,9 @@ export async function POST(request: Request) {
     console.log('👤 User ID (JWT mode):', userId);
 
     const body = await request.json();
-    console.log('📦 Request body:', { platform: body.platform, scheduledTime: body.scheduledTime, status: body.status });
+    console.log('📦 Request body:', { platform: body.platform, scheduledTime: body.scheduledTime, status: body.status, hasAffiliateLink: !!body.affiliateLink });
     
-    const { platform, scheduledTime, imageUrl, caption, status } = body;
+    const { platform, scheduledTime, imageUrl, caption, affiliateLink, status } = body;
 
     if (!platform || !scheduledTime || !imageUrl || !caption || !status) {
       console.log('❌ Missing required fields');
@@ -68,6 +68,7 @@ export async function POST(request: Request) {
       scheduledTime: new Date(scheduledTime),
       imageUrl,
       caption,
+      affiliateLink: affiliateLink || null,
       status
     }});
 

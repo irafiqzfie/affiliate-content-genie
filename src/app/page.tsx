@@ -47,6 +47,7 @@ interface ScheduledPost {
   scheduledTime: string; // ISO string
   imageUrl: string;
   caption: string;
+  affiliateLink?: string;
   status: 'Scheduled';
 }
 
@@ -239,6 +240,7 @@ export default function Home() {
   const [schedulingPlatform, setSchedulingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [scheduleDate, setScheduleDate] = useState('');
   const [scheduleTime, setScheduleTime] = useState('');
+  const [affiliateLink, setAffiliateLink] = useState('');
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [shopeeProductInfo, setShopeeProductInfo] = useState<ShopeeProductInfo | null>(null);
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
@@ -1328,7 +1330,7 @@ export default function Home() {
     const postContent = editableContent.post;
     const selectedImageIndex = selectedOptionIndexes['imagePrompt'] ?? 0;
     const imageKey = `post-imagePrompt-${selectedImageIndex}`;
-    const imageUrl = generatedImages[imageKey];
+    let imageUrl = generatedImages[imageKey];
     
     const selectedBodyIndex = selectedOptionIndexes['body'] ?? 0;
     const captionText = postContent?.body?.[selectedBodyIndex];
@@ -1338,29 +1340,51 @@ export default function Home() {
         return;
     }
 
-    // Validate that the image URL is a valid HTTP/HTTPS URL
+    setIsLoading(true);
+    setError(null);
+
     try {
-        const url = new URL(imageUrl);
-        if (!url.protocol.startsWith('http')) {
-            alert("Image must be a publicly accessible URL. Please generate the image using the 'Generate Image' button first.");
-            return;
+        // Check if image URL is a data URL (base64) - upload to Vercel Blob
+        const isDataUrl = imageUrl.startsWith('data:');
+        
+        if (isDataUrl) {
+            console.log('📤 Uploading base64 image to Vercel Blob before scheduling...');
+            
+            const uploadResponse = await fetch(`${API_URL}/upload-image`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ imageData: imageUrl })
+            });
+
+            const uploadData = await uploadResponse.json();
+
+            if (!uploadResponse.ok) {
+                throw new Error(uploadData.error || uploadData.details || 'Failed to upload image');
+            }
+
+            imageUrl = uploadData.url;
+            console.log('✅ Image uploaded to:', imageUrl);
+        } else {
+            // Validate it's a proper HTTP/HTTPS URL
+            const url = new URL(imageUrl);
+            if (!url.protocol.startsWith('http')) {
+                throw new Error('Image URL is invalid. Please generate a new image.');
+            }
         }
-    } catch {
-        alert(`Invalid image URL. Please generate a new image using the 'Generate Image' button.`);
-        return;
-    }
 
-    const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`).toISOString();
+        const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`).toISOString();
 
-    const newPostPayload = {
-        platform: schedulingPlatform,
-        scheduledTime: scheduledDateTime,
-        imageUrl: imageUrl,
-        caption: stripHtml(captionText),
-        status: 'Scheduled' as const,
-    };
+        const newPostPayload = {
+            platform: schedulingPlatform,
+            scheduledTime: scheduledDateTime,
+            imageUrl: imageUrl,
+            caption: stripHtml(captionText),
+            affiliateLink: affiliateLink || undefined,
+            status: 'Scheduled' as const,
+        };
 
-    try {
         const response = await fetch(`${API_URL}/scheduled-posts`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1381,6 +1405,9 @@ export default function Home() {
         console.error(err);
         const errorMsg = err instanceof Error ? err.message : 'Could not schedule the post. Please try again.';
         setError(errorMsg);
+        alert(errorMsg);
+    } finally {
+        setIsLoading(false);
     }
   };
   
@@ -1486,7 +1513,37 @@ export default function Home() {
         throw new Error(data.error || data.details?.error?.message || 'Failed to post to Threads');
       }
 
-      console.log('✅ Successfully posted to Threads!');
+      console.log('✅ Successfully posted to Threads!', { postId: data.postId });
+
+      // If there's an affiliate link, post it as a reply/comment
+      if (post.affiliateLink && data.postId) {
+        console.log('💬 Posting affiliate link as comment...');
+        
+        try {
+          const replyResponse = await fetch(`${API_URL}/threads/reply`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              postId: data.postId,
+              text: `🔗 ${post.affiliateLink}`
+            })
+          });
+
+          const replyData = await replyResponse.json();
+
+          if (replyResponse.ok) {
+            console.log('✅ Affiliate link posted as comment!');
+          } else {
+            console.warn('⚠️ Failed to post affiliate link:', replyData);
+            // Don't fail the whole operation if comment fails
+          }
+        } catch (replyErr) {
+          console.warn('⚠️ Error posting affiliate link comment:', replyErr);
+          // Continue even if comment fails
+        }
+      }
 
       // Remove from scheduled posts after successful posting
       const updatedPosts = scheduledPosts.filter(p => p.id !== post.id);
@@ -1496,7 +1553,10 @@ export default function Home() {
       await fetch(`${API_URL}/scheduled-posts/${post.id}`, { method: 'DELETE' });
 
       // Show success message using alert for now
-      alert('Successfully posted to Threads! 🎉');
+      const successMsg = post.affiliateLink 
+        ? 'Successfully posted to Threads with affiliate link! 🎉' 
+        : 'Successfully posted to Threads! 🎉';
+      alert(successMsg);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : 'Failed to post to Threads. Please try again.');
@@ -1525,6 +1585,7 @@ export default function Home() {
         tomorrow.setHours(9, 0, 0, 0);
         setScheduleDate(tomorrow.toISOString().split('T')[0]); // YYYY-MM-DD
         setScheduleTime('09:00');
+        setAffiliateLink('');
         setSchedulingPlatform(platform);
     };
 
@@ -1557,6 +1618,18 @@ export default function Home() {
                                 <div className="schedule-input-group">
                                     <label htmlFor="schedule-time">Time</label>
                                     <input id="schedule-time" className="schedule-input" type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} />
+                                </div>
+                                <div className="schedule-input-group">
+                                    <label htmlFor="affiliate-link">Affiliate Link (Optional)</label>
+                                    <input 
+                                        id="affiliate-link" 
+                                        className="schedule-input" 
+                                        type="url" 
+                                        placeholder="https://example.com/affiliate-link"
+                                        value={affiliateLink} 
+                                        onChange={e => setAffiliateLink(e.target.value)} 
+                                    />
+                                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>Will be posted as a comment on Threads</small>
                                 </div>
                             </div>
                         </div>

@@ -8,9 +8,9 @@ export async function GET() {
   try {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     
-    // Use authenticated user ID or null for unauthenticated users
-    const userId = session?.user?.id || null;
-    console.log('👤 GET User ID:', userId);
+    // In JWT mode, we don't store users in the database, so always use null
+    const userId = null;
+    console.log('👤 GET User ID (JWT mode):', userId);
 
     // Check if Prisma is available
     if (!prisma) {
@@ -37,9 +37,9 @@ export async function POST(request: Request) {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     console.log('🔐 Session:', session ? 'Authenticated' : 'Not authenticated');
     
-    // Use authenticated user ID or null for unauthenticated users
-    const userId = session?.user?.id || null;
-    console.log('👤 User ID:', userId);
+    // In JWT mode, we don't store users in the database, so always use null
+    const userId = null;
+    console.log('👤 User ID (JWT mode):', userId);
 
     let body;
     try {

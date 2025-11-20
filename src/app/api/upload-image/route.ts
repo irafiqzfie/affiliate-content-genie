@@ -9,6 +9,18 @@ import { put } from '@vercel/blob';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check if Vercel Blob is configured
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('❌ BLOB_READ_WRITE_TOKEN not configured');
+      return NextResponse.json(
+        { 
+          error: 'Vercel Blob Storage not configured',
+          details: 'BLOB_READ_WRITE_TOKEN environment variable is missing. Please connect your blob store in Vercel project settings.'
+        },
+        { status: 503 }
+      );
+    }
+
     const { imageData } = await request.json();
 
     if (!imageData) {
