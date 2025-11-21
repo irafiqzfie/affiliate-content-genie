@@ -3429,11 +3429,30 @@ body {
   
   .form-with-analysis {
     grid-template-columns: 1fr;
-    gap: 0.25rem;
+    gap: 1rem;
   }
   
   .analysis-column {
     position: static;
+    order: 2;
+  }
+  
+  .form-column {
+    order: 1;
+  }
+  
+  /* Ensure generate button is always visible on mobile */
+  .generate-button {
+    position: relative;
+    z-index: 100;
+    margin: 1.5rem 0;
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    width: 100%;
+    max-width: none;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .output-actions-section-top {
@@ -3592,14 +3611,14 @@ body {
     grid-template-columns: 1fr;
   }
   
-  /* Ensure generate button is visible on mobile */
-  .generate-button {
-    position: relative;
-    z-index: 10;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    padding: 0.875rem 1.5rem;
+  .input-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+    margin: 0;
+    padding: 0 0 2rem 0; /* Add bottom padding to ensure button is visible */
+    overflow: visible;
   }
   
   .card-header {
@@ -3619,6 +3638,16 @@ body {
   .form-card .accordion-header {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+  
+  /* Fix accordion overflow issue on mobile */
+  .accordion-content.open {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  .accordion-content-inner {
+    padding-bottom: 2rem; /* Ensure bottom spacing for generate button */
   }
 }
 
@@ -3686,12 +3715,19 @@ body {
   
   /* Ensure generate button is prominent on small mobile */
   .generate-button {
-    position: relative;
-    z-index: 10;
-    margin: 1.5rem 0;
-    font-size: 1.05rem;
-    padding: 1rem 1.5rem;
-    width: 100%;
+    position: relative !important;
+    z-index: 100 !important;
+    margin: 2rem 0 !important;
+    font-size: 1.1rem !important;
+    padding: 1.25rem 2rem !important;
+    width: 100% !important;
+    max-width: none !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    color: white !important;
   }
   
   .export-actions {
