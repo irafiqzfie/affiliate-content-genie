@@ -120,8 +120,8 @@ Requirements:
 
         console.log('📝 Enhanced generation prompt:', enhancedPrompt.substring(0, 200) + '...');
         
-        // Step 3: Generate new image with Imagen 4
-        console.log('🎨 Generating new image with Imagen 4...');
+        // Step 3: Generate new image with Gemini 2.5 Flash
+        console.log('🎨 Generating new image with Gemini 2.5 Flash...');
         
         const imageResult = await imageGenModel.generateContent([
           enhancedPrompt,
@@ -153,7 +153,7 @@ Requirements:
                 isConditioned: true,
                 transformation,
                 analysis: imageAnalysis.substring(0, 200),
-                note: 'AI-generated using Imagen 4'
+                note: 'AI-generated using Gemini 2.5 Flash'
               });
             } else if (part.text) {
               console.log('📝 Found text in response:', part.text.substring(0, 100));
@@ -195,7 +195,7 @@ Requirements:
     console.log('🔍 Keywords extracted:', cleanKeywords);
 
     try {
-      // Use Imagen 4 to generate from text prompt alone
+      // Use Gemini 2.5 Flash to generate from text prompt alone
       const imagePrompt = `Create a professional, high-quality product photograph for: ${outputText.substring(0, 500)}
 
 Keywords: ${cleanKeywords}
@@ -209,7 +209,7 @@ Requirements:
 - Sharp focus and proper depth of field
 - Commercial product photography style`;
 
-      console.log('🚀 Calling Imagen 4 for text-to-image generation...');
+      console.log('🚀 Calling Gemini 2.5 Flash for text-to-image generation...');
       
       const imageResult = await imageGenModel.generateContent(imagePrompt);
       const imageResponse = await imageResult.response;
@@ -224,7 +224,7 @@ Requirements:
         
         for (const part of parts) {
           if (part.inlineData) {
-            console.log('✅ Found inline image data from Imagen 4');
+            console.log('✅ Found inline image data from Gemini 2.5 Flash');
             const generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
             
             return NextResponse.json({ 
@@ -232,7 +232,7 @@ Requirements:
               prompt: outputText.substring(0, 100) + '...',
               keywords: cleanKeywords,
               isConditioned: false,
-              note: 'AI-generated using Imagen 4 (text-to-image)'
+              note: 'AI-generated using Gemini 2.5 Flash (text-to-image)'
             });
           } else if (part.text) {
             console.log('📝 Found text in response:', part.text.substring(0, 100));
