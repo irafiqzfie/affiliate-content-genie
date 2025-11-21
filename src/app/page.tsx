@@ -1409,9 +1409,35 @@ export default function Home() {
       // Check if image URL is a data URL (base64) - upload to Vercel Blob
       let mediaUrl: string | null = post.imageUrl;
       const isDataUrl = mediaUrl?.startsWith('data:');
+      const isPicsumUrl = mediaUrl?.includes('picsum.photos');
       
-      if (isDataUrl && mediaUrl) {
-        console.log('📤 Uploading base64 image to Vercel Blob...');
+      // Upload data URLs or picsum URLs (which Threads doesn't accept)
+      if ((isDataUrl || isPicsumUrl) && mediaUrl) {
+        if (isPicsumUrl) {
+          console.warn('⚠️ Detected picsum.photos URL - fetching and converting to Vercel Blob...');
+          
+          try {
+            // Fetch the picsum image
+            const imageResponse = await fetch(mediaUrl);
+            const imageBlob = await imageResponse.blob();
+            
+            // Convert to base64
+            const reader = new FileReader();
+            const base64Promise = new Promise<string>((resolve, reject) => {
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+            });
+            reader.readAsDataURL(imageBlob);
+            mediaUrl = await base64Promise;
+          } catch (fetchErr) {
+            console.error('Failed to fetch picsum image:', fetchErr);
+            setError('Failed to fetch placeholder image. Please regenerate the content.');
+            setIsLoading(false);
+            return;
+          }
+        }
+        
+        console.log('📤 Uploading image to Vercel Blob...');
         
         const uploadResponse = await fetch(`${API_URL}/upload-image`, {
           method: 'POST',
