@@ -201,10 +201,64 @@ Requirements:
       .filter(k => k.length > 0)
       .join(',');
     
-    console.warn('⚠️ Using fallback placeholder (Gemini image generation not available)');
+    console.log('🎨 Generating image from text prompt using Gemini...');
     console.log('🔍 Keywords extracted:', cleanKeywords);
 
-    // Create a simple colored SVG placeholder
+    try {
+      // Use Gemini 2.5 Flash Image to generate from text prompt alone
+      const imagePrompt = `Create a professional, high-quality product photograph for: ${outputText.substring(0, 500)}
+
+Keywords: ${cleanKeywords}
+
+Requirements:
+- Professional studio lighting or lifestyle setting
+- Clean, modern composition
+- High-quality, detailed render
+- NO watermarks, text overlays, or promotional badges
+- 8K resolution quality
+- Sharp focus and proper depth of field
+- Commercial product photography style`;
+
+      console.log('🚀 Calling Gemini Image Model for text-to-image generation...');
+      
+      const imageResult = await imageGenModel.generateContent(imagePrompt);
+      const imageResponse = await imageResult.response;
+      
+      console.log('📦 Response received, extracting generated image...');
+      
+      // Extract generated image from response
+      const parts = imageResponse.candidates?.[0]?.content?.parts;
+      
+      if (parts) {
+        console.log(`🔍 Found ${parts.length} part(s) in response`);
+        
+        for (const part of parts) {
+          if (part.inlineData) {
+            console.log('✅ Found inline image data from Gemini');
+            const generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            
+            return NextResponse.json({ 
+              imageUrl: generatedImage,
+              prompt: outputText.substring(0, 100) + '...',
+              keywords: cleanKeywords,
+              isConditioned: false,
+              note: 'AI-generated using Gemini 2.5 Flash Image (text-to-image)'
+            });
+          } else if (part.text) {
+            console.log('📝 Found text in response:', part.text.substring(0, 100));
+          }
+        }
+      }
+      
+      console.warn('⚠️ No image in Gemini response, creating SVG placeholder');
+      throw new Error('Gemini did not return an image');
+      
+    } catch (geminiError) {
+      console.error('❌ Gemini text-to-image failed:', geminiError);
+      console.warn('⚠️ Falling back to SVG placeholder');
+    }
+
+    // Fallback: Create a simple colored SVG placeholder only if Gemini fails
     const svgPlaceholder = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <rect width="512" height="512" fill="#6366f1"/>
       <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="24" font-family="Arial">
