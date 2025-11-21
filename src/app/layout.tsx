@@ -13,6 +13,11 @@ const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], 
 export const metadata: Metadata = {
   title: "Inabiz Online - Content Genie",
   description: "Professional content generation tool - a MASTER SERVE innovation",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
 };
 
 export default function RootLayout({

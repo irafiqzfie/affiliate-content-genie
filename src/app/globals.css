@@ -2012,7 +2012,7 @@ body {
 }
 
 .accordion-content.open {
-    max-height: 1500px; /* arbitrary large value */
+    max-height: 5000px; /* Increased for better mobile support */
     opacity: 1;
 }
 
@@ -3439,6 +3439,8 @@ body {
   
   .form-column {
     order: 1;
+    min-height: auto;
+    overflow: visible;
   }
   
   /* Ensure generate button is always visible on mobile */
