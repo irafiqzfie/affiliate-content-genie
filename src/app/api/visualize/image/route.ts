@@ -12,9 +12,9 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// Use Gemini 2.0 Flash for both text analysis and image generation
+// Use Gemini 2.0 Flash Exp for text analysis and Gemini 2.5 Flash for image generation
 const visionModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-const imageGenModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+const imageGenModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 /**
  * Creates a concise, descriptive prompt for image search
