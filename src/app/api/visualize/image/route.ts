@@ -13,9 +13,9 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 
 // Use Gemini 2.0 Flash Exp for text analysis
-// Use Imagen 4 Fast for image generation
+// Use Gemini 2.5 Flash Preview Image for image generation
 const visionModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-const imageGenModel = genAI.getGenerativeModel({ model: 'imagen-4.0-fast-generate-001' });
+const imageGenModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-preview-image' });
 
 /**
  * Creates a concise, descriptive prompt for image search
