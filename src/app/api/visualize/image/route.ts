@@ -68,129 +68,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Prompt (outputText) is required' }, { status: 400 });
     }
     
-    // If a condition image is provided, use Gemini for image analysis and generation
+    // If a condition image is provided, just return it directly
+    // Image transformation is disabled due to API rate limits
     if (conditionImage) {
-      console.log('🖼️ Using uploaded product image for AI transformation');
-      console.log('📝 Transformation type:', transformation || 'enhance');
-      console.log('💡 Prompt:', outputText.substring(0, 100) + '...');
+      console.log('🖼️ Using uploaded product image directly');
+      console.log('📝 Transformation type:', transformation || 'none');
+      console.log('💡 Note: AI image transformation disabled due to rate limits');
       
-      try {
-        console.log('🚀 Starting Gemini image analysis and generation...');
-        
-        // Step 1: Analyze the uploaded image with Gemini Vision
-        console.log('🔍 Analyzing uploaded image...');
-        const base64Image = conditionImage.replace(/^data:image\/\w+;base64,/, '');
-        const mimeTypeMatch = conditionImage.match(/^data:(image\/\w+);base64,/);
-        const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
-        
-        const analysisPrompt = `Analyze this product image and extract key details:
-1. What is the main product?
-2. What are its key visual features (color, shape, material)?
-3. What is the current background/setting?
-4. What promotional elements or text overlays are present?
-
-Be concise and factual.`;
-
-        const analysisResult = await visionModel.generateContent([
-          analysisPrompt,
-          {
-            inlineData: {
-              mimeType,
-              data: base64Image
-            }
-          }
-        ]);
-        
-        const analysisResponse = await analysisResult.response;
-        const imageAnalysis = analysisResponse.text();
-        console.log('📊 Image analysis:', imageAnalysis.substring(0, 200) + '...');
-        
-        // Step 2: Create enhanced prompt combining analysis with desired output
-        const enhancedPrompt = `Create a professional product photograph based on this description: ${outputText}
-
-Product details from reference image: ${imageAnalysis}
-
-Requirements:
-- Professional studio lighting or natural lighting as specified
-- Clean, uncluttered background
-- High-quality, detailed render
-- NO watermarks, sale badges, promotional text, or price tags
-- Focus on the product
-- 8K resolution quality
-- Sharp focus and proper depth of field`;
-
-        console.log('📝 Enhanced generation prompt:', enhancedPrompt.substring(0, 200) + '...');
-        
-        // Step 3: Generate new image with Gemini 2.5 Flash Image
-        console.log('🎨 Generating new image with Gemini Image Model...');
-        
-        // Pass the original image along with the enhanced prompt for img2img transformation
-        const imageResult = await imageGenModel.generateContent([
-          enhancedPrompt,
-          {
-            inlineData: {
-              mimeType,
-              data: base64Image
-            }
-          }
-        ]);
-        
-        const imageResponse = await imageResult.response;
-        console.log('📦 Response received, extracting image...');
-        
-        // Extract generated image from response - check multiple possible locations
-        const parts = imageResponse.candidates?.[0]?.content?.parts;
-        
-        if (parts) {
-          console.log(`🔍 Found ${parts.length} part(s) in response`);
-          
-          for (const part of parts) {
-            // Log what we found
-            if (part.inlineData) {
-              console.log('✅ Found inline image data');
-              const generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-              
-              return NextResponse.json({ 
-                imageUrl: generatedImage,
-                prompt: outputText.substring(0, 100) + '...',
-                isConditioned: true,
-                transformation,
-                analysis: imageAnalysis.substring(0, 200),
-                note: 'AI-generated using Gemini 2.5 Flash Image'
-              });
-            } else if (part.text) {
-              console.log('📝 Found text in response:', part.text.substring(0, 100));
-            }
-          }
-        } else {
-          console.error('❌ No parts found in response');
-          console.error('Response structure:', JSON.stringify(imageResponse, null, 2).substring(0, 500));
-        }
-        
-        throw new Error('No image generated in response');
-        
-      } catch (geminiError) {
-        console.error('❌ Gemini transformation failed:', geminiError);
-        console.error('❌ Error details:', {
-          message: geminiError instanceof Error ? geminiError.message : 'Unknown error',
-          stack: geminiError instanceof Error ? geminiError.stack : undefined,
-          type: typeof geminiError,
-          full: geminiError
-        });
-        console.log('📌 Falling back to original image');
-        
-        return NextResponse.json({ 
-          imageUrl: conditionImage,
-          prompt: outputText.substring(0, 100) + '...',
-          isConditioned: true,
-          transformation,
-          error: geminiError instanceof Error ? geminiError.message : 'Unknown error',
-          note: 'Gemini API error, returned original image'
-        });
-      }
+      return NextResponse.json({ 
+        imageUrl: conditionImage,
+        prompt: outputText.substring(0, 100) + '...',
+        isConditioned: true,
+        transformation: 'original',
+        note: 'Using original uploaded image (AI transformation disabled)'
+      });
     }
     
-    console.log('📝 Generating placeholder image (no uploaded image provided)');
+    console.log('📝 No uploaded image - creating placeholder');
     
     // Generate smart keywords using Gemini
     const searchQuery = await createImageSearchQuery(outputText);
@@ -202,64 +96,10 @@ Requirements:
       .filter(k => k.length > 0)
       .join(',');
     
-    console.log('🎨 Generating image from text prompt using Gemini...');
     console.log('🔍 Keywords extracted:', cleanKeywords);
+    console.log('⚠️ Note: AI image generation disabled due to rate limits');
 
-    try {
-      // Use Gemini 2.5 Flash Image to generate from text prompt alone
-      const imagePrompt = `Create a professional, high-quality product photograph for: ${outputText.substring(0, 500)}
-
-Keywords: ${cleanKeywords}
-
-Requirements:
-- Professional studio lighting or lifestyle setting
-- Clean, modern composition
-- High-quality, detailed render
-- NO watermarks, text overlays, or promotional badges
-- 8K resolution quality
-- Sharp focus and proper depth of field
-- Commercial product photography style`;
-
-      console.log('🚀 Calling Gemini Image Model for text-to-image generation...');
-      
-      const imageResult = await imageGenModel.generateContent(imagePrompt);
-      const imageResponse = await imageResult.response;
-      
-      console.log('📦 Response received, extracting generated image...');
-      
-      // Extract generated image from response
-      const parts = imageResponse.candidates?.[0]?.content?.parts;
-      
-      if (parts) {
-        console.log(`🔍 Found ${parts.length} part(s) in response`);
-        
-        for (const part of parts) {
-          if (part.inlineData) {
-            console.log('✅ Found inline image data from Gemini');
-            const generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-            
-            return NextResponse.json({ 
-              imageUrl: generatedImage,
-              prompt: outputText.substring(0, 100) + '...',
-              keywords: cleanKeywords,
-              isConditioned: false,
-              note: 'AI-generated using Gemini 2.5 Flash Image (text-to-image)'
-            });
-          } else if (part.text) {
-            console.log('📝 Found text in response:', part.text.substring(0, 100));
-          }
-        }
-      }
-      
-      console.warn('⚠️ No image in Gemini response, creating SVG placeholder');
-      throw new Error('Gemini did not return an image');
-      
-    } catch (geminiError) {
-      console.error('❌ Gemini text-to-image failed:', geminiError);
-      console.warn('⚠️ Falling back to SVG placeholder');
-    }
-
-    // Fallback: Create a simple colored SVG placeholder only if Gemini fails
+    // Create a simple colored SVG placeholder
     const svgPlaceholder = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <rect width="512" height="512" fill="#6366f1"/>
       <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="24" font-family="Arial">
