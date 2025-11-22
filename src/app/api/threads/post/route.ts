@@ -117,6 +117,55 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Container created:', creationId);
 
+    // Step 1.5: For videos, wait for processing to complete
+    if (mediaUrl && mediaType === 'VIDEO') {
+      console.log('⏳ Waiting for video processing...');
+      
+      let statusAttempts = 0;
+      const maxAttempts = 30; // Max 30 attempts (30 seconds)
+      let isReady = false;
+      
+      while (statusAttempts < maxAttempts && !isReady) {
+        // Check container status
+        const statusUrl = `https://graph.threads.net/v1.0/${creationId}?fields=status,error_message&access_token=${accessToken}`;
+        const statusResponse = await fetch(statusUrl);
+        
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          console.log(`📊 Video status (attempt ${statusAttempts + 1}):`, statusData.status);
+          
+          if (statusData.status === 'FINISHED') {
+            isReady = true;
+            break;
+          } else if (statusData.status === 'ERROR') {
+            return NextResponse.json(
+              { 
+                error: 'Video processing failed',
+                details: statusData.error_message || 'Unknown error during video processing'
+              },
+              { status: 400 }
+            );
+          }
+        }
+        
+        // Wait 1 second before checking again
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        statusAttempts++;
+      }
+      
+      if (!isReady) {
+        return NextResponse.json(
+          { 
+            error: 'Video processing timeout',
+            details: 'Video took too long to process. Please try with a shorter video.'
+          },
+          { status: 408 }
+        );
+      }
+      
+      console.log('✅ Video processing complete');
+    }
+
     // Step 2: Publish the container
     const publishUrl = `https://graph.threads.net/v1.0/${userId}/threads_publish`;
     
