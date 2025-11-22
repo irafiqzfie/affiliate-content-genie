@@ -68,18 +68,86 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Prompt (outputText) is required' }, { status: 400 });
     }
     
-    // If a condition image is provided, return it directly
-    // Note: Gemini image generation models are not reliably available
+    // If a condition image is provided, use it as context for AI generation
     if (conditionImage) {
-      console.log('🖼️ Using uploaded product image directly');
-      console.log('💡 Skipping AI transformation due to model availability issues');
+      console.log('🖼️ Using uploaded product image as context for AI generation');
+      console.log('📝 Transformation type:', transformation || 'enhance');
       
-      return NextResponse.json({ 
-        imageUrl: conditionImage,
-        prompt: outputText.substring(0, 100) + '...',
-        isConditioned: true,
-        note: 'Using original uploaded image (AI transformation unavailable)'
-      });
+      try {
+        console.log('🚀 Starting image generation with Gemini 2.5 Flash Preview Image...');
+        
+        const base64Image = conditionImage.replace(/^data:image\/\w+;base64,/, '');
+        const mimeTypeMatch = conditionImage.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
+        
+        // Analyze image first with vision model
+        const analysisPrompt = `Analyze this product image briefly: what is the product, its color, and key features?`;
+        
+        const analysisResult = await visionModel.generateContent([
+          analysisPrompt,
+          {
+            inlineData: {
+              mimeType,
+              data: base64Image
+            }
+          }
+        ]);
+        
+        const imageAnalysis = (await analysisResult.response).text();
+        console.log('📊 Image analysis:', imageAnalysis.substring(0, 150) + '...');
+        
+        // Generate new image with the preview-image model
+        const enhancedPrompt = `Create a professional product photograph: ${outputText}
+
+Product details: ${imageAnalysis}
+
+Requirements: Professional lighting, clean background, high-quality, NO watermarks or text overlays.`;
+
+        console.log('🎨 Generating new image...');
+        
+        const imageResult = await imageGenModel.generateContent([
+          enhancedPrompt,
+          {
+            inlineData: {
+              mimeType,
+              data: base64Image
+            }
+          }
+        ]);
+        
+        const imageResponse = await imageResult.response;
+        const parts = imageResponse.candidates?.[0]?.content?.parts;
+        
+        if (parts) {
+          for (const part of parts) {
+            if (part.inlineData) {
+              console.log('✅ Generated image successfully');
+              const generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+              
+              return NextResponse.json({ 
+                imageUrl: generatedImage,
+                prompt: outputText.substring(0, 100) + '...',
+                isConditioned: true,
+                note: 'AI-generated using Gemini 2.5 Flash Preview Image'
+              });
+            }
+          }
+        }
+        
+        throw new Error('No image in response');
+        
+      } catch (error) {
+        console.error('❌ Image generation failed:', error);
+        console.log('📌 Using original image as fallback');
+        
+        return NextResponse.json({ 
+          imageUrl: conditionImage,
+          prompt: outputText.substring(0, 100) + '...',
+          isConditioned: true,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          note: 'Fallback to original image'
+        });
+      }
     }
     
     console.log('📝 No uploaded image - creating placeholder');
