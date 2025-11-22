@@ -8,7 +8,7 @@ Your app now includes Facebook SDK with login status checking as per Facebook's 
 
 ### 1. Facebook SDK Loading (layout.tsx)
 The Facebook SDK is loaded on every page with:
-- **App ID**: `1457302132011854`
+- **App ID**: `1340853470991732`
 - **API Version**: `v17.0`
 - **Features**: Cookie support, XFBML, Page view logging
 

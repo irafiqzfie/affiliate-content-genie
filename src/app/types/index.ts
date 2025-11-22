@@ -33,6 +33,7 @@ export interface ScheduledPost {
   scheduledTime: string; // ISO string
   imageUrl: string;
   caption: string;
+  affiliateLink?: string;
   status: 'Scheduled';
   createdAt?: string;
 }

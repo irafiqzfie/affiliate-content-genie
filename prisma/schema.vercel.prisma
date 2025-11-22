@@ -5,17 +5,17 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  engineType = "library"
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  accounts      Account[]
-  savedItems    SavedItem[]
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  image     String?
+  createdAt DateTime @default(now())
+  accounts  Account[]
+  savedItems SavedItem[]
   scheduledPosts ScheduledPost[]
 }
 
@@ -27,7 +27,7 @@ model SavedItem {
   video      String
   post       String
   createdAt  DateTime @default(now())
-  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user       User?    @relation(fields: [userId], references: [id])
 }
 
 model ScheduledPost {
@@ -37,10 +37,10 @@ model ScheduledPost {
   scheduledTime DateTime
   imageUrl      String
   caption       String
-  affiliateLink String?
   status        String
+  affiliateLink String?
   createdAt     DateTime @default(now())
-  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user          User?    @relation(fields: [userId], references: [id])
 }
 
 model Account {
@@ -53,12 +53,8 @@ model Account {
   expires_at        Int?
   token_type        String?
   scope             String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id_token          String?
+  user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
-
-

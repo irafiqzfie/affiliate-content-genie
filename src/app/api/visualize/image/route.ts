@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 
 // Configure route timeout for image generation (60 seconds)
 export const maxDuration = 60;
@@ -12,8 +13,8 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// Use Gemini 2.0 Flash for image generation and analysis
-const visionModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+// Use Gemini 2.5 Flash for text analysis and Gemini 2.5 Flash Image for image generation
+const visionModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 const imageGenModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-image' });
 
 /**
@@ -67,29 +68,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Prompt (outputText) is required' }, { status: 400 });
     }
     
-    // If a condition image is provided, use Gemini for image analysis and generation
+    // If a condition image is provided, use it as context for AI generation
     if (conditionImage) {
-      console.log('🖼️ Using uploaded product image for AI transformation');
+      console.log('🖼️ Using uploaded product image as context for AI generation');
       console.log('📝 Transformation type:', transformation || 'enhance');
-      console.log('💡 Prompt:', outputText.substring(0, 100) + '...');
       
       try {
-        console.log('🚀 Starting Gemini image analysis and generation...');
+        console.log('🚀 Starting image generation with Gemini 2.5 Flash Preview Image...');
         
-        // Step 1: Analyze the uploaded image with Gemini Vision
-        console.log('🔍 Analyzing uploaded image...');
         const base64Image = conditionImage.replace(/^data:image\/\w+;base64,/, '');
         const mimeTypeMatch = conditionImage.match(/^data:(image\/\w+);base64,/);
         const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
         
-        const analysisPrompt = `Analyze this product image and extract key details:
-1. What is the main product?
-2. What are its key visual features (color, shape, material)?
-3. What is the current background/setting?
-4. What promotional elements or text overlays are present?
-
-Be concise and factual.`;
-
+        // Analyze image first with vision model
+        const analysisPrompt = `Analyze this product image briefly: what is the product, its color, and key features?`;
+        
         const analysisResult = await visionModel.generateContent([
           analysisPrompt,
           {
@@ -100,30 +93,18 @@ Be concise and factual.`;
           }
         ]);
         
-        const analysisResponse = await analysisResult.response;
-        const imageAnalysis = analysisResponse.text();
-        console.log('📊 Image analysis:', imageAnalysis.substring(0, 200) + '...');
+        const imageAnalysis = (await analysisResult.response).text();
+        console.log('📊 Image analysis:', imageAnalysis.substring(0, 150) + '...');
         
-        // Step 2: Create enhanced prompt combining analysis with desired output
-        const enhancedPrompt = `Create a professional product photograph based on this description: ${outputText}
+        // Generate new image with the preview-image model
+        const enhancedPrompt = `Create a professional product photograph: ${outputText}
 
-Product details from reference image: ${imageAnalysis}
+Product details: ${imageAnalysis}
 
-Requirements:
-- Professional studio lighting or natural lighting as specified
-- Clean, uncluttered background
-- High-quality, detailed render
-- NO watermarks, sale badges, promotional text, or price tags
-- Focus on the product
-- 8K resolution quality
-- Sharp focus and proper depth of field`;
+Requirements: Professional lighting, clean background, high-quality, NO watermarks or text overlays.`;
 
-        console.log('📝 Enhanced generation prompt:', enhancedPrompt.substring(0, 200) + '...');
+        console.log('🎨 Generating new image...');
         
-        // Step 3: Generate new image with Gemini 2.5 Flash Image
-        console.log('🎨 Generating new image with Gemini Image Model...');
-        
-        // Pass the original image along with the enhanced prompt for img2img transformation
         const imageResult = await imageGenModel.generateContent([
           enhancedPrompt,
           {
@@ -135,61 +116,42 @@ Requirements:
         ]);
         
         const imageResponse = await imageResult.response;
-        console.log('📦 Response received, extracting image...');
-        
-        // Extract generated image from response - check multiple possible locations
         const parts = imageResponse.candidates?.[0]?.content?.parts;
         
         if (parts) {
-          console.log(`🔍 Found ${parts.length} part(s) in response`);
-          
           for (const part of parts) {
-            // Log what we found
             if (part.inlineData) {
-              console.log('✅ Found inline image data');
+              console.log('✅ Generated image successfully');
               const generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
               
               return NextResponse.json({ 
                 imageUrl: generatedImage,
                 prompt: outputText.substring(0, 100) + '...',
                 isConditioned: true,
-                transformation,
-                analysis: imageAnalysis.substring(0, 200),
-                note: 'AI-generated using Gemini 2.5 Flash Image'
+                note: 'AI-generated using Gemini 2.5 Flash Preview Image'
               });
-            } else if (part.text) {
-              console.log('📝 Found text in response:', part.text.substring(0, 100));
             }
           }
-        } else {
-          console.error('❌ No parts found in response');
-          console.error('Response structure:', JSON.stringify(imageResponse, null, 2).substring(0, 500));
         }
         
-        throw new Error('No image generated in response');
+        throw new Error('No image in response');
         
-      } catch (geminiError) {
-        console.error('❌ Gemini transformation failed:', geminiError);
-        console.error('❌ Error details:', {
-          message: geminiError instanceof Error ? geminiError.message : 'Unknown error',
-          stack: geminiError instanceof Error ? geminiError.stack : undefined,
-          type: typeof geminiError,
-          full: geminiError
-        });
-        console.log('📌 Falling back to original image');
+      } catch (error) {
+        console.error('❌ Image generation failed:', error);
+        console.log('📌 Using original image as fallback');
         
         return NextResponse.json({ 
           imageUrl: conditionImage,
           prompt: outputText.substring(0, 100) + '...',
           isConditioned: true,
-          transformation,
-          error: geminiError instanceof Error ? geminiError.message : 'Unknown error',
-          note: 'Gemini API error, returned original image'
+          error: error instanceof Error ? error.message : 'Unknown error',
+          note: 'Fallback to original image'
         });
       }
     }
     
-    console.log('📝 Generating placeholder image (no uploaded image provided)');
+    console.log('📝 No uploaded image - creating placeholder');
+    console.log('💡 Note: Text-to-image requires dedicated image generation API');
     
     // Generate smart keywords using Gemini
     const searchQuery = await createImageSearchQuery(outputText);
@@ -201,35 +163,71 @@ Requirements:
       .filter(k => k.length > 0)
       .join(',');
     
-    // Create a consistent seed from the keywords for stable image selection
-    let seed = 0;
-    for (let i = 0; i < cleanKeywords.length; i++) {
-      seed += cleanKeywords.charCodeAt(i);
-    }
-    
-    // Use Lorem Picsum with seed for consistent, high-quality placeholder images
-    const imageUrl = `https://picsum.photos/seed/${seed}/512/512`;
+    console.log('🔍 Keywords extracted:', cleanKeywords);
 
-    console.log('✅ Image URL created:', imageUrl);
-    console.log('🔍 Keywords used (for context):', cleanKeywords);
-    console.log('📌 Using seed:', seed);
+    // Create a simple colored SVG placeholder
+    const svgPlaceholder = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#6366f1"/>
+      <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="24" font-family="Arial">
+        ${cleanKeywords.substring(0, 30)}
+      </text>
+    </svg>`;
+    
+    // Upload directly to Vercel Blob
+    const blob = await put(
+      `placeholder-${Date.now()}.svg`,
+      svgPlaceholder,
+      {
+        access: 'public',
+        contentType: 'image/svg+xml',
+      }
+    );
+
+    console.log('✅ Placeholder uploaded to Vercel Blob:', blob.url);
 
     return NextResponse.json({ 
-      imageUrl,
+      imageUrl: blob.url,
       prompt: outputText.substring(0, 100) + '...',
       keywords: cleanKeywords,
-      isConditioned: false
+      isConditioned: false,
+      isPlaceholder: true
     });
 
   } catch (error) {
     console.error('❌ Image generation error:', error);
     
-    const fallbackImageUrl = `https://picsum.photos/512/512?random=${Date.now()}`;
-    
-    return NextResponse.json({ 
-      imageUrl: fallbackImageUrl,
-      message: 'An error occurred during image generation.',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    // Create a simple error placeholder and upload directly to Vercel Blob
+    const svgError = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" fill="#ef4444"/>
+      <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="20" font-family="Arial">
+        Image Generation Failed
+      </text>
+    </svg>`;
+
+    try {
+      const blob = await put(
+        `error-${Date.now()}.svg`,
+        svgError,
+        {
+          access: 'public',
+          contentType: 'image/svg+xml',
+        }
+      );
+
+      return NextResponse.json({ 
+        imageUrl: blob.url,
+        message: 'Using placeholder image due to generation error.',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isPlaceholder: true
+      });
+    } catch (uploadError) {
+      console.error('Failed to upload error placeholder:', uploadError);
+      
+      return NextResponse.json({ 
+        imageUrl: null,
+        message: 'Image generation failed and placeholder upload failed.',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }, { status: 500 });
+    }
   }
 }

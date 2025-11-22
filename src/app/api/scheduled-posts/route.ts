@@ -6,20 +6,28 @@ import type { Session, NextAuthOptions } from 'next-auth'
 
 export async function GET() {
   try {
-  const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
+    const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
   
-  // Use authenticated user ID or null for unauthenticated users
-  const userId = session?.user?.id || null;
-  console.log('👤 GET User ID:', userId);
+    // For JWT-only sessions, all posts have null userId
+    const userId = null;
+    console.log('👤 GET User ID (JWT mode):', userId);
 
-  const posts = await prisma.scheduledPost.findMany({ 
-    where: userId ? { userId } : { userId: null }, 
-    orderBy: { scheduledTime: 'asc' } 
-  });
+    // Check if Prisma is available
+    if (!prisma) {
+      console.warn('⚠️ Prisma not available - returning empty array');
+      return NextResponse.json([]);
+    }
+
+    // Get all posts with null userId (JWT mode posts)
+    const posts = await prisma.scheduledPost.findMany({ 
+      where: { userId: null }, 
+      orderBy: { scheduledTime: 'asc' } 
+    });
     return NextResponse.json(posts);
   } catch (error) {
     console.error('GET /api/scheduled-posts error:', error);
-    return NextResponse.json({ message: 'Error fetching scheduled posts' }, { status: 500 });
+    // Return empty array instead of error when Prisma is unavailable
+    return NextResponse.json([]);
   }
 }
 
@@ -30,14 +38,14 @@ export async function POST(request: Request) {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     console.log('🔐 Session:', session ? 'Authenticated' : 'Not authenticated');
     
-    // Use authenticated user ID or null for unauthenticated users
-    const userId = session?.user?.id || null;
-    console.log('👤 User ID:', userId);
+    // For JWT-only sessions, userId doesn't exist in database, so set to null
+    const userId = null;
+    console.log('👤 User ID (JWT mode):', userId);
 
     const body = await request.json();
-    console.log('📦 Request body:', { platform: body.platform, scheduledTime: body.scheduledTime, status: body.status });
+    console.log('📦 Request body:', { platform: body.platform, scheduledTime: body.scheduledTime, status: body.status, hasAffiliateLink: !!body.affiliateLink });
     
-    const { platform, scheduledTime, imageUrl, caption, status } = body;
+    const { platform, scheduledTime, imageUrl, caption, affiliateLink, status } = body;
 
     if (!platform || !scheduledTime || !imageUrl || !caption || !status) {
       console.log('❌ Missing required fields');
@@ -45,12 +53,21 @@ export async function POST(request: Request) {
     }
 
     console.log('💾 Attempting to save to database...');
+    
+    // Check if Prisma is available
+    if (!prisma) {
+      console.warn('⚠️ Prisma not available - cannot schedule post');
+      return NextResponse.json({ 
+        message: 'Database temporarily unavailable. Please try again later.' 
+      }, { status: 503 });
+    }
+    
     const newPost = await prisma.scheduledPost.create({ data: {
-      userId: userId,
       platform,
       scheduledTime: new Date(scheduledTime),
       imageUrl,
       caption,
+      affiliateLink: affiliateLink || null,
       status
     }});
 

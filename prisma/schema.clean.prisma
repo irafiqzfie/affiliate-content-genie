@@ -5,6 +5,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native"]
 }
 
 model User {
@@ -36,6 +37,7 @@ model ScheduledPost {
   scheduledTime DateTime
   imageUrl      String
   caption       String
+  affiliateLink String?
   status        String
   createdAt     DateTime @default(now())
   user          User?    @relation(fields: [userId], references: [id])

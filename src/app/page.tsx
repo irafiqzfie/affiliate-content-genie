@@ -3,10 +3,10 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
 import { SavedItemsList } from '@/app/components/SavedContent';
 import { ScheduledPostsList } from '@/app/components/Scheduler';
-import { ProductInfoCard } from '@/app/components/ContentGeneration';
 // import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
@@ -33,19 +33,13 @@ interface SavedItem {
   post: string;
 }
 
-interface ShopeeProductInfo {
-  title: string;
-  price: string;
-  image: string;
-  description: string;
-}
-
 interface ScheduledPost {
   id: number;
   platform: 'Facebook' | 'Threads';
   scheduledTime: string; // ISO string
   imageUrl: string;
   caption: string;
+  affiliateLink?: string;
   status: 'Scheduled';
 }
 
@@ -199,6 +193,7 @@ const sectionsConfigPost = [
 
 
 export default function Home() {
+  const { data: session } = useSession();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [productLink, setProductLink] = useState('');
   // New fields for manual product input
@@ -227,7 +222,7 @@ export default function Home() {
   const [selectedOptionIndexes, setSelectedOptionIndexes] = useState<Record<string, number>>({});
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler'>('generator');
-  const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post' | 'info'>('video');
+  const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post'>('video');
   const [trendscore, setTrendscore] = useState<number | null>(null);
   const [productSummary, setProductSummary] = useState<string | null>(null);
   const [productFeatures, setProductFeatures] = useState<string[] | null>(null);
@@ -237,8 +232,8 @@ export default function Home() {
   const [schedulingPlatform, setSchedulingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [scheduleDate, setScheduleDate] = useState('');
   const [scheduleTime, setScheduleTime] = useState('');
+  const [affiliateLink, setAffiliateLink] = useState('');
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [shopeeProductInfo, setShopeeProductInfo] = useState<ShopeeProductInfo | null>(null);
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
@@ -423,12 +418,11 @@ export default function Home() {
 
   const handleProductLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProductLink(e.target.value);
-    if (trendscore !== null || productSummary || affiliatePotential || productFeatures || shopeeProductInfo) {
+    if (trendscore !== null || productSummary || affiliatePotential || productFeatures) {
         setTrendscore(null);
         setProductSummary(null);
         setProductFeatures(null);
         setAffiliatePotential(null);
-        setShopeeProductInfo(null);
     }
   };
 
@@ -630,7 +624,6 @@ export default function Home() {
     setProductSummary(null);
     setProductFeatures(null);
     setAffiliatePotential(null);
-    setShopeeProductInfo(null);
 
     try {
         const response = await fetch(`${API_URL}/analyze`, {
@@ -657,7 +650,6 @@ export default function Home() {
         setProductSummary(suggestions.productSummary);
         setProductFeatures(suggestions.productFeatures);
         setAffiliatePotential(suggestions.affiliatePotential);
-        setShopeeProductInfo(suggestions.shopeeProductInfo || null);
 
     } catch (err: unknown) {
         console.error('Analysis failed:', err);
@@ -695,27 +687,6 @@ export default function Home() {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     
     try {
-      // If shopeeProductInfo doesn't exist yet and we have a product link, call analyze first
-      if (hasProductLink && !shopeeProductInfo) {
-        console.log('🔍 No product info found, analyzing first...');
-        try {
-          const analyzeResponse = await fetch(`${API_URL}/analyze`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productLink }),
-          });
-          
-          if (analyzeResponse.ok) {
-            const suggestions = await analyzeResponse.json();
-            setShopeeProductInfo(suggestions.shopeeProductInfo || null);
-            console.log('✅ Product info retrieved');
-          }
-        } catch (analyzeError) {
-          console.warn('⚠️ Could not fetch product info, continuing with generation:', analyzeError);
-          // Continue with generation even if analyze fails
-        }
-      }
-      
       const response = await fetch(`${API_URL}/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -786,7 +757,7 @@ export default function Home() {
         } finally {
       setIsLoading(false);
     }
-  }, [productLink, productTitle, productImagePreviews, isLoading, shopeeProductInfo, advancedInputs, initializeOptionIndexes, parseContent]);
+  }, [productLink, productTitle, productImagePreviews, isLoading, advancedInputs, initializeOptionIndexes, parseContent]);
   
   const handleGenerateImage = useCallback(async (key: string, promptText: string) => {
     console.log('🎨 Generating image for key:', key, 'with prompt:', promptText.substring(0, 100) + '...');
@@ -1271,7 +1242,6 @@ export default function Home() {
     setProductSummary(null);
     setProductFeatures(null);
     setAffiliatePotential(null);
-    setShopeeProductInfo(null);
     initializeOptionIndexes();
     setCurrentPage('generator');
     setHasGeneratedAttempt(true);
@@ -1289,7 +1259,6 @@ export default function Home() {
   };
 
   const handleSaveEdit = (sectionKey: string, index: number) => {
-    if (activeOutputTab === 'info') return;
     if (!editableContent[activeOutputTab]) return;
     const newEditableContent = JSON.parse(JSON.stringify(editableContent));
     newEditableContent[activeOutputTab]![sectionKey as keyof ParsedContent]![index] = editText;
@@ -1326,7 +1295,7 @@ export default function Home() {
     const postContent = editableContent.post;
     const selectedImageIndex = selectedOptionIndexes['imagePrompt'] ?? 0;
     const imageKey = `post-imagePrompt-${selectedImageIndex}`;
-    const imageUrl = generatedImages[imageKey];
+    let imageUrl = generatedImages[imageKey];
     
     const selectedBodyIndex = selectedOptionIndexes['body'] ?? 0;
     const captionText = postContent?.body?.[selectedBodyIndex];
@@ -1336,17 +1305,51 @@ export default function Home() {
         return;
     }
 
-    const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`).toISOString();
-
-    const newPostPayload = {
-        platform: schedulingPlatform,
-        scheduledTime: scheduledDateTime,
-        imageUrl: imageUrl,
-        caption: stripHtml(captionText),
-        status: 'Scheduled' as const,
-    };
+    setIsLoading(true);
+    setError(null);
 
     try {
+        // Check if image URL is a data URL (base64) - upload to Vercel Blob
+        const isDataUrl = imageUrl.startsWith('data:');
+        
+        if (isDataUrl) {
+            console.log('📤 Uploading base64 image to Vercel Blob before scheduling...');
+            
+            const uploadResponse = await fetch(`${API_URL}/upload-image`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ imageData: imageUrl })
+            });
+
+            const uploadData = await uploadResponse.json();
+
+            if (!uploadResponse.ok) {
+                throw new Error(uploadData.error || uploadData.details || 'Failed to upload image');
+            }
+
+            imageUrl = uploadData.url;
+            console.log('✅ Image uploaded to:', imageUrl);
+        } else {
+            // Validate it's a proper HTTP/HTTPS URL
+            const url = new URL(imageUrl);
+            if (!url.protocol.startsWith('http')) {
+                throw new Error('Image URL is invalid. Please generate a new image.');
+            }
+        }
+
+        const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`).toISOString();
+
+        const newPostPayload = {
+            platform: schedulingPlatform,
+            scheduledTime: scheduledDateTime,
+            imageUrl: imageUrl,
+            caption: stripHtml(captionText),
+            affiliateLink: affiliateLink || undefined,
+            status: 'Scheduled' as const,
+        };
+
         const response = await fetch(`${API_URL}/scheduled-posts`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1367,6 +1370,9 @@ export default function Home() {
         console.error(err);
         const errorMsg = err instanceof Error ? err.message : 'Could not schedule the post. Please try again.';
         setError(errorMsg);
+        alert(errorMsg);
+    } finally {
+        setIsLoading(false);
     }
   };
   
@@ -1390,6 +1396,176 @@ export default function Home() {
     }
   };
 
+  const handlePostNow = async (post: ScheduledPost) => {
+    if (!session) {
+      setError('Please sign in with Threads to post.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Check if image URL is a data URL (base64) - upload to Vercel Blob
+      let mediaUrl: string | null = post.imageUrl;
+      const isDataUrl = mediaUrl?.startsWith('data:');
+      const isPicsumUrl = mediaUrl?.includes('picsum.photos');
+      
+      // Upload data URLs or picsum URLs (which Threads doesn't accept)
+      if ((isDataUrl || isPicsumUrl) && mediaUrl) {
+        if (isPicsumUrl) {
+          console.warn('⚠️ Detected picsum.photos URL - fetching and converting to Vercel Blob...');
+          
+          try {
+            // Fetch the picsum image
+            const imageResponse = await fetch(mediaUrl);
+            const imageBlob = await imageResponse.blob();
+            
+            // Convert to base64
+            const reader = new FileReader();
+            const base64Promise = new Promise<string>((resolve, reject) => {
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+            });
+            reader.readAsDataURL(imageBlob);
+            mediaUrl = await base64Promise;
+          } catch (fetchErr) {
+            console.error('Failed to fetch picsum image:', fetchErr);
+            setError('Failed to fetch placeholder image. Please regenerate the content.');
+            setIsLoading(false);
+            return;
+          }
+        }
+        
+        console.log('📤 Uploading image to Vercel Blob...');
+        
+        const uploadResponse = await fetch(`${API_URL}/upload-image`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ imageData: mediaUrl })
+        });
+
+        const uploadData = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+          throw new Error(uploadData.error || 'Failed to upload image');
+        }
+
+        mediaUrl = uploadData.url;
+        console.log('✅ Image uploaded to:', mediaUrl);
+      } else if (mediaUrl) {
+        // Validate it's a proper HTTP/HTTPS URL
+        try {
+          const url = new URL(mediaUrl);
+          if (!url.protocol.startsWith('http')) {
+            throw new Error('Invalid URL protocol');
+          }
+        } catch {
+          setError('Image URL is invalid. Cannot post to Threads.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Confirm before posting
+      const confirmMessage = mediaUrl 
+        ? "Post this content with image to Threads now?" 
+        : "No image available. Post text-only to Threads?";
+      
+      if (!window.confirm(confirmMessage)) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Post to Threads
+      console.log('🚀 Posting to Threads with:', {
+        text: post.caption?.substring(0, 50) + '...',
+        mediaUrl: mediaUrl || '(text-only)',
+        mediaType: mediaUrl ? 'IMAGE' : 'TEXT'
+      });
+      
+      const response = await fetch(`${API_URL}/threads/post`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: post.caption,
+          ...(mediaUrl && { mediaUrl, mediaType: 'IMAGE' })
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('❌ Threads API error:', data);
+        throw new Error(data.error || data.details?.error?.message || 'Failed to post to Threads');
+      }
+
+      console.log('✅ Successfully posted to Threads!', { postId: data.postId });
+
+      // If there's an affiliate link, post it as a reply/comment with CTA
+      if (post.affiliateLink && data.postId) {
+        console.log('💬 Posting affiliate link with CTA as comment...');
+        
+        // Get the CTA text from generated content
+        const postContent = editableContent.post;
+        const selectedCtaIndex = selectedOptionIndexes['cta'] ?? 0;
+        const ctaText = postContent?.cta?.[selectedCtaIndex];
+        
+        // Build the comment text: CTA + affiliate link
+        const commentText = ctaText 
+          ? `${stripHtml(ctaText)}\n\n🔗 ${post.affiliateLink}`
+          : `🔗 ${post.affiliateLink}`;
+        
+        try {
+          const replyResponse = await fetch(`${API_URL}/threads/reply`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              postId: data.postId,
+              text: commentText
+            })
+          });
+
+          const replyData = await replyResponse.json();
+
+          if (replyResponse.ok) {
+            console.log('✅ Affiliate link with CTA posted as comment!');
+          } else {
+            console.warn('⚠️ Failed to post affiliate link:', replyData);
+            // Don't fail the whole operation if comment fails
+          }
+        } catch (replyErr) {
+          console.warn('⚠️ Error posting affiliate link comment:', replyErr);
+          // Continue even if comment fails
+        }
+      }
+
+      // Remove from scheduled posts after successful posting
+      const updatedPosts = scheduledPosts.filter(p => p.id !== post.id);
+      setScheduledPosts(updatedPosts);
+
+      // Delete from database
+      await fetch(`${API_URL}/scheduled-posts/${post.id}`, { method: 'DELETE' });
+
+      // Show success message using alert for now
+      const successMsg = post.affiliateLink 
+        ? 'Successfully posted to Threads with affiliate link! 🎉' 
+        : 'Successfully posted to Threads! 🎉';
+      alert(successMsg);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to post to Threads. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderSocialModal = () => {
     if (!isSocialModalOpen) return null;
 
@@ -1410,6 +1586,7 @@ export default function Home() {
         tomorrow.setHours(9, 0, 0, 0);
         setScheduleDate(tomorrow.toISOString().split('T')[0]); // YYYY-MM-DD
         setScheduleTime('09:00');
+        setAffiliateLink('');
         setSchedulingPlatform(platform);
     };
 
@@ -1417,7 +1594,7 @@ export default function Home() {
         <div className="modal-overlay" onClick={handleCloseSocialModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>{schedulingPlatform ? `Schedule for ${schedulingPlatform}` : 'Schedule a Post'}</h3>
+                    <h3>{schedulingPlatform ? `Save Post for ${schedulingPlatform}` : 'Save Post'}</h3>
                     <button className="modal-close-button" onClick={handleCloseSocialModal} aria-label="Close modal">&times;</button>
                 </div>
                 <div className="modal-body">
@@ -1443,6 +1620,18 @@ export default function Home() {
                                     <label htmlFor="schedule-time">Time</label>
                                     <input id="schedule-time" className="schedule-input" type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} />
                                 </div>
+                                <div className="schedule-input-group">
+                                    <label htmlFor="affiliate-link">Affiliate Link (Optional)</label>
+                                    <input 
+                                        id="affiliate-link" 
+                                        className="schedule-input" 
+                                        type="url" 
+                                        placeholder="https://example.com/affiliate-link"
+                                        value={affiliateLink} 
+                                        onChange={e => setAffiliateLink(e.target.value)} 
+                                    />
+                                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>Will be posted as a comment on Threads</small>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -1456,12 +1645,12 @@ export default function Home() {
                     {schedulingPlatform ? (
                         <>
                             <button className="modal-footer-button secondary" onClick={() => setSchedulingPlatform(null)}>Back</button>
-                            <button className="modal-footer-button primary" onClick={handleSchedulePost}>Confirm Schedule</button>
+                            <button className="modal-footer-button primary" onClick={handleSchedulePost}>Save Post</button>
                         </>
                     ) : (
                         <>
-                         <button className="social-platform-button facebook" onClick={() => handlePlatformSelect('Facebook')} disabled={!finalImageUrl}>Schedule on Facebook</button>
-                         <button className="social-platform-button threads" onClick={() => handlePlatformSelect('Threads')} disabled={!finalImageUrl}>Schedule on Threads</button>
+                         <button className="social-platform-button facebook" onClick={() => handlePlatformSelect('Facebook')} disabled={!finalImageUrl}>Save for Facebook</button>
+                         <button className="social-platform-button threads" onClick={() => handlePlatformSelect('Threads')} disabled={!finalImageUrl}>Save for Threads</button>
                         </>
                     )}
                 </div>
@@ -1493,7 +1682,7 @@ export default function Home() {
         }, [] as ({ key: string; title: string; icon: string; })[][]);
 
     const renderPromptCard = (section: {key: string; title: string; icon: string;}, isVisual = false) => {
-        if (!section || activeOutputTab === 'info') return <div/>;
+        if (!section) return <div/>;
         
         const { key, title, icon } = section;
         const richTextFields = new Set(['body', 'caption']);
@@ -1736,6 +1925,11 @@ export default function Home() {
                 <form className="input-form" onSubmit={handleGenerate}>
                     {/* Product Input Section */}
                     <div className="product-input-section">
+                      <div className="section-header">
+                        <span className="section-eyebrow">Product Info</span>
+                        <h4 className="section-title">Describe the product you want content for</h4>
+                      </div>
+
                       <div className="form-group">
                         <label htmlFor="productTitle" className="input-label">Product Title</label>
                         <input
@@ -1752,59 +1946,67 @@ export default function Home() {
 
                       <div className="form-group">
                         <label htmlFor="productImage" className="input-label">
-                          Product Images {productImages.length > 0 && `(${productImages.length}/5)`}
+                          Product Images <span className="input-label-caption">(up to 5)</span>
                         </label>
                         <div className="image-upload-container">
-                          {/* Image Grid */}
-                          {productImagePreviews.length > 0 && (
-                            <div className="image-preview-grid">
-                              {productImagePreviews.map((preview, index) => (
-                                <div key={index} className="image-preview-item">
-                                  <Image 
-                                    src={preview} 
-                                    alt={`Product preview ${index + 1}`} 
-                                    className="image-preview"
-                                    width={200}
-                                    height={200}
-                                    unoptimized
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveImage(index)}
-                                    className="remove-image-button"
-                                    aria-label={`Remove image ${index + 1}`}
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                                    </svg>
-                                  </button>
-                                  {index === 0 && (
-                                    <div className="primary-badge">Primary</div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          
-                          {/* Upload Area - Show only if less than 5 images */}
+                          <div className="image-preview-grid gallery-grid">
+                            {productImagePreviews.map((preview, index) => (
+                              <div key={index} className="image-preview-item gallery-tile">
+                                <Image 
+                                  src={preview} 
+                                  alt={`Product preview ${index + 1}`} 
+                                  className="image-preview"
+                                  width={200}
+                                  height={200}
+                                  unoptimized
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(index)}
+                                  className="remove-image-button"
+                                  aria-label={`Remove image ${index + 1}`}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                                  </svg>
+                                </button>
+                                {index === 0 && (
+                                  <div className="primary-badge compact">Primary</div>
+                                )}
+                              </div>
+                            ))}
+
+                            {Array.from({ length: Math.max(0, 5 - productImagePreviews.length) }).map((_, idx) => (
+                              <button
+                                key={`placeholder-${idx}`}
+                                type="button"
+                                className="image-preview-item gallery-tile placeholder"
+                                onClick={() => document.getElementById('productImage')?.click()}
+                              >
+                                <span className="placeholder-plus">+</span>
+                                <span className="placeholder-label">Add</span>
+                              </button>
+                            ))}
+                          </div>
+
                           {productImages.length < 5 && (
                             <div
-                              className={`image-drop-zone ${isDragging ? 'dragging' : ''}`}
+                              className={`image-drop-zone subtle ${isDragging ? 'dragging' : ''}`}
                               onDragOver={handleDragOver}
                               onDragLeave={handleDragLeave}
                               onDrop={handleDrop}
                             >
                               <label htmlFor="productImage" className="image-upload-label">
                                 <div className="upload-placeholder">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 0 1-.708-.708l3-3z"/>
                                   </svg>
                                   <span className="upload-text">
-                                    {productImages.length > 0 ? 'Add more images' : 'Click to upload images'}
+                                    Drag & drop images here or click any tile
                                   </span>
                                   <span className="upload-hint">
-                                    {isDragging ? 'Drop images here' : 'JPG, PNG, or WEBP (max 5MB each, up to 5 images)'}
+                                    JPG, PNG, or WEBP · max 5MB each
                                   </span>
                                 </div>
                                 <input
@@ -1818,8 +2020,7 @@ export default function Home() {
                                   multiple
                                 />
                               </label>
-                              
-                              {/* URL Input */}
+
                               <div className="image-url-input-container">
                                 <div className="divider">
                                   <span>or</span>
@@ -1853,29 +2054,43 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="form-group">
-                        <label htmlFor="customDescription" className="input-label">Custom Description <span style={{ fontSize: '0.85rem', color: 'var(--secondary-text-color)', fontWeight: 'normal' }}>(Optional)</span></label>
+                      <div className="form-group description-group">
+                        <label htmlFor="customDescription" className="input-label">Custom Description <span className="optional-label">(Optional)</span></label>
                         <textarea
                           id="customDescription"
                           name="customDescription"
-                          className="textarea-field"
+                          className="textarea-field enhanced-textarea"
                           value={customDescription}
                           onChange={(e) => setCustomDescription(e.target.value)}
-                          placeholder="Write your product description here..."
+                          placeholder="Write your own description or let AI auto-generate it."
                           aria-label="Custom Description"
-                          rows={4}
+                          rows={5}
                         />
                       </div>
 
-                      <div className="or-divider">
-                        <span>OR</span>
-                      </div>
+                      <div className="section-divider" />
 
-                      <div className="form-group">
-                        <div className="label-with-action">
-                            <label htmlFor="productLink" className="input-label">
-                              Shopee Product Link <span style={{ fontSize: '0.85rem', color: 'var(--secondary-text-color)', fontWeight: 'normal' }}>(Optional if title & images provided)</span>
-                            </label>
+                      <div className="product-input-section shopee-section">
+                        <div className="section-header compact">
+                          <span className="section-eyebrow">Import from Shopee</span>
+                          <p className="section-subtitle">Paste a Shopee product URL and let AI analyze it.</p>
+                        </div>
+
+                        <div className="form-group">
+                          <label htmlFor="productLink" className="input-label">
+                            Shopee Product Link <span className="optional-label">(Optional if title & images provided)</span>
+                          </label>
+                          <div className="input-with-button inline-button">
+                            <input
+                              id="productLink"
+                              name="productLink"
+                              type="url"
+                              className="input-field"
+                              value={productLink}
+                              onChange={handleProductLinkChange}
+                              placeholder="https://shopee.com/..."
+                              aria-label="Shopee Product Link"
+                            />
                             <button 
                                 type="button" 
                                 className="analyze-button" 
@@ -1884,17 +2099,8 @@ export default function Home() {
                             >
                                 {isAnalyzing ? 'Analyzing...' : 'Analyze'}
                             </button>
+                          </div>
                         </div>
-                        <input
-                        id="productLink"
-                        name="productLink"
-                        type="url"
-                        className="input-field"
-                        value={productLink}
-                        onChange={handleProductLinkChange}
-                        placeholder="Paste your Shopee product link here (or fill title & images below)..."
-                        aria-label="Shopee Product Link"
-                        />
                       </div>
                     </div>
                     
@@ -2102,7 +2308,7 @@ export default function Home() {
         </div>
       )}
 
-      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || shopeeProductInfo || error)) && (
+      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || error)) && (
         <div className="output-actions-section-top">
           <div className="output-actions-left">
             <span className="output-title">
@@ -2136,14 +2342,6 @@ export default function Home() {
               >
                 ✍️ Post
               </button>
-              <button 
-                type="button" 
-                className={`output-tab-btn ${activeOutputTab === 'info' ? 'active' : ''}`} 
-                onClick={() => setActiveOutputTab('info')}
-                disabled={!shopeeProductInfo}
-              >
-                ℹ️ Info
-              </button>
             </div>
           </div>
           <div className="output-actions-group">
@@ -2175,14 +2373,10 @@ export default function Home() {
         </div>
       )}
       
-      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || shopeeProductInfo || error)) && (
+      {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || error)) && (
         <>
         <div className="output-container">
-            {activeOutputTab === 'info' && shopeeProductInfo ? (
-              <ProductInfoCard productInfo={shopeeProductInfo} />
-            ) : (
-              <>
-                {activeOutputTab === 'post' ? (
+            {activeOutputTab === 'post' ? (
                   <>
                     {/* Row 1: Body + Image Prompt */}
                     <div className="standard-section-row">
@@ -2209,8 +2403,6 @@ export default function Home() {
                     ))}
                   </>
                 )}
-              </>
-            )}
         </div>
         </>
       )}
@@ -2231,6 +2423,7 @@ export default function Home() {
     <ScheduledPostsList 
       scheduledPosts={scheduledPosts}
       onDeletePost={handleDeleteScheduledPost}
+      onPostNow={handlePostNow}
     />
   );
 
@@ -2274,8 +2467,8 @@ export default function Home() {
             className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
             onClick={() => setCurrentPage('scheduler')}
           >
-            <span className="tab-icon">🗓️</span>
-            <span className="tab-label">Scheduler</span>
+            <span className="tab-icon">📮</span>
+            <span className="tab-label">Posts</span>
             {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
           </button>
         </nav>
