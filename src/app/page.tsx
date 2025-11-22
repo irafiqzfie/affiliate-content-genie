@@ -1506,9 +1506,19 @@ export default function Home() {
 
       console.log('✅ Successfully posted to Threads!', { postId: data.postId });
 
-      // If there's an affiliate link, post it as a reply/comment
+      // If there's an affiliate link, post it as a reply/comment with CTA
       if (post.affiliateLink && data.postId) {
-        console.log('💬 Posting affiliate link as comment...');
+        console.log('💬 Posting affiliate link with CTA as comment...');
+        
+        // Get the CTA text from generated content
+        const postContent = editableContent.post;
+        const selectedCtaIndex = selectedOptionIndexes['cta'] ?? 0;
+        const ctaText = postContent?.cta?.[selectedCtaIndex];
+        
+        // Build the comment text: CTA + affiliate link
+        const commentText = ctaText 
+          ? `${stripHtml(ctaText)}\n\n🔗 ${post.affiliateLink}`
+          : `🔗 ${post.affiliateLink}`;
         
         try {
           const replyResponse = await fetch(`${API_URL}/threads/reply`, {
@@ -1518,14 +1528,14 @@ export default function Home() {
             },
             body: JSON.stringify({
               postId: data.postId,
-              text: `🔗 ${post.affiliateLink}`
+              text: commentText
             })
           });
 
           const replyData = await replyResponse.json();
 
           if (replyResponse.ok) {
-            console.log('✅ Affiliate link posted as comment!');
+            console.log('✅ Affiliate link with CTA posted as comment!');
           } else {
             console.warn('⚠️ Failed to post affiliate link:', replyData);
             // Don't fail the whole operation if comment fails
