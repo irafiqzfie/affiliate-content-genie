@@ -28,9 +28,10 @@ interface ParsedContent {
 interface SavedItem {
   id: number;
   title: string;
-  productLink: string;
+  productLink: string | null;
   video: string;
   post: string;
+  createdAt?: string;
 }
 
 interface ScheduledPost {
@@ -235,6 +236,7 @@ export default function Home() {
   const [affiliateLink, setAffiliateLink] = useState('');
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
+  const [isShopeeImportOpen, setIsShopeeImportOpen] = useState(false);
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
 
@@ -1120,14 +1122,6 @@ export default function Home() {
     
     setSaveButtonState('loading');
     
-    // Validate productLink
-    if (!productLink || productLink.trim() === '') {
-      setError('Product link is required. Please enter a Shopee product URL.');
-      setSaveButtonState('error');
-      setTimeout(() => setSaveButtonState('idle'), 2000);
-      return;
-    }
-    
     const titleSource = editableContent.video?.title?.[0] || editableContent.post?.hook?.[0];
     const title = titleSource || `Saved Idea - ${new Date().toLocaleString()}`;
 
@@ -1145,7 +1139,7 @@ export default function Home() {
 
     const newItemPayload = {
       title,
-      productLink,
+      productLink: productLink || null,
       content: {
           video: videoContent,
           post: postContent,
@@ -1228,7 +1222,7 @@ export default function Home() {
   };
 
   const handleLoadSavedItem = (item: SavedItem) => {
-    setProductLink(item.productLink);
+    setProductLink(item.productLink || '');
     setGeneratedContent({
       video: item.video,
       post: item.post,
@@ -1923,11 +1917,11 @@ export default function Home() {
             <div className="accordion-content-inner form-with-analysis">
                 <div className="form-column">
                 <form className="input-form" onSubmit={handleGenerate}>
-                    {/* Product Input Section */}
-                    <div className="product-input-section">
-                      <div className="section-header">
-                        <span className="section-eyebrow">Product Info</span>
-                        <h4 className="section-title">Describe the product you want content for</h4>
+                    {/* Product Info Block */}
+                    <div className="input-section-group">
+                      <div className="input-section-group-header">
+                        <h3 className="input-section-group-title">Product Info</h3>
+                        <p className="input-section-group-description">Describe the product you want content for</p>
                       </div>
 
                       <div className="form-group">
@@ -2054,7 +2048,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="form-group description-group">
+                      <div className="form-group description-group compact">
                         <label htmlFor="customDescription" className="input-label">Custom Description <span className="optional-label">(Optional)</span></label>
                         <textarea
                           id="customDescription"
@@ -2062,55 +2056,74 @@ export default function Home() {
                           className="textarea-field enhanced-textarea"
                           value={customDescription}
                           onChange={(e) => setCustomDescription(e.target.value)}
-                          placeholder="Write your own description or let AI auto-generate it."
+                          placeholder="Click to add a custom description or let AI auto-generate it..."
                           aria-label="Custom Description"
-                          rows={5}
+                          rows={2}
                         />
                       </div>
+                    </div>
 
-                      <div className="section-divider" />
-
-                      <div className="product-input-section shopee-section">
-                        <div className="section-header compact">
-                          <span className="section-eyebrow">Import from Shopee</span>
-                          <p className="section-subtitle">Paste a Shopee product URL and let AI analyze it.</p>
+                    {/* External Import Block - Collapsible */}
+                    <div className="collapsible-section">
+                      <div 
+                        className="collapsible-header"
+                        onClick={() => setIsShopeeImportOpen(!isShopeeImportOpen)}
+                      >
+                        <div className="collapsible-header-content">
+                          <span>🔗</span>
+                          <div>
+                            <h3 className="collapsible-title">Import from E-commerce Link</h3>
+                            <p className="collapsible-subtitle">Paste a Shopee product URL for quick import</p>
+                          </div>
                         </div>
-
-                        <div className="form-group">
-                          <label htmlFor="productLink" className="input-label">
-                            Shopee Product Link <span className="optional-label">(Optional if title & images provided)</span>
-                          </label>
-                          <div className="input-with-button inline-button">
-                            <input
-                              id="productLink"
-                              name="productLink"
-                              type="url"
-                              className="input-field"
-                              value={productLink}
-                              onChange={handleProductLinkChange}
-                              placeholder="https://shopee.com/..."
-                              aria-label="Shopee Product Link"
-                            />
-                            <button 
-                                type="button" 
-                                className="analyze-button" 
-                                onClick={handleAnalyze} 
-                                disabled={(!productLink && !productTitle && !customDescription) || isAnalyzing || isLoading}
-                            >
-                                {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-                            </button>
+                        <svg className={`collapsible-icon ${isShopeeImportOpen ? 'open' : ''}`} xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                          <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                      </div>
+                      <div className={`collapsible-content ${isShopeeImportOpen ? 'open' : ''}`}>
+                        <div className="collapsible-content-inner">
+                          <div className="form-group">
+                            <label htmlFor="productLink" className="input-label">
+                              Shopee Product Link
+                            </label>
+                            <div className="input-with-button inline-button">
+                              <input
+                                id="productLink"
+                                name="productLink"
+                                type="url"
+                                className="input-field"
+                                value={productLink}
+                                onChange={handleProductLinkChange}
+                                placeholder="https://shopee.com/..."
+                                aria-label="Shopee Product Link"
+                              />
+                              <button 
+                                  type="button" 
+                                  className="analyze-button" 
+                                  onClick={handleAnalyze} 
+                                  disabled={(!productLink && !productTitle && !customDescription) || isAnalyzing || isLoading}
+                              >
+                                  {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                     
-                    <fieldset className="advanced-options-fieldset" disabled={isAnalyzing}>
+                    {/* Content Style Block */}
+                    <div className="input-section-group">
+                      <div className="input-section-group-header">
+                        <h3 className="input-section-group-title">Content Style</h3>
+                        <p className="input-section-group-description">Customize the tone, format, and narrative style</p>
+                      </div>
+                      <fieldset className="advanced-options-fieldset" disabled={isAnalyzing}>
                         <div className="advanced-options-grid">
-                            <div className="form-group">
+                            <div className="form-group featured">
                                 <div className="tooltip-wrapper">
-                                  <label htmlFor="goal" className="input-label">Content Goal</label>
+                                  <label htmlFor="goal" className="input-label">🎯 Content Goal</label>
                                   <span className="tooltip-icon" tabIndex={0}>?
-                                    <span className="tooltip-content">Choose your primary objective for this content</span>
+                                    <span className="tooltip-content">Choose your primary objective - this will guide all other content decisions</span>
                                   </span>
                                 </div>
                                 <select id="goal" name="goal" className="select-field" value={advancedInputs.goal} onChange={handleAdvancedInputChange}>
@@ -2121,33 +2134,6 @@ export default function Home() {
                                     <option>Educational</option>
                                 </select>
                             </div>
-                            <div className="form-group">
-                                <div className="tooltip-wrapper">
-                                  <label htmlFor="audienceBuyerType" className="input-label">Buyer Type</label>
-                                  <span className="tooltip-icon" tabIndex={0}>?
-                                    <span className="tooltip-content">Who is your target customer?</span>
-                                  </span>
-                                </div>
-                                <input type="text" id="audienceBuyerType" name="audienceBuyerType" className="input-field" value={advancedInputs.audienceBuyerType} onChange={handleAdvancedInputChange} placeholder="e.g., Budget-conscious"/>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="audienceGender" className="input-label">Target Gender</label>
-                                <select id="audienceGender" name="audienceGender" className="select-field" value={advancedInputs.audienceGender} onChange={handleAdvancedInputChange}>
-                                    <option>Unisex</option>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                </select>
-                            </div>
-                             <div className="form-group">
-                                <label htmlFor="audienceAge" className="input-label">Target Age Group</label>
-                                <select id="audienceAge" name="audienceAge" className="select-field" value={advancedInputs.audienceAge} onChange={handleAdvancedInputChange}>
-                                    <option>Teen</option>
-                                    <option>20s</option>
-                                    <option>30s</option>
-                                    <option>40s+</option>
-                                </select>
-                            </div>
-
                             <div className="form-group">
                                 <label htmlFor="toneAndStyle" className="input-label">Tone & Style</label>
                                 <select id="toneAndStyle" name="toneAndStyle" className="select-field" value={advancedInputs.toneAndStyle} onChange={handleAdvancedInputChange}>
@@ -2208,7 +2194,9 @@ export default function Home() {
                                 </select>
                             </div>
                         </div>
-                    </fieldset>
+                      </fieldset>
+                    </div>
+
                     <button type="submit" className="generate-button" disabled={isLoading || isAnalyzing || (!productLink && !productTitle)}>
                       {isLoading ? 'Generating...' : '✨ Generate Content'}
                     </button>
@@ -2455,30 +2443,34 @@ export default function Home() {
             <span className="tab-icon">✨</span>
             <span className="tab-label">Generator</span>
           </button>
-          <button 
-            className={`unified-tab ${currentPage === 'saved' ? 'active' : ''}`} 
-            onClick={() => setCurrentPage('saved')}
-          >
-            <span className="tab-icon">💾</span>
-            <span className="tab-label">Saved</span>
-            {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
-          </button>
-          <button 
-            className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
-            onClick={() => setCurrentPage('scheduler')}
-          >
-            <span className="tab-icon">📮</span>
-            <span className="tab-label">Posts</span>
-            {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
-          </button>
+          {session && (
+            <>
+              <button 
+                className={`unified-tab ${currentPage === 'saved' ? 'active' : ''}`} 
+                onClick={() => setCurrentPage('saved')}
+              >
+                <span className="tab-icon">💾</span>
+                <span className="tab-label">Saved</span>
+                {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
+              </button>
+              <button 
+                className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
+                onClick={() => setCurrentPage('scheduler')}
+              >
+                <span className="tab-icon">📮</span>
+                <span className="tab-label">Posts</span>
+                {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
+              </button>
+            </>
+          )}
         </nav>
         
         <div className="header-auth">
           <a href="/about" className="about-link">
-            ℹ️ About Us
+            About Us
           </a>
           <a href="/contact" className="about-link">
-            📧 Contact Us
+            Contact Us
           </a>
           <AuthButton />
         </div>
@@ -2486,8 +2478,20 @@ export default function Home() {
 
       <main className="main-content">
         {currentPage === 'generator' && renderGeneratorPage()}
-        {currentPage === 'saved' && renderSavedPage()}
-        {currentPage === 'scheduler' && renderSchedulerPage()}
+        {currentPage === 'saved' && session && renderSavedPage()}
+        {currentPage === 'scheduler' && session && renderSchedulerPage()}
+        {currentPage === 'saved' && !session && (
+          <div className="empty-saved-page">
+            <h2>🔒 Login Required</h2>
+            <p>Please sign in to access your saved content.</p>
+          </div>
+        )}
+        {currentPage === 'scheduler' && !session && (
+          <div className="empty-saved-page">
+            <h2>🔒 Login Required</h2>
+            <p>Please sign in to access scheduled posts.</p>
+          </div>
+        )}
       </main>
 
       <footer className="app-footer">

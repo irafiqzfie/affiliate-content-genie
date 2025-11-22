@@ -592,10 +592,34 @@ body {
 }
 
 .form-group.featured {
-  background: rgba(255, 123, 0, 0.05);
-  border: 1px solid rgba(255, 123, 0, 0.2);
+  grid-column: 1 / -1;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, rgba(255, 123, 0, 0.08) 0%, rgba(0, 170, 255, 0.08) 100%);
+  border: 2px solid rgba(255, 123, 0, 0.3);
   border-radius: var(--border-radius);
-  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-group.featured .input-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.form-group.featured .select-field {
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 123, 0, 0.3);
+}
+
+.form-group.featured .select-field:focus {
+  border-color: var(--gradient-orange);
+  box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.15);
 }
 
 /* New form layout styles */
@@ -913,6 +937,156 @@ body {
   box-sizing: border-box;
 }
 
+/* Input Section Groups - Visual Separation */
+.input-section-group {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+}
+
+.input-section-group:last-child {
+  margin-bottom: 0;
+}
+
+.input-section-group-header {
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.input-section-group-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary-text-color);
+  margin: 0 0 0.25rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input-section-group-description {
+  font-size: 0.85rem;
+  color: var(--secondary-text-color);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Collapsible Section */
+.collapsible-section {
+  margin-bottom: 1.5rem;
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.collapsible-header:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.collapsible-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.collapsible-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary-text-color);
+  margin: 0;
+}
+
+.collapsible-subtitle {
+  font-size: 0.75rem;
+  color: var(--secondary-text-color);
+  margin: 0;
+}
+
+.collapsible-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+  color: var(--secondary-text-color);
+}
+
+.collapsible-icon.open {
+  transform: rotate(180deg);
+}
+
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.collapsible-content.open {
+  max-height: 1000px;
+  padding-top: 1rem;
+}
+
+.collapsible-content-inner {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius);
+  margin-top: 0.5rem;
+}
+
+/* Compact Description Field */
+.description-group.compact textarea {
+  min-height: 60px;
+  transition: min-height 0.2s ease;
+}
+
+.description-group.compact textarea:focus {
+  min-height: 120px;
+}
+
+/* Input Section Groups - Visual Separation */
+.input-section-group {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+}
+
+.input-section-group:last-child {
+  margin-bottom: 0;
+}
+
+.input-section-group-header {
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.input-section-group-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary-text-color);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input-section-group-description {
+  font-size: 0.85rem;
+  color: var(--secondary-text-color);
+  line-height: 1.4;
+}
+
 /* Image Upload */
 .image-upload-container {
   width: 100%;
@@ -979,12 +1153,12 @@ body {
   align-items: center;
   justify-content: center;
   gap: var(--spacing-element);
-  padding: 2rem;
+  padding: 1.5rem;
   border: 2px dashed var(--glass-border);
   border-radius: var(--border-radius);
   background: rgba(13, 15, 27, 0.5);
   transition: all 0.3s ease;
-  min-height: 150px;
+  min-height: 100px;
 }
 
 .upload-placeholder:hover {
@@ -1018,15 +1192,20 @@ body {
   border-width: 1px;
   border-color: rgba(255, 255, 255, 0.12);
   background: radial-gradient(circle at top, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.4));
-  padding: 0.75rem 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.image-drop-zone.subtle .upload-placeholder {
+  min-height: 80px;
+  padding: 0.75rem;
 }
 
 .image-drop-zone.subtle .upload-text {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .image-drop-zone.subtle .upload-hint {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
 }
 
 .image-drop-zone.dragging .upload-placeholder {
@@ -1040,34 +1219,35 @@ body {
 }
 
 .image-url-input-container {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 1rem 0;
   color: var(--secondary-text-color);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  text-transform: lowercase;
+  white-space: nowrap;
+  padding-right: 0.5rem;
 }
 
 .divider::before,
 .divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid var(--glass-border);
+  display: none;
 }
 
 .divider span {
-  padding: 0 1rem;
+  padding: 0;
 }
 
 .url-input-group {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex: 1;
 }
 
 .url-input-field {
@@ -2724,6 +2904,20 @@ body {
     text-overflow: ellipsis;
     opacity: 0.8;
     transition: opacity 0.2s;
+}
+
+.saved-item-date {
+    font-size: 0.8rem;
+    color: var(--secondary-text-color);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.saved-item-date::before {
+    content: '🕒';
+    font-size: 0.75rem;
 }
 
 .saved-item:hover .saved-item-link {
