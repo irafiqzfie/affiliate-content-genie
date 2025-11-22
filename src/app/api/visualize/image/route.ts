@@ -69,16 +69,16 @@ export async function POST(request: Request) {
     }
     
     // If a condition image is provided, return it directly
-    // AI image generation disabled - model availability issues
+    // Note: Gemini image generation models are not reliably available
     if (conditionImage) {
       console.log('🖼️ Using uploaded product image directly');
-      console.log('💡 AI transformation disabled (use original image)');
+      console.log('💡 Skipping AI transformation due to model availability issues');
       
       return NextResponse.json({ 
         imageUrl: conditionImage,
         prompt: outputText.substring(0, 100) + '...',
         isConditioned: true,
-        note: 'Using original uploaded image'
+        note: 'Using original uploaded image (AI transformation unavailable)'
       });
     }
     
