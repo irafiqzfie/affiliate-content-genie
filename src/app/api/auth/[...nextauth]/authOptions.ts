@@ -189,6 +189,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.userId as string;
         // Add error to session if present (for handling expired tokens)
         if (token.error) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (session as any).error = token.error;
         }
       }
