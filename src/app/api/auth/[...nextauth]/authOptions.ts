@@ -122,13 +122,64 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, account, user }) {
-      // Initial sign in - save access token to JWT
+      // Initial sign in - save access token and expiry to JWT
       if (account && user) {
-        token.accessToken = account.access_token;
-        token.provider = account.provider;
-        token.userId = user.id;
+        console.log('💾 Storing tokens for', account.provider);
+        return {
+          ...token,
+          accessToken: account.access_token,
+          refreshToken: account.refresh_token,
+          expiresAt: account.expires_at ? account.expires_at * 1000 : Date.now() + 60 * 24 * 60 * 60 * 1000, // Default 60 days
+          provider: account.provider,
+          userId: user.id,
+        };
       }
-      return token;
+
+      // Token is still valid
+      if (Date.now() < (token.expiresAt as number)) {
+        console.log('✅ Token still valid');
+        return token;
+      }
+
+      // Token expired - try to refresh for Threads
+      if (token.provider === 'threads' && token.refreshToken) {
+        console.log('🔄 Refreshing Threads token...');
+        try {
+          const params = new URLSearchParams({
+            grant_type: 'th_refresh_token',
+            access_token: token.refreshToken as string,
+          });
+
+          const response = await fetch(`https://graph.threads.net/oauth/access_token?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          });
+
+          const refreshedTokens = await response.json();
+
+          if (!response.ok) throw refreshedTokens;
+
+          console.log('✅ Token refreshed successfully');
+          return {
+            ...token,
+            accessToken: refreshedTokens.access_token,
+            expiresAt: Date.now() + 60 * 24 * 60 * 60 * 1000, // 60 days
+          };
+        } catch (error) {
+          console.error('❌ Token refresh failed:', error);
+          // Return token as-is, will force re-login on next request
+          return { ...token, error: 'RefreshAccessTokenError' };
+        }
+      }
+
+      // For long-lived tokens without refresh, just extend expiry
+      console.log('⚠️ Token expired but no refresh available, extending...');
+      return {
+        ...token,
+        expiresAt: Date.now() + 60 * 24 * 60 * 60 * 1000, // Extend by 60 days
+      };
     },
     async session({ session, token }) {
       // Make access token and provider available in session
@@ -136,6 +187,10 @@ export const authOptions: NextAuthOptions = {
         session.accessToken = token.accessToken as string;
         session.provider = token.provider as string;
         session.user.id = token.userId as string;
+        // Add error to session if present (for handling expired tokens)
+        if (token.error) {
+          (session as any).error = token.error;
+        }
       }
       return session;
     },
