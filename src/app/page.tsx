@@ -1594,7 +1594,7 @@ export default function Home() {
         <div className="modal-overlay" onClick={handleCloseSocialModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>{schedulingPlatform ? `Schedule Reminder for ${schedulingPlatform}` : 'Schedule a Post'}</h3>
+                    <h3>{schedulingPlatform ? `Save Post for ${schedulingPlatform}` : 'Save Post'}</h3>
                     <button className="modal-close-button" onClick={handleCloseSocialModal} aria-label="Close modal">&times;</button>
                 </div>
                 <div className="modal-body">
@@ -1610,17 +1610,6 @@ export default function Home() {
 
                     {schedulingPlatform && (
                         <div className="modal-scheduling-view">
-                            <div style={{ 
-                                backgroundColor: '#fff3cd', 
-                                border: '1px solid #ffc107', 
-                                borderRadius: '4px', 
-                                padding: '12px', 
-                                marginBottom: '16px',
-                                fontSize: '14px',
-                                color: '#856404'
-                            }}>
-                                ℹ️ <strong>Reminder Mode:</strong> This saves your post for later. You&apos;ll need to click &quot;Post Now&quot; when you&apos;re ready to publish.
-                            </div>
                             <h4>Set Date & Time</h4>
                              <div className="schedule-form">
                                 <div className="schedule-input-group">
@@ -1656,12 +1645,12 @@ export default function Home() {
                     {schedulingPlatform ? (
                         <>
                             <button className="modal-footer-button secondary" onClick={() => setSchedulingPlatform(null)}>Back</button>
-                            <button className="modal-footer-button primary" onClick={handleSchedulePost}>Confirm Schedule</button>
+                            <button className="modal-footer-button primary" onClick={handleSchedulePost}>Save Post</button>
                         </>
                     ) : (
                         <>
-                         <button className="social-platform-button facebook" onClick={() => handlePlatformSelect('Facebook')} disabled={!finalImageUrl}>Schedule on Facebook</button>
-                         <button className="social-platform-button threads" onClick={() => handlePlatformSelect('Threads')} disabled={!finalImageUrl}>Schedule on Threads</button>
+                         <button className="social-platform-button facebook" onClick={() => handlePlatformSelect('Facebook')} disabled={!finalImageUrl}>Save for Facebook</button>
+                         <button className="social-platform-button threads" onClick={() => handlePlatformSelect('Threads')} disabled={!finalImageUrl}>Save for Threads</button>
                         </>
                     )}
                 </div>
@@ -2461,8 +2450,8 @@ export default function Home() {
             className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
             onClick={() => setCurrentPage('scheduler')}
           >
-            <span className="tab-icon">🗓️</span>
-            <span className="tab-label">Scheduler</span>
+            <span className="tab-icon">📮</span>
+            <span className="tab-label">Posts</span>
             {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
           </button>
         </nav>
