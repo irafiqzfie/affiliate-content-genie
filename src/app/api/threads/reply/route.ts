@@ -67,6 +67,53 @@ export async function POST(request: NextRequest) {
     const containerId = containerData.id;
     console.log('📦 Reply container created:', containerId);
 
+    // Step 1.5: Wait for container to be ready
+    console.log('⏳ Waiting for reply container to be ready...');
+    
+    let statusAttempts = 0;
+    const maxAttempts = 10; // 10 seconds max for text replies
+    let isReady = false;
+    
+    while (statusAttempts < maxAttempts && !isReady) {
+      // Check container status
+      const statusUrl = `https://graph.threads.net/v1.0/${containerId}?fields=status,error_message&access_token=${accessToken}`;
+      const statusResponse = await fetch(statusUrl);
+      
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        console.log(`📊 Reply container status (attempt ${statusAttempts + 1}):`, statusData.status);
+        
+        if (statusData.status === 'FINISHED') {
+          isReady = true;
+          break;
+        } else if (statusData.status === 'ERROR') {
+          return NextResponse.json(
+            { 
+              error: 'Reply container processing failed',
+              details: statusData.error_message || 'Unknown error'
+            },
+            { status: 400 }
+          );
+        }
+      }
+      
+      // Wait 1 second before checking again
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      statusAttempts++;
+    }
+    
+    if (!isReady) {
+      return NextResponse.json(
+        { 
+          error: 'Reply container processing timeout',
+          details: 'Container took too long to process. Please try again.'
+        },
+        { status: 408 }
+      );
+    }
+    
+    console.log('✅ Reply container ready for publishing');
+
     // Step 2: Publish the reply container
     const publishResponse = await fetch(
       `https://graph.threads.net/v1.0/${userId}/threads_publish`,
