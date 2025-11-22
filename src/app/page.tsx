@@ -1925,6 +1925,11 @@ export default function Home() {
                 <form className="input-form" onSubmit={handleGenerate}>
                     {/* Product Input Section */}
                     <div className="product-input-section">
+                      <div className="section-header">
+                        <span className="section-eyebrow">Product Info</span>
+                        <h4 className="section-title">Describe the product you want content for</h4>
+                      </div>
+
                       <div className="form-group">
                         <label htmlFor="productTitle" className="input-label">Product Title</label>
                         <input
@@ -1941,59 +1946,67 @@ export default function Home() {
 
                       <div className="form-group">
                         <label htmlFor="productImage" className="input-label">
-                          Product Images {productImages.length > 0 && `(${productImages.length}/5)`}
+                          Product Images <span className="input-label-caption">(up to 5)</span>
                         </label>
                         <div className="image-upload-container">
-                          {/* Image Grid */}
-                          {productImagePreviews.length > 0 && (
-                            <div className="image-preview-grid">
-                              {productImagePreviews.map((preview, index) => (
-                                <div key={index} className="image-preview-item">
-                                  <Image 
-                                    src={preview} 
-                                    alt={`Product preview ${index + 1}`} 
-                                    className="image-preview"
-                                    width={200}
-                                    height={200}
-                                    unoptimized
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveImage(index)}
-                                    className="remove-image-button"
-                                    aria-label={`Remove image ${index + 1}`}
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                                    </svg>
-                                  </button>
-                                  {index === 0 && (
-                                    <div className="primary-badge">Primary</div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          
-                          {/* Upload Area - Show only if less than 5 images */}
+                          <div className="image-preview-grid gallery-grid">
+                            {productImagePreviews.map((preview, index) => (
+                              <div key={index} className="image-preview-item gallery-tile">
+                                <Image 
+                                  src={preview} 
+                                  alt={`Product preview ${index + 1}`} 
+                                  className="image-preview"
+                                  width={200}
+                                  height={200}
+                                  unoptimized
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(index)}
+                                  className="remove-image-button"
+                                  aria-label={`Remove image ${index + 1}`}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                                  </svg>
+                                </button>
+                                {index === 0 && (
+                                  <div className="primary-badge compact">Primary</div>
+                                )}
+                              </div>
+                            ))}
+
+                            {Array.from({ length: Math.max(0, 5 - productImagePreviews.length) }).map((_, idx) => (
+                              <button
+                                key={`placeholder-${idx}`}
+                                type="button"
+                                className="image-preview-item gallery-tile placeholder"
+                                onClick={() => document.getElementById('productImage')?.click()}
+                              >
+                                <span className="placeholder-plus">+</span>
+                                <span className="placeholder-label">Add</span>
+                              </button>
+                            ))}
+                          </div>
+
                           {productImages.length < 5 && (
                             <div
-                              className={`image-drop-zone ${isDragging ? 'dragging' : ''}`}
+                              className={`image-drop-zone subtle ${isDragging ? 'dragging' : ''}`}
                               onDragOver={handleDragOver}
                               onDragLeave={handleDragLeave}
                               onDrop={handleDrop}
                             >
                               <label htmlFor="productImage" className="image-upload-label">
                                 <div className="upload-placeholder">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 0 1-.708-.708l3-3z"/>
                                   </svg>
                                   <span className="upload-text">
-                                    {productImages.length > 0 ? 'Add more images' : 'Click to upload images'}
+                                    Drag & drop images here or click any tile
                                   </span>
                                   <span className="upload-hint">
-                                    {isDragging ? 'Drop images here' : 'JPG, PNG, or WEBP (max 5MB each, up to 5 images)'}
+                                    JPG, PNG, or WEBP · max 5MB each
                                   </span>
                                 </div>
                                 <input
@@ -2007,8 +2020,7 @@ export default function Home() {
                                   multiple
                                 />
                               </label>
-                              
-                              {/* URL Input */}
+
                               <div className="image-url-input-container">
                                 <div className="divider">
                                   <span>or</span>
@@ -2042,29 +2054,43 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="form-group">
-                        <label htmlFor="customDescription" className="input-label">Custom Description <span style={{ fontSize: '0.85rem', color: 'var(--secondary-text-color)', fontWeight: 'normal' }}>(Optional)</span></label>
+                      <div className="form-group description-group">
+                        <label htmlFor="customDescription" className="input-label">Custom Description <span className="optional-label">(Optional)</span></label>
                         <textarea
                           id="customDescription"
                           name="customDescription"
-                          className="textarea-field"
+                          className="textarea-field enhanced-textarea"
                           value={customDescription}
                           onChange={(e) => setCustomDescription(e.target.value)}
-                          placeholder="Write your product description here..."
+                          placeholder="Write your own description or let AI auto-generate it."
                           aria-label="Custom Description"
-                          rows={4}
+                          rows={5}
                         />
                       </div>
 
-                      <div className="or-divider">
-                        <span>OR</span>
-                      </div>
+                      <div className="section-divider" />
 
-                      <div className="form-group">
-                        <div className="label-with-action">
-                            <label htmlFor="productLink" className="input-label">
-                              Shopee Product Link <span style={{ fontSize: '0.85rem', color: 'var(--secondary-text-color)', fontWeight: 'normal' }}>(Optional if title & images provided)</span>
-                            </label>
+                      <div className="product-input-section shopee-section">
+                        <div className="section-header compact">
+                          <span className="section-eyebrow">Import from Shopee</span>
+                          <p className="section-subtitle">Paste a Shopee product URL and let AI analyze it.</p>
+                        </div>
+
+                        <div className="form-group">
+                          <label htmlFor="productLink" className="input-label">
+                            Shopee Product Link <span className="optional-label">(Optional if title & images provided)</span>
+                          </label>
+                          <div className="input-with-button inline-button">
+                            <input
+                              id="productLink"
+                              name="productLink"
+                              type="url"
+                              className="input-field"
+                              value={productLink}
+                              onChange={handleProductLinkChange}
+                              placeholder="https://shopee.com/..."
+                              aria-label="Shopee Product Link"
+                            />
                             <button 
                                 type="button" 
                                 className="analyze-button" 
@@ -2073,17 +2099,8 @@ export default function Home() {
                             >
                                 {isAnalyzing ? 'Analyzing...' : 'Analyze'}
                             </button>
+                          </div>
                         </div>
-                        <input
-                        id="productLink"
-                        name="productLink"
-                        type="url"
-                        className="input-field"
-                        value={productLink}
-                        onChange={handleProductLinkChange}
-                        placeholder="Paste your Shopee product link here (or fill title & images below)..."
-                        aria-label="Shopee Product Link"
-                        />
                       </div>
                     </div>
                     
