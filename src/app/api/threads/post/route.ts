@@ -117,12 +117,12 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Container created:', creationId);
 
-    // Step 1.5: For videos, wait for processing to complete
-    if (mediaUrl && mediaType === 'VIDEO') {
-      console.log('⏳ Waiting for video processing...');
+    // Step 1.5: Wait for container to be ready (for both images and videos)
+    if (mediaUrl) {
+      console.log('⏳ Waiting for media container to be ready...');
       
       let statusAttempts = 0;
-      const maxAttempts = 30; // Max 30 attempts (30 seconds)
+      const maxAttempts = mediaType === 'VIDEO' ? 30 : 10; // 30s for video, 10s for images
       let isReady = false;
       
       while (statusAttempts < maxAttempts && !isReady) {
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
         
         if (statusResponse.ok) {
           const statusData = await statusResponse.json();
-          console.log(`📊 Video status (attempt ${statusAttempts + 1}):`, statusData.status);
+          console.log(`📊 Container status (attempt ${statusAttempts + 1}):`, statusData.status);
           
           if (statusData.status === 'FINISHED') {
             isReady = true;
@@ -140,8 +140,8 @@ export async function POST(request: NextRequest) {
           } else if (statusData.status === 'ERROR') {
             return NextResponse.json(
               { 
-                error: 'Video processing failed',
-                details: statusData.error_message || 'Unknown error during video processing'
+                error: 'Media processing failed',
+                details: statusData.error_message || 'Unknown error during media processing'
               },
               { status: 400 }
             );
@@ -156,14 +156,14 @@ export async function POST(request: NextRequest) {
       if (!isReady) {
         return NextResponse.json(
           { 
-            error: 'Video processing timeout',
-            details: 'Video took too long to process. Please try with a shorter video.'
+            error: 'Media processing timeout',
+            details: `Media took too long to process. Please try again.`
           },
           { status: 408 }
         );
       }
       
-      console.log('✅ Video processing complete');
+      console.log('✅ Media container ready for publishing');
     }
 
     // Step 2: Publish the container
