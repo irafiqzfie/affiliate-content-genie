@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 
 // Configure route timeout for image generation (60 seconds)
 export const maxDuration = 60;
@@ -172,27 +173,20 @@ Requirements: Professional lighting, clean background, high-quality, NO watermar
       </text>
     </svg>`;
     
-    // Convert SVG to base64
-    const base64Svg = Buffer.from(svgPlaceholder).toString('base64');
-    const dataUrl = `data:image/svg+xml;base64,${base64Svg}`;
+    // Upload directly to Vercel Blob
+    const blob = await put(
+      `placeholder-${Date.now()}.svg`,
+      svgPlaceholder,
+      {
+        access: 'public',
+        contentType: 'image/svg+xml',
+      }
+    );
 
-    // Upload to Vercel Blob so it's accessible to Threads API
-    const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/upload-image`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageData: dataUrl })
-    });
-
-    if (!uploadResponse.ok) {
-      throw new Error('Failed to upload placeholder image to Vercel Blob');
-    }
-
-    const { url: imageUrl } = await uploadResponse.json();
-
-    console.log('✅ Placeholder uploaded to Vercel Blob:', imageUrl);
+    console.log('✅ Placeholder uploaded to Vercel Blob:', blob.url);
 
     return NextResponse.json({ 
-      imageUrl,
+      imageUrl: blob.url,
       prompt: outputText.substring(0, 100) + '...',
       keywords: cleanKeywords,
       isConditioned: false,
@@ -202,41 +196,38 @@ Requirements: Professional lighting, clean background, high-quality, NO watermar
   } catch (error) {
     console.error('❌ Image generation error:', error);
     
-    // Create a simple error placeholder and upload to Vercel Blob
+    // Create a simple error placeholder and upload directly to Vercel Blob
     const svgError = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <rect width="512" height="512" fill="#ef4444"/>
       <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="20" font-family="Arial">
         Image Generation Failed
       </text>
     </svg>`;
-    
-    const base64Svg = Buffer.from(svgError).toString('base64');
-    const dataUrl = `data:image/svg+xml;base64,${base64Svg}`;
 
     try {
-      const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/upload-image`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData: dataUrl })
-      });
+      const blob = await put(
+        `error-${Date.now()}.svg`,
+        svgError,
+        {
+          access: 'public',
+          contentType: 'image/svg+xml',
+        }
+      );
 
-      if (uploadResponse.ok) {
-        const { url: fallbackImageUrl } = await uploadResponse.json();
-        return NextResponse.json({ 
-          imageUrl: fallbackImageUrl,
-          message: 'Using placeholder image due to generation error.',
-          error: error instanceof Error ? error.message : 'Unknown error',
-          isPlaceholder: true
-        });
-      }
+      return NextResponse.json({ 
+        imageUrl: blob.url,
+        message: 'Using placeholder image due to generation error.',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isPlaceholder: true
+      });
     } catch (uploadError) {
       console.error('Failed to upload error placeholder:', uploadError);
+      
+      return NextResponse.json({ 
+        imageUrl: null,
+        message: 'Image generation failed and placeholder upload failed.',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }, { status: 500 });
     }
-
-    return NextResponse.json({ 
-      imageUrl: null,
-      message: 'Image generation failed and placeholder upload failed.',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
   }
 }
