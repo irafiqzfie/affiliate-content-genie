@@ -23,7 +23,7 @@ model SavedItem {
   id         Int      @id @default(autoincrement())
   userId     String?
   title      String
-  productLink String
+  productLink String?
   video      String
   post       String
   createdAt  DateTime @default(now())
