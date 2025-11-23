@@ -2609,104 +2609,138 @@ export default function Home() {
   
   const renderSchedulerPage = () => (
     <>
-      {/* Ready to Post - Minimalist Post Preview */}
+      {/* Ready to Post - Scheduled Post Style Preview */}
       {generatedContent.post && editableContent.post && (
-        <div className="ready-to-post-section">
-          <div className="section-header">
-            <h2>📱 Ready to Post</h2>
-          </div>
+        <div className="scheduled-posts-section">
+          <h2 className="section-title">Scheduled Posts</h2>
 
-          <div className="minimal-preview-card">
-            {/* Image Preview */}
+          <div className="scheduled-post-card">
+            {/* Image */}
             {generatedImages['body'] && (
-              <div className="minimal-preview-image">
+              <div className="scheduled-post-image">
                 <Image 
                   src={generatedImages['body']} 
                   alt="Post preview" 
                   width={400}
-                  height={400}
-                  className="preview-img"
+                  height={300}
+                  className="post-img"
                 />
               </div>
             )}
 
-            {/* Post Text Preview - Only main content */}
-            <div className="minimal-preview-text">
-              {(() => {
-                const hook = editableContent.post.hook?.[selectedOptionIndexes['hook'] ?? 0];
-                const body = editableContent.post.body?.[selectedOptionIndexes['body'] ?? 0];
-                const cta = editableContent.post.cta?.[selectedOptionIndexes['cta'] ?? 0];
-                
-                const parts = [];
-                if (hook) parts.push(stripHtml(hook));
-                if (body) parts.push(stripHtml(body));
-                if (cta) parts.push(stripHtml(cta));
-                
-                return parts.join('\n\n');
-              })()}
-            </div>
-
-            {/* Hashtags - Collapsed by default */}
-            <details className="minimal-details">
-              <summary className="minimal-summary">Hashtags</summary>
-              <div className="minimal-hashtags">
-                {editableContent.post.hashtags?.[selectedOptionIndexes['hashtags'] ?? 0] && 
-                  stripHtml(editableContent.post.hashtags[selectedOptionIndexes['hashtags'] ?? 0])
-                }
+            {/* Post Content */}
+            <div className="scheduled-post-content">
+              {/* Platform Badge & Timestamp */}
+              <div className="scheduled-post-header">
+                <span className="platform-badge">Threads</span>
+                <span className="post-timestamp">{new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span>
               </div>
-            </details>
 
-            {/* Affiliate Link - Subtle */}
-            <details className="minimal-details">
-              <summary className="minimal-summary">Add affiliate link (optional)</summary>
-              <div className="minimal-affiliate-expanded">
-                <input
-                  type="url"
-                  value={affiliateLink}
-                  onChange={(e) => setAffiliateLink(e.target.value)}
-                  placeholder="https://example.com/product?ref=..."
-                  className="minimal-affiliate-input"
-                />
-                <small className="minimal-hint">Will be posted as a comment</small>
+              {/* Post Text */}
+              <div className="scheduled-post-text">
+                {(() => {
+                  const hook = editableContent.post.hook?.[selectedOptionIndexes['hook'] ?? 0];
+                  const body = editableContent.post.body?.[selectedOptionIndexes['body'] ?? 0];
+                  const cta = editableContent.post.cta?.[selectedOptionIndexes['cta'] ?? 0];
+                  
+                  const parts = [];
+                  if (hook) parts.push(stripHtml(hook));
+                  if (body) parts.push(stripHtml(body));
+                  if (cta) parts.push(stripHtml(cta));
+                  
+                  const fullText = parts.join('\n\n');
+                  // Truncate if too long
+                  return fullText.length > 200 ? fullText.substring(0, 200) + '...' : fullText;
+                })()}
               </div>
-            </details>
 
-            {/* Actions */}
-            <div className="minimal-preview-actions">
-              <button
-                className="minimal-btn btn-save"
-                onClick={async () => {
-                  setSaveButtonState('loading');
-                  try {
-                    await handleSaveToList();
-                    setSaveButtonState('success');
-                    setTimeout(() => setSaveButtonState('idle'), 2000);
-                  } catch {
-                    setSaveButtonState('error');
-                    setTimeout(() => setSaveButtonState('idle'), 2000);
-                  }
-                }}
-                disabled={saveButtonState === 'loading'}
-              >
-                {saveButtonState === 'loading' && '⏳'}
-                {saveButtonState === 'success' && '✅'}
-                {saveButtonState === 'error' && '❌'}
-                {saveButtonState === 'idle' && '💾 Save Draft'}
-              </button>
+              {/* Collapsible Details */}
+              <details className="post-details">
+                <summary className="details-toggle">Show more details</summary>
+                <div className="details-content">
+                  {/* Full Text */}
+                  <div className="detail-section">
+                    <span className="detail-label">Full Post:</span>
+                    <div className="detail-text">
+                      {(() => {
+                        const hook = editableContent.post.hook?.[selectedOptionIndexes['hook'] ?? 0];
+                        const body = editableContent.post.body?.[selectedOptionIndexes['body'] ?? 0];
+                        const cta = editableContent.post.cta?.[selectedOptionIndexes['cta'] ?? 0];
+                        
+                        const parts = [];
+                        if (hook) parts.push(stripHtml(hook));
+                        if (body) parts.push(stripHtml(body));
+                        if (cta) parts.push(stripHtml(cta));
+                        
+                        return parts.join('\n\n');
+                      })()}
+                    </div>
+                  </div>
 
-              <button
-                className="minimal-btn btn-post"
-                onClick={() => {
-                  setPendingPlatform('Threads');
-                  setShowPostConfirmation(true);
-                }}
-                disabled={!session}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 192 192">
-                  <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6866C105.707 61.7589 111.932 64.1498 116.137 68.848C118.675 71.6555 120.342 75.0943 121.142 79.1583C115.316 76.9103 108.644 75.7828 101.337 75.7828C74.0963 75.7828 58.7056 88.9788 58.7056 108.159C58.7056 117.207 62.1986 125.202 68.5695 130.45C74.5103 135.331 82.5887 137.827 91.9257 137.827C108.593 137.827 119.69 130.242 125.556 115.693C129.445 125.418 136.331 132.224 146.212 135.965L154.193 120.276C147.347 117.801 143.132 113.536 141.537 108.221C139.455 101.333 139.455 92.4562 141.537 88.9883ZM97.4576 121.866C86.8339 121.866 80.8128 117.498 80.8128 108.159C80.8128 98.8205 86.8339 94.4524 97.4576 94.4524C103.42 94.4524 109.022 95.4805 113.783 97.4524C113.783 116.632 106.668 121.866 97.4576 121.866Z"/>
-                </svg>
-                {session ? 'Post to Threads' : '🔒 Login'}
-              </button>
+                  {/* Hashtags */}
+                  {editableContent.post.hashtags?.[selectedOptionIndexes['hashtags'] ?? 0] && (
+                    <div className="detail-section">
+                      <span className="detail-label">Hashtags:</span>
+                      <div className="detail-hashtags">
+                        {stripHtml(editableContent.post.hashtags[selectedOptionIndexes['hashtags'] ?? 0])}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Affiliate Link Input */}
+                  <div className="detail-section">
+                    <span className="detail-label">Affiliate Link (optional):</span>
+                    <input
+                      type="url"
+                      value={affiliateLink}
+                      onChange={(e) => setAffiliateLink(e.target.value)}
+                      placeholder="https://example.com/product?ref=..."
+                      className="affiliate-link-input"
+                    />
+                    <small className="input-hint">Will be posted as a comment</small>
+                  </div>
+                </div>
+              </details>
+
+              {/* Action Buttons */}
+              <div className="scheduled-post-actions">
+                <button
+                  className="action-btn btn-post-now"
+                  onClick={() => {
+                    setPendingPlatform('Threads');
+                    setShowPostConfirmation(true);
+                  }}
+                  disabled={!session}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 192 192">
+                    <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6866C105.707 61.7589 111.932 64.1498 116.137 68.848C118.675 71.6555 120.342 75.0943 121.142 79.1583C115.316 76.9103 108.644 75.7828 101.337 75.7828C74.0963 75.7828 58.7056 88.9788 58.7056 108.159C58.7056 117.207 62.1986 125.202 68.5695 130.45C74.5103 135.331 82.5887 137.827 91.9257 137.827C108.593 137.827 119.69 130.242 125.556 115.693C129.445 125.418 136.331 132.224 146.212 135.965L154.193 120.276C147.347 117.801 143.132 113.536 141.537 108.221C139.455 101.333 139.455 92.4562 141.537 88.9883ZM97.4576 121.866C86.8339 121.866 80.8128 117.498 80.8128 108.159C80.8128 98.8205 86.8339 94.4524 97.4576 94.4524C103.42 94.4524 109.022 95.4805 113.783 97.4524C113.783 116.632 106.668 121.866 97.4576 121.866Z"/>
+                  </svg>
+                  Post Now
+                </button>
+                <button
+                  className="action-btn btn-cancel"
+                  onClick={async () => {
+                    setSaveButtonState('loading');
+                    try {
+                      await handleSaveToList();
+                      setSaveButtonState('success');
+                      setTimeout(() => setSaveButtonState('idle'), 2000);
+                    } catch {
+                      setSaveButtonState('error');
+                      setTimeout(() => setSaveButtonState('idle'), 2000);
+                    }
+                  }}
+                  disabled={saveButtonState === 'loading'}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                  </svg>
+                  {saveButtonState === 'loading' && 'Saving...'}
+                  {saveButtonState === 'success' && 'Saved!'}
+                  {saveButtonState === 'error' && 'Failed'}
+                  {saveButtonState === 'idle' && 'Cancel'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
