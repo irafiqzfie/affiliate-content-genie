@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
 import { SavedItemsList } from '@/app/components/SavedContent';
 import { ScheduledPostsList, PostHistory } from '@/app/components/Scheduler';
+import PostConfirmationModal, { PostOptions } from './components/PostConfirmationModal';
 // import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
@@ -231,6 +232,8 @@ export default function Home() {
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
   const [postedPosts, setPostedPosts] = useState<ScheduledPost[]>([]);
   const [schedulingPlatform, setSchedulingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
+  const [showPostConfirmation, setShowPostConfirmation] = useState(false);
+  const [pendingPlatform, setPendingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [affiliateLink, setAffiliateLink] = useState('');
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
@@ -1284,7 +1287,15 @@ export default function Home() {
   };
 
   const handleSchedulePost = async (platform: 'Facebook' | 'Threads') => {
-    setSchedulingPlatform(platform);
+    setPendingPlatform(platform);
+    setShowPostConfirmation(true);
+  };
+
+  const handleConfirmPost = async (options: PostOptions) => {
+    if (!pendingPlatform) return;
+    
+    setShowPostConfirmation(false);
+    setSchedulingPlatform(pendingPlatform);
 
     const postContent = editableContent.post;
     
@@ -1297,57 +1308,81 @@ export default function Home() {
       }
     }
     
-    // Use hook (short version) for caption, fallback to body-long if hook not available
+    // Determine caption based on user selection
+    let captionText = '';
     const selectedBodyHookIndex = selectedOptionIndexes['body-hook'] ?? 0;
     const selectedBodyLongIndex = selectedOptionIndexes['body-long'] ?? 0;
-    const captionText = postContent?.['body-hook']?.[selectedBodyHookIndex] || postContent?.['body-long']?.[selectedBodyLongIndex];
+    
+    if (options.useHook && postContent?.['body-hook']?.[selectedBodyHookIndex]) {
+      captionText = postContent['body-hook'][selectedBodyHookIndex];
+    } else if (options.useLongForm && postContent?.['body-long']?.[selectedBodyLongIndex]) {
+      captionText = postContent['body-long'][selectedBodyLongIndex];
+    }
 
-    if (!imageUrl || !captionText) {
-        alert("A generated image and caption are required to schedule a post.");
+    if (!captionText) {
+        alert("No caption text available. Please generate content first.");
+        setSchedulingPlatform(null);
         return;
+    }
+
+    // Check if image is required and available
+    if (options.includeImage && !options.textOnly) {
+      if (!imageUrl) {
+        alert("Image was selected but no generated image is available.");
+        setSchedulingPlatform(null);
+        return;
+      }
     }
 
     setIsLoading(true);
     setError(null);
 
     try {
-        // Check if image URL is a data URL (base64) - upload to Vercel Blob
-        const isDataUrl = imageUrl.startsWith('data:');
+        let finalImageUrl = imageUrl;
         
-        if (isDataUrl) {
-            console.log('📤 Uploading base64 image to Vercel Blob before scheduling...');
-            
-            const uploadResponse = await fetch(`${API_URL}/upload-image`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ imageData: imageUrl })
-            });
+        // Only process image if user wants to include it
+        if (options.includeImage && !options.textOnly && imageUrl) {
+          // Check if image URL is a data URL (base64) - upload to Vercel Blob
+          const isDataUrl = imageUrl.startsWith('data:');
+          
+          if (isDataUrl) {
+              console.log('📤 Uploading base64 image to Vercel Blob before scheduling...');
+              
+              const uploadResponse = await fetch(`${API_URL}/upload-image`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ imageData: imageUrl })
+              });
 
-            const uploadData = await uploadResponse.json();
+              const uploadData = await uploadResponse.json();
 
-            if (!uploadResponse.ok) {
-                throw new Error(uploadData.error || uploadData.details || 'Failed to upload image');
-            }
+              if (!uploadResponse.ok) {
+                  throw new Error(uploadData.error || uploadData.details || 'Failed to upload image');
+              }
 
-            imageUrl = uploadData.url;
-            console.log('✅ Image uploaded to:', imageUrl);
+              finalImageUrl = uploadData.url;
+              console.log('✅ Image uploaded to:', finalImageUrl);
+          } else {
+              // Validate it's a proper HTTP/HTTPS URL
+              const url = new URL(imageUrl);
+              if (!url.protocol.startsWith('http')) {
+                  throw new Error('Image URL is invalid. Please generate a new image.');
+              }
+          }
         } else {
-            // Validate it's a proper HTTP/HTTPS URL
-            const url = new URL(imageUrl);
-            if (!url.protocol.startsWith('http')) {
-                throw new Error('Image URL is invalid. Please generate a new image.');
-            }
+          // Text only - use placeholder image
+          finalImageUrl = 'https://via.placeholder.com/800x800/1a1c30/ffffff?text=Text+Only+Post';
         }
 
         // Auto-schedule for immediate posting
         const scheduledDateTime = new Date().toISOString();
 
         const newPostPayload = {
-            platform: platform,
+            platform: pendingPlatform,
             scheduledTime: scheduledDateTime,
-            imageUrl: imageUrl,
+            imageUrl: finalImageUrl || '',
             caption: stripHtml(captionText),
             affiliateLink: affiliateLink || undefined,
             status: 'Scheduled' as const,
@@ -1369,7 +1404,8 @@ export default function Home() {
         setScheduledPosts(updatedPosts);
         
         setSchedulingPlatform(null);
-        alert(`Post saved for ${platform}!`);
+        setPendingPlatform(null);
+        alert(`Post saved for ${pendingPlatform}!`);
     } catch (err) {
         console.error(err);
         const errorMsg = err instanceof Error ? err.message : 'Could not schedule the post. Please try again.';
@@ -2649,6 +2685,22 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      
+      {/* Post Confirmation Modal */}
+      {pendingPlatform && (
+        <PostConfirmationModal
+          isOpen={showPostConfirmation}
+          platform={pendingPlatform}
+          onClose={() => {
+            setShowPostConfirmation(false);
+            setPendingPlatform(null);
+          }}
+          onConfirm={handleConfirmPost}
+          hasImage={!!Object.keys(generatedImages).find(key => key.startsWith('post-') && generatedImages[key])}
+          hasLongForm={!!(editableContent.post?.['body-long'] && editableContent.post['body-long'].length > 0)}
+          hasHook={!!(editableContent.post?.['body-hook'] && editableContent.post['body-hook'].length > 0)}
+        />
+      )}
     </div>
   );
 };
