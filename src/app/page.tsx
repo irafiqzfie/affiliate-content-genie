@@ -231,8 +231,6 @@ export default function Home() {
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
   const [schedulingPlatform, setSchedulingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
-  const [scheduleDate, setScheduleDate] = useState('');
-  const [scheduleTime, setScheduleTime] = useState('');
   const [affiliateLink, setAffiliateLink] = useState('');
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
@@ -1281,8 +1279,8 @@ export default function Home() {
   };
 
   const handleSchedulePost = async () => {
-    if (!schedulingPlatform || !scheduleDate || !scheduleTime) {
-        alert("Please select a date and time.");
+    if (!schedulingPlatform) {
+        alert("Please select a platform.");
         return;
     }
 
@@ -1333,7 +1331,8 @@ export default function Home() {
             }
         }
 
-        const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`).toISOString();
+        // Auto-schedule for immediate posting
+        const scheduledDateTime = new Date().toISOString();
 
         const newPostPayload = {
             platform: schedulingPlatform,
@@ -1575,11 +1574,6 @@ export default function Home() {
     const finalCaption = captionText ? stripHtml(captionText) : "Generate content to create a post.";
 
     const handlePlatformSelect = (platform: 'Facebook' | 'Threads') => {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(9, 0, 0, 0);
-        setScheduleDate(tomorrow.toISOString().split('T')[0]); // YYYY-MM-DD
-        setScheduleTime('09:00');
         setAffiliateLink('');
         setSchedulingPlatform(platform);
     };
@@ -1604,16 +1598,7 @@ export default function Home() {
 
                     {schedulingPlatform && (
                         <div className="modal-scheduling-view">
-                            <h4>Set Date & Time</h4>
-                             <div className="schedule-form">
-                                <div className="schedule-input-group">
-                                    <label htmlFor="schedule-date">Date</label>
-                                    <input id="schedule-date" className="schedule-input" type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} />
-                                </div>
-                                <div className="schedule-input-group">
-                                    <label htmlFor="schedule-time">Time</label>
-                                    <input id="schedule-time" className="schedule-input" type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} />
-                                </div>
+                            <div className="schedule-form">
                                 <div className="schedule-input-group">
                                     <label htmlFor="affiliate-link">Affiliate Link (Optional)</label>
                                     <input 
