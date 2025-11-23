@@ -1289,8 +1289,10 @@ export default function Home() {
       }
     }
     
-    const selectedBodyIndex = selectedOptionIndexes['body'] ?? 0;
-    const captionText = postContent?.body?.[selectedBodyIndex];
+    // Use hook (short version) for caption, fallback to body-long if hook not available
+    const selectedBodyHookIndex = selectedOptionIndexes['body-hook'] ?? 0;
+    const selectedBodyLongIndex = selectedOptionIndexes['body-long'] ?? 0;
+    const captionText = postContent?.['body-hook']?.[selectedBodyHookIndex] || postContent?.['body-long']?.[selectedBodyLongIndex];
 
     if (!imageUrl || !captionText) {
         alert("A generated image and caption are required to schedule a post.");
