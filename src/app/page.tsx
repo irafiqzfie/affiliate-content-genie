@@ -1332,10 +1332,14 @@ export default function Home() {
   };
 
   const handleConfirmPost = async (options: PostOptions) => {
-    if (!pendingPlatform) return;
+    const platforms = options.selectedPlatforms;
+    
+    if (!platforms || platforms.length === 0) {
+      alert('Please select at least one platform');
+      return;
+    }
     
     setShowPostConfirmation(false);
-    setSchedulingPlatform(pendingPlatform);
 
     const postContent = editableContent.post;
     
@@ -1361,7 +1365,6 @@ export default function Home() {
 
     if (!captionText) {
         alert("No caption text available. Please generate content first.");
-        setSchedulingPlatform(null);
         return;
     }
 
@@ -1369,7 +1372,6 @@ export default function Home() {
     if (options.includeImage && !options.textOnly) {
       if (!imageUrl) {
         alert("Image was selected but no generated image is available.");
-        setSchedulingPlatform(null);
         return;
       }
     }
@@ -1416,35 +1418,44 @@ export default function Home() {
         // Auto-schedule for immediate posting
         const scheduledDateTime = new Date().toISOString();
 
-        const newPostPayload = {
-            platform: pendingPlatform,
-            scheduledTime: scheduledDateTime,
-            imageUrl: (options.includeImage && !options.textOnly && finalImageUrl) ? finalImageUrl : null,
-            caption: stripHtml(captionText),
-            affiliateLink: affiliateLink || undefined,
-            status: 'Posted' as const, // Mark as Posted immediately
-        };
+        // Post to each selected platform
+        const postPromises = platforms.map(async (platform) => {
+          setSchedulingPlatform(platform);
+          
+          const newPostPayload = {
+              platform: platform,
+              scheduledTime: scheduledDateTime,
+              imageUrl: (options.includeImage && !options.textOnly && finalImageUrl) ? finalImageUrl : null,
+              caption: stripHtml(captionText),
+              affiliateLink: affiliateLink || undefined,
+              status: 'Posted' as const, // Mark as Posted immediately
+          };
 
-        const response = await fetch(`${API_URL}/scheduled-posts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newPostPayload)
+          const response = await fetch(`${API_URL}/scheduled-posts`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newPostPayload)
+          });
+          
+          if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(`Failed to post to ${platform}: ${errorData.details || errorData.message}`);
+          }
+
+          return response.json();
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.details || errorData.message || 'Failed to schedule post.');
-        }
 
-        const scheduledPost = await response.json();
+        const scheduledPostsResults = await Promise.all(postPromises);
         
-        // Add to posted posts (since status is 'Posted')
-        const updatedPostedPosts = [scheduledPost, ...postedPosts];
+        // Add all posts to posted posts
+        const updatedPostedPosts = [...scheduledPostsResults, ...postedPosts];
         setPostedPosts(updatedPostedPosts);
         
         setSchedulingPlatform(null);
         setPendingPlatform(null);
-        alert(`Post published to ${pendingPlatform}!`);
+        
+        const platformNames = platforms.join(' and ');
+        alert(`Post published to ${platformNames}!`);
     } catch (err) {
         console.error(err);
         const errorMsg = err instanceof Error ? err.message : 'Could not schedule the post. Please try again.';
@@ -2643,43 +2654,9 @@ export default function Home() {
 
             {/* Post Content */}
             <div className="scheduled-post-content">
-              {/* Platform Selection */}
+              {/* Platform Badge & Timestamp */}
               <div className="scheduled-post-header">
-                <div className="platform-selection">
-                  <span className="platform-label">Post to:</span>
-                  <label className="platform-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedPlatforms.has('Threads')}
-                      onChange={(e) => {
-                        const newPlatforms = new Set(selectedPlatforms);
-                        if (e.target.checked) {
-                          newPlatforms.add('Threads');
-                        } else {
-                          newPlatforms.delete('Threads');
-                        }
-                        setSelectedPlatforms(newPlatforms);
-                      }}
-                    />
-                    <span className="platform-name">Threads</span>
-                  </label>
-                  <label className="platform-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedPlatforms.has('Facebook')}
-                      onChange={(e) => {
-                        const newPlatforms = new Set(selectedPlatforms);
-                        if (e.target.checked) {
-                          newPlatforms.add('Facebook');
-                        } else {
-                          newPlatforms.delete('Facebook');
-                        }
-                        setSelectedPlatforms(newPlatforms);
-                      }}
-                    />
-                    <span className="platform-name">Facebook</span>
-                  </label>
-                </div>
+                <span className="platform-badge">Threads</span>
                 <span className="post-timestamp">{new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span>
               </div>
 
@@ -2753,39 +2730,15 @@ export default function Home() {
               <div className="scheduled-post-actions">
                 <button
                   className="action-btn btn-post-now"
-                  onClick={async () => {
-                    if (selectedPlatforms.size === 0) {
-                      alert('Please select at least one platform');
-                      return;
-                    }
-                    
-                    // Post to each selected platform
-                    for (const platform of Array.from(selectedPlatforms)) {
-                      setPendingPlatform(platform);
-                      setShowPostConfirmation(true);
-                      // Wait a bit between posts if multiple platforms
-                      if (selectedPlatforms.size > 1) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                      }
-                    }
+                  onClick={() => {
+                    setShowPostConfirmation(true);
                   }}
-                  disabled={!session || selectedPlatforms.size === 0}
+                  disabled={!session}
                 >
-                  {selectedPlatforms.size === 0 ? (
-                    '⚠️ Select Platform'
-                  ) : selectedPlatforms.size === 1 ? (
-                    <>
-                      {selectedPlatforms.has('Threads') && (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 192 192">
-                          <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6866C105.707 61.7589 111.932 64.1498 116.137 68.848C118.675 71.6555 120.342 75.0943 121.142 79.1583C115.316 76.9103 108.644 75.7828 101.337 75.7828C74.0963 75.7828 58.7056 88.9788 58.7056 108.159C58.7056 117.207 62.1986 125.202 68.5695 130.45C74.5103 135.331 82.5887 137.827 91.9257 137.827C108.593 137.827 119.69 130.242 125.556 115.693C129.445 125.418 136.331 132.224 146.212 135.965L154.193 120.276C147.347 117.801 143.132 113.536 141.537 108.221C139.455 101.333 139.455 92.4562 141.537 88.9883ZM97.4576 121.866C86.8339 121.866 80.8128 117.498 80.8128 108.159C80.8128 98.8205 86.8339 94.4524 97.4576 94.4524C103.42 94.4524 109.022 95.4805 113.783 97.4524C113.783 116.632 106.668 121.866 97.4576 121.866Z"/>
-                        </svg>
-                      )}
-                      {selectedPlatforms.has('Facebook') && '📘'}
-                      Post to {Array.from(selectedPlatforms)[0]}
-                    </>
-                  ) : (
-                    `📤 Post to ${selectedPlatforms.size} Platforms`
-                  )}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 192 192">
+                    <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6866C105.707 61.7589 111.932 64.1498 116.137 68.848C118.675 71.6555 120.342 75.0943 121.142 79.1583C115.316 76.9103 108.644 75.7828 101.337 75.7828C74.0963 75.7828 58.7056 88.9788 58.7056 108.159C58.7056 117.207 62.1986 125.202 68.5695 130.45C74.5103 135.331 82.5887 137.827 91.9257 137.827C108.593 137.827 119.69 130.242 125.556 115.693C129.445 125.418 136.331 132.224 146.212 135.965L154.193 120.276C147.347 117.801 143.132 113.536 141.537 108.221C139.455 101.333 139.455 92.4562 141.537 88.9883ZM97.4576 121.866C86.8339 121.866 80.8128 117.498 80.8128 108.159C80.8128 98.8205 86.8339 94.4524 97.4576 94.4524C103.42 94.4524 109.022 95.4805 113.783 97.4524C113.783 116.632 106.668 121.866 97.4576 121.866Z"/>
+                  </svg>
+                  Post Now
                 </button>
                 <button
                   className="action-btn btn-cancel"
@@ -2918,20 +2871,17 @@ export default function Home() {
       </footer>
       
       {/* Post Confirmation Modal */}
-      {pendingPlatform && (
-        <PostConfirmationModal
-          isOpen={showPostConfirmation}
-          platform={pendingPlatform}
-          onClose={() => {
-            setShowPostConfirmation(false);
-            setPendingPlatform(null);
-          }}
-          onConfirm={handleConfirmPost}
-          hasImage={!!Object.keys(generatedImages).find(key => key.startsWith('post-') && generatedImages[key])}
-          hasLongForm={!!(editableContent.post?.['body-long'] && editableContent.post['body-long'].length > 0)}
-          hasHook={!!(editableContent.post?.['body-hook'] && editableContent.post['body-hook'].length > 0)}
-        />
-      )}
+      <PostConfirmationModal
+        isOpen={showPostConfirmation}
+        platform={'Threads'}
+        onClose={() => {
+          setShowPostConfirmation(false);
+        }}
+        onConfirm={handleConfirmPost}
+        hasImage={!!Object.keys(generatedImages).find(key => key.startsWith('post-') && generatedImages[key])}
+        hasLongForm={!!(editableContent.post?.['body-long'] && editableContent.post['body-long'].length > 0)}
+        hasHook={!!(editableContent.post?.['body-hook'] && editableContent.post['body-hook'].length > 0)}
+      />
     </div>
   );
 };
