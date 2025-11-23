@@ -1269,6 +1269,7 @@ export default function Home() {
   };
 
   const handleSaveEdit = (sectionKey: string, index: number) => {
+    if (activeOutputTab === 'info') return; // Info tab has no editable content
     if (!editableContent[activeOutputTab]) return;
     const newEditableContent = JSON.parse(JSON.stringify(editableContent));
     newEditableContent[activeOutputTab]![sectionKey as keyof ParsedContent]![index] = editText;
@@ -1623,6 +1624,9 @@ export default function Home() {
     const renderBodyCard = (section: {key: string; title: string; icon: string;}) => {
         const { key, title, icon } = section;
         
+        // Info tab has no body content
+        if (activeOutputTab === 'info') return null;
+        
         // Get content for both body-long and body-hook separately
         const longFormContent = editableContent[activeOutputTab]?.['body-long'];
         const hookContent = editableContent[activeOutputTab]?.['body-hook'];
@@ -1839,6 +1843,10 @@ export default function Home() {
         const { key, title, icon } = section;
         const richTextFields = new Set(['body', 'caption']);
         const isRichText = richTextFields.has(key);
+        
+        // Info tab has no prompt cards
+        if (activeOutputTab === 'info') return null;
+        
         const content = editableContent[activeOutputTab]?.[key as keyof ParsedContent];
         const selectedIndex = selectedOptionIndexes[key] ?? 0;
         const selectedOption = content?.[selectedIndex];
