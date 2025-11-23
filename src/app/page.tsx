@@ -2565,8 +2565,8 @@ export default function Home() {
                 )}
         </div>
         
-        {/* Post History - only show in Post tab */}
-        {activeOutputTab === 'post' && postedPosts.length > 0 && (
+        {/* Post History - always show in Post tab */}
+        {activeOutputTab === 'post' && (
           <PostHistory posts={postedPosts} />
         )}
         </>
