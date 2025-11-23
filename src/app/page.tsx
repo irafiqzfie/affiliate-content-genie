@@ -1321,7 +1321,7 @@ export default function Home() {
         const scheduledDateTime = new Date().toISOString();
 
         const newPostPayload = {
-            platform: schedulingPlatform,
+            platform: platform,
             scheduledTime: scheduledDateTime,
             imageUrl: imageUrl,
             caption: stripHtml(captionText),
