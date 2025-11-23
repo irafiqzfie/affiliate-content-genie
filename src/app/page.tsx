@@ -1592,6 +1592,11 @@ export default function Home() {
         const isEditingLongForm = editingKey === longFormKey;
         const isEditingHook = editingKey === hookKey;
         
+        // Image generation state
+        const imageKey = `post-image-generation`;
+        const isLoadingImage = imageLoadingStates[imageKey];
+        const generatedImage = generatedImages[imageKey];
+
         const renderSubsection = (subsectionTitle: string, subsectionKey: string, isEditing: boolean, subsectionContent: string[] | undefined, selectedOption: string | undefined) => {
             return (
                 <div className="body-subsection">
@@ -1679,9 +1684,46 @@ export default function Home() {
                         )}
                     </div>
                 </div>
-                <div className="body-card-content">
-                    {renderSubsection("📝 Long-Form Content", longFormKey, isEditingLongForm, longFormContent, selectedLongForm)}
-                    {renderSubsection("🎯 Hook / Short Version", hookKey, isEditingHook, hookContent, selectedHook)}
+                <div className="body-card-with-image">
+                    {/* Product Image on the left */}
+                    <div className="body-image-section">
+                        {isLoadingImage && (
+                            <div className="image-loading-indicator">
+                                <div className="spinner image-spinner"></div>
+                                <span>Generating...</span>
+                            </div>
+                        )}
+                        {generatedImage && (
+                            <div className="image-result-container">
+                                <Image
+                                    src={generatedImage}
+                                    alt="Generated product image"
+                                    className="generated-image"
+                                    width={300}
+                                    height={300}
+                                    unoptimized
+                                />
+                                <div className="image-overlay-actions">
+                                    <a href={generatedImage} target="_blank" rel="noreferrer" className="image-action-link">Open</a>
+                                    <a href={generatedImage} download="product.jpg" className="image-action-link">Download</a>
+                                </div>
+                            </div>
+                        )}
+                        {!generatedImage && !isLoadingImage && (
+                            <div className="image-placeholder">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                    <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                </svg>
+                                <p>Product Image</p>
+                            </div>
+                        )}
+                    </div>
+                    {/* Text content on the right */}
+                    <div className="body-card-content">
+                        {renderSubsection("📝 Long-Form Content", longFormKey, isEditingLongForm, longFormContent, selectedLongForm)}
+                        {renderSubsection("🎯 Hook / Short Version", hookKey, isEditingHook, hookContent, selectedHook)}
+                    </div>
                 </div>
             </div>
         );
@@ -2452,11 +2494,8 @@ export default function Home() {
         <div className="output-container">
             {activeOutputTab === 'post' ? (
                   <>
-                    {/* Row 1: Body + Image Generation */}
-                    <div className="standard-section-row">
-                      {renderPromptCard(sectionsConfig.find(s => s.key === 'body')!)}
-                      {renderImageGenerationCard()}
-                    </div>
+                    {/* Post Body with embedded image */}
+                    {renderPromptCard(sectionsConfig.find(s => s.key === 'body')!)}
                     {/* Row 2: Hook + Hashtags + CTA */}
                     <div className="three-column-row">
                       {renderPromptCard(sectionsConfig.find(s => s.key === 'hook')!)}

@@ -2133,6 +2133,84 @@ body {
 }
 
 /* Body Card Subsections */
+.body-card-with-image {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    flex-grow: 1;
+    min-height: 300px;
+}
+
+.body-image-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    border-right: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.body-image-section .image-result-container {
+    position: relative;
+    width: 100%;
+    max-width: 240px;
+}
+
+.body-image-section .generated-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+}
+
+.body-image-section .image-overlay-actions {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.body-image-section .image-result-container:hover .image-overlay-actions {
+    opacity: 1;
+}
+
+.body-image-section .image-action-link {
+    flex: 1;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+}
+
+.body-image-section .image-action-link:hover {
+    background: rgba(255, 123, 0, 0.9);
+}
+
+.body-image-section .image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--secondary-text-color);
+    opacity: 0.3;
+}
+
+.body-image-section .image-loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .body-card-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2199,6 +2277,13 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.subsection-content::-webkit-scrollbar {
+    display: none;
 }
 
 .accordion-header {
@@ -2367,6 +2452,13 @@ body {
     flex-grow: 1;
     min-height: 0;
     overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.option-display-area::-webkit-scrollbar,
+.edit-area::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 .option-display-area p, .prose {
