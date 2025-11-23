@@ -2507,10 +2507,11 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    {/* Video tab: full width single column */}
-                    {sectionsConfig.map((section) => (
-                        <div key={section.key}>
-                            {renderPromptCard(section)}
+                    {/* Video tab: 2-column layout */}
+                    {chunkedNonVisualizableSections.map((pair, index) => (
+                        <div key={index} className="standard-section-row">
+                            {renderPromptCard(pair[0])}
+                            {pair[1] ? renderPromptCard(pair[1]) : <div />}
                         </div>
                     ))}
                   </>
