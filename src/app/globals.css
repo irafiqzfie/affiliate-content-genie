@@ -2213,7 +2213,7 @@ body {
 
 .body-card-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     gap: 0;
     flex-grow: 1;
     min-height: 300px;
