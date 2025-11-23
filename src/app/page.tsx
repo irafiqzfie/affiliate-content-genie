@@ -2503,7 +2503,7 @@ export default function Home() {
               <>
                 <button 
                   onClick={() => handleSchedulePost('Facebook')} 
-                  className="output-action-btn primary"
+                  className="output-action-btn facebook-btn"
                   disabled={isLoading}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
@@ -2513,7 +2513,7 @@ export default function Home() {
                 </button>
                 <button 
                   onClick={() => handleSchedulePost('Threads')} 
-                  className="output-action-btn primary"
+                  className="output-action-btn threads-btn"
                   disabled={isLoading}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 192 192">
