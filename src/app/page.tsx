@@ -2630,34 +2630,46 @@ export default function Home() {
               </div>
             )}
 
-            {/* Post Text Preview */}
+            {/* Post Text Preview - Only main content */}
             <div className="minimal-preview-text">
               {(() => {
                 const hook = editableContent.post.hook?.[selectedOptionIndexes['hook'] ?? 0];
                 const body = editableContent.post.body?.[selectedOptionIndexes['body'] ?? 0];
                 const cta = editableContent.post.cta?.[selectedOptionIndexes['cta'] ?? 0];
-                const hashtags = editableContent.post.hashtags?.[selectedOptionIndexes['hashtags'] ?? 0];
                 
                 const parts = [];
                 if (hook) parts.push(stripHtml(hook));
                 if (body) parts.push(stripHtml(body));
                 if (cta) parts.push(stripHtml(cta));
-                if (hashtags) parts.push(stripHtml(hashtags));
                 
                 return parts.join('\n\n');
               })()}
             </div>
 
-            {/* Affiliate Link */}
-            <div className="minimal-affiliate">
-              <input
-                type="url"
-                value={affiliateLink}
-                onChange={(e) => setAffiliateLink(e.target.value)}
-                placeholder="🔗 Affiliate link (optional - posted as comment)"
-                className="minimal-affiliate-input"
-              />
-            </div>
+            {/* Hashtags - Collapsed by default */}
+            <details className="minimal-details">
+              <summary className="minimal-summary">Hashtags</summary>
+              <div className="minimal-hashtags">
+                {editableContent.post.hashtags?.[selectedOptionIndexes['hashtags'] ?? 0] && 
+                  stripHtml(editableContent.post.hashtags[selectedOptionIndexes['hashtags'] ?? 0])
+                }
+              </div>
+            </details>
+
+            {/* Affiliate Link - Subtle */}
+            <details className="minimal-details">
+              <summary className="minimal-summary">Add affiliate link (optional)</summary>
+              <div className="minimal-affiliate-expanded">
+                <input
+                  type="url"
+                  value={affiliateLink}
+                  onChange={(e) => setAffiliateLink(e.target.value)}
+                  placeholder="https://example.com/product?ref=..."
+                  className="minimal-affiliate-input"
+                />
+                <small className="minimal-hint">Will be posted as a comment</small>
+              </div>
+            </details>
 
             {/* Actions */}
             <div className="minimal-preview-actions">
