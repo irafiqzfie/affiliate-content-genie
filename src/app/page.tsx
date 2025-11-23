@@ -2510,53 +2510,74 @@ export default function Home() {
         <>
         <div className="output-container">
             {activeOutputTab === 'info' ? (
-              <div className="info-tab-content">
+              <>
                 {(trendscore !== null || productSummary || affiliatePotential || productFeatures) ? (
-                  <div className="analysis-inline-section">
-                    <div className="analysis-inline-header">
-                      <span>📊</span>
-                      <h3>AI Analysis</h3>
-                    </div>
-                    
-                    <div className="analysis-inline-content">
-                      {trendscore !== null && (
-                        <div className="analysis-inline-item">
-                          <h4>Trend Score</h4>
+                  <>
+                    {trendscore !== null && (
+                      <div className="output-card">
+                        <div className="card-header">
+                          <h3 className="card-title">
+                            <span className="card-icon">📈</span>
+                            Trend Score
+                          </h3>
+                        </div>
+                        <div className="card-content">
                           <div className="trend-score-display">
                             <div className="trend-score-fill" style={{ width: `${trendscore}%` }}></div>
                             <span className="trend-score-label">{trendscore}/100</span>
                           </div>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {affiliatePotential && (
-                        <div className="analysis-inline-item">
-                          <h4>Affiliate Potential</h4>
+                    {affiliatePotential && (
+                      <div className="output-card">
+                        <div className="card-header">
+                          <h3 className="card-title">
+                            <span className="card-icon">💰</span>
+                            Affiliate Potential
+                          </h3>
+                        </div>
+                        <div className="card-content">
                           <span className={`potential-badge potential-${affiliatePotential.toLowerCase()}`}>
                             {affiliatePotential}
                           </span>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {productSummary && (
-                        <div className="analysis-inline-item">
-                          <h4>Product Summary</h4>
+                    {productSummary && (
+                      <div className="output-card">
+                        <div className="card-header">
+                          <h3 className="card-title">
+                            <span className="card-icon">📝</span>
+                            Product Summary
+                          </h3>
+                        </div>
+                        <div className="card-content">
                           <div className="analysis-content">{productSummary}</div>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {productFeatures && productFeatures.length > 0 && (
-                        <div className="analysis-inline-item">
-                          <h4>Key Features</h4>
+                    {productFeatures && productFeatures.length > 0 && (
+                      <div className="output-card">
+                        <div className="card-header">
+                          <h3 className="card-title">
+                            <span className="card-icon">✨</span>
+                            Key Features
+                          </h3>
+                        </div>
+                        <div className="card-content">
                           <ul className="features-list">
                             {productFeatures.map((feature, index) => (
                               <li key={index}>{feature}</li>
                             ))}
                           </ul>
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="info-placeholder">
                     <div className="info-placeholder-icon">📊</div>
@@ -2564,7 +2585,7 @@ export default function Home() {
                     <p>Product analysis information will appear here after you analyze a product link.</p>
                   </div>
                 )}
-              </div>
+              </>
             ) : activeOutputTab === 'post' ? (
                   <>
                     {/* Post Body with embedded image */}
