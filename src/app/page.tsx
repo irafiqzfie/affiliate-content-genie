@@ -2564,11 +2564,6 @@ export default function Home() {
                   </>
                 )}
         </div>
-        
-        {/* Post History - always show in Post tab */}
-        {activeOutputTab === 'post' && (
-          <PostHistory posts={postedPosts} />
-        )}
         </>
       )}
     </>
@@ -2584,11 +2579,14 @@ export default function Home() {
   );
   
   const renderSchedulerPage = () => (
-    <ScheduledPostsList 
-      scheduledPosts={scheduledPosts}
-      onDeletePost={handleDeleteScheduledPost}
-      onPostNow={handlePostNow}
-    />
+    <>
+      <ScheduledPostsList 
+        scheduledPosts={scheduledPosts}
+        onDeletePost={handleDeleteScheduledPost}
+        onPostNow={handlePostNow}
+      />
+      <PostHistory posts={postedPosts} />
+    </>
   );
 
   if (isInitialLoading) {
