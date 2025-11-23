@@ -2046,7 +2046,7 @@ body {
 
 .three-column-row {
     display: grid;
-    gap: var(--spacing-section);
+    gap: 0.5rem;
     grid-template-columns: repeat(3, 1fr);
     align-items: stretch;
 }
