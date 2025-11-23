@@ -238,6 +238,7 @@ export default function Home() {
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
   const [isShopeeImportOpen, setIsShopeeImportOpen] = useState(false);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<'Threads' | 'Facebook'>>(new Set(['Threads']));
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
 
@@ -2465,9 +2466,21 @@ export default function Home() {
             </div>
           </div>
           <div className="output-actions-group">
+            {(generatedContent.post && editableContent.post) && (
+              <button 
+                onClick={() => {
+                  setCurrentPage('scheduler');
+                  // Scroll to top after navigation
+                  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+                }}
+                className="output-action-btn primary"
+              >
+                📮 Send to Preview
+              </button>
+            )}
             <button 
               onClick={handleSaveToList} 
-              className={`output-action-btn primary ${saveButtonState}`}
+              className={`output-action-btn ${saveButtonState}`}
               disabled={saveButtonState === 'loading'}
             >
               💾 {saveButtonState === 'idle' && 'Save'}
@@ -2630,9 +2643,43 @@ export default function Home() {
 
             {/* Post Content */}
             <div className="scheduled-post-content">
-              {/* Platform Badge & Timestamp */}
+              {/* Platform Selection */}
               <div className="scheduled-post-header">
-                <span className="platform-badge">Threads</span>
+                <div className="platform-selection">
+                  <span className="platform-label">Post to:</span>
+                  <label className="platform-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedPlatforms.has('Threads')}
+                      onChange={(e) => {
+                        const newPlatforms = new Set(selectedPlatforms);
+                        if (e.target.checked) {
+                          newPlatforms.add('Threads');
+                        } else {
+                          newPlatforms.delete('Threads');
+                        }
+                        setSelectedPlatforms(newPlatforms);
+                      }}
+                    />
+                    <span className="platform-name">Threads</span>
+                  </label>
+                  <label className="platform-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedPlatforms.has('Facebook')}
+                      onChange={(e) => {
+                        const newPlatforms = new Set(selectedPlatforms);
+                        if (e.target.checked) {
+                          newPlatforms.add('Facebook');
+                        } else {
+                          newPlatforms.delete('Facebook');
+                        }
+                        setSelectedPlatforms(newPlatforms);
+                      }}
+                    />
+                    <span className="platform-name">Facebook</span>
+                  </label>
+                </div>
                 <span className="post-timestamp">{new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span>
               </div>
 
@@ -2706,16 +2753,39 @@ export default function Home() {
               <div className="scheduled-post-actions">
                 <button
                   className="action-btn btn-post-now"
-                  onClick={() => {
-                    setPendingPlatform('Threads');
-                    setShowPostConfirmation(true);
+                  onClick={async () => {
+                    if (selectedPlatforms.size === 0) {
+                      alert('Please select at least one platform');
+                      return;
+                    }
+                    
+                    // Post to each selected platform
+                    for (const platform of Array.from(selectedPlatforms)) {
+                      setPendingPlatform(platform);
+                      setShowPostConfirmation(true);
+                      // Wait a bit between posts if multiple platforms
+                      if (selectedPlatforms.size > 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                      }
+                    }
                   }}
-                  disabled={!session}
+                  disabled={!session || selectedPlatforms.size === 0}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 192 192">
-                    <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6866C105.707 61.7589 111.932 64.1498 116.137 68.848C118.675 71.6555 120.342 75.0943 121.142 79.1583C115.316 76.9103 108.644 75.7828 101.337 75.7828C74.0963 75.7828 58.7056 88.9788 58.7056 108.159C58.7056 117.207 62.1986 125.202 68.5695 130.45C74.5103 135.331 82.5887 137.827 91.9257 137.827C108.593 137.827 119.69 130.242 125.556 115.693C129.445 125.418 136.331 132.224 146.212 135.965L154.193 120.276C147.347 117.801 143.132 113.536 141.537 108.221C139.455 101.333 139.455 92.4562 141.537 88.9883ZM97.4576 121.866C86.8339 121.866 80.8128 117.498 80.8128 108.159C80.8128 98.8205 86.8339 94.4524 97.4576 94.4524C103.42 94.4524 109.022 95.4805 113.783 97.4524C113.783 116.632 106.668 121.866 97.4576 121.866Z"/>
-                  </svg>
-                  Post Now
+                  {selectedPlatforms.size === 0 ? (
+                    '⚠️ Select Platform'
+                  ) : selectedPlatforms.size === 1 ? (
+                    <>
+                      {selectedPlatforms.has('Threads') && (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 192 192">
+                          <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6866C105.707 61.7589 111.932 64.1498 116.137 68.848C118.675 71.6555 120.342 75.0943 121.142 79.1583C115.316 76.9103 108.644 75.7828 101.337 75.7828C74.0963 75.7828 58.7056 88.9788 58.7056 108.159C58.7056 117.207 62.1986 125.202 68.5695 130.45C74.5103 135.331 82.5887 137.827 91.9257 137.827C108.593 137.827 119.69 130.242 125.556 115.693C129.445 125.418 136.331 132.224 146.212 135.965L154.193 120.276C147.347 117.801 143.132 113.536 141.537 108.221C139.455 101.333 139.455 92.4562 141.537 88.9883ZM97.4576 121.866C86.8339 121.866 80.8128 117.498 80.8128 108.159C80.8128 98.8205 86.8339 94.4524 97.4576 94.4524C103.42 94.4524 109.022 95.4805 113.783 97.4524C113.783 116.632 106.668 121.866 97.4576 121.866Z"/>
+                        </svg>
+                      )}
+                      {selectedPlatforms.has('Facebook') && '📘'}
+                      Post to {Array.from(selectedPlatforms)[0]}
+                    </>
+                  ) : (
+                    `📤 Post to ${selectedPlatforms.size} Platforms`
+                  )}
                 </button>
                 <button
                   className="action-btn btn-cancel"
