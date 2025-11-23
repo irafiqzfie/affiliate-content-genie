@@ -54,14 +54,19 @@ export async function POST(request: Request) {
     
     const { title, productLink, content } = body;
 
-    if (!title || !productLink || !content) {
+    if (!title || !content) {
       console.log('❌ Missing required fields:', { title: !!title, productLink: !!productLink, content: !!content });
-      return NextResponse.json({ message: 'Missing required fields: title, productLink, and content are required' }, { status: 400 });
+      return NextResponse.json({ message: 'Missing required fields: title and content are required' }, { status: 400 });
     }
 
-    if (typeof title !== 'string' || typeof productLink !== 'string') {
+    if (typeof title !== 'string') {
       console.log('❌ Invalid field types');
-      return NextResponse.json({ message: 'Invalid field types: title and productLink must be strings' }, { status: 400 });
+      return NextResponse.json({ message: 'Invalid field types: title must be a string' }, { status: 400 });
+    }
+
+    if (productLink && typeof productLink !== 'string') {
+      console.log('❌ Invalid productLink type');
+      return NextResponse.json({ message: 'Invalid field types: productLink must be a string or null' }, { status: 400 });
     }
 
     if (typeof content !== 'object' || !content.video || !content.post) {
@@ -79,13 +84,27 @@ export async function POST(request: Request) {
       }, { status: 503 });
     }
     
-    const newItem = await prisma.savedItem.create({ data: {
-      userId: userId,
+    // Build data object conditionally
+    const dataToCreate: {
+      title: string;
+      productLink: string | null;
+      video: string;
+      post: string;
+      userId?: string | null;
+    } = {
       title,
-      productLink,
+      productLink: productLink || null,
       video: content.video || '',
       post: content.post || ''
-    }});
+    };
+    
+    if (userId !== null) {
+      dataToCreate.userId = userId;
+    }
+    
+    const newItem = await prisma.savedItem.create({ 
+      data: dataToCreate
+    });
 
     console.log('✅ Item saved successfully:', newItem.id);
     return NextResponse.json(newItem, { status: 201 });
