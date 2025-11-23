@@ -8,19 +8,20 @@ if (!API_KEY) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { productLink, productTitle, customDescription } = body;
+    const { productLink, productTitle, customDescription, productImages } = body;
 
     // Validate that at least one input is provided
-    if (!productLink && !productTitle && !customDescription) {
+    if (!productLink && !productTitle && !customDescription && (!productImages || productImages.length === 0)) {
       return NextResponse.json({ 
-        message: 'Please provide at least one of: Product Link, Product Title, or Custom Description.' 
+        message: 'Please provide at least one of: Product Link, Product Title, Custom Description, or Product Images.' 
       }, { status: 400 });
     }
 
     console.log('🔍 Analyzing product with:', { 
       hasLink: !!productLink, 
       hasTitle: !!productTitle, 
-      hasDescription: !!customDescription 
+      hasDescription: !!customDescription,
+      hasImages: !!productImages && productImages.length > 0
     });
 
     // Extract product name from URL or use title
@@ -48,6 +49,10 @@ export async function POST(request: Request) {
     if (customDescription) {
       analysisPrompt += `Product Description: ${customDescription}\n`;
     }
+    if (productImages && productImages.length > 0) {
+      analysisPrompt += `Product Images: ${productImages.length} image(s) provided\n`;
+      analysisPrompt += `(Note: Analyze visual content if images are available for enhanced recommendations)\n`;
+    }
 
     analysisPrompt += `\nBased on the provided information, provide a JSON response with the following structure:
 {
@@ -68,12 +73,37 @@ Provide ONLY valid JSON, no additional text.`;
 
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${API_KEY}`;
     
+    // Build the request parts with text and optional images
+    const contentParts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [
+      { text: analysisPrompt }
+    ];
+    
+    // Add images to the request if provided (support for vision analysis)
+    if (productImages && productImages.length > 0) {
+      for (const imageUrl of productImages.slice(0, 3)) { // Limit to first 3 images
+        // If it's a base64 data URL, extract the data
+        if (imageUrl.startsWith('data:image/')) {
+          const matches = imageUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+          if (matches) {
+            contentParts.push({
+              inlineData: {
+                mimeType: `image/${matches[1]}`,
+                data: matches[2]
+              }
+            });
+          }
+        }
+        // For regular URLs, we'd need to fetch and convert them
+        // Skipping for now as it adds complexity
+      }
+    }
+    
     const response = await fetch(GEMINI_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
-          parts: [{ text: analysisPrompt }]
+          parts: contentParts
         }]
       })
     });

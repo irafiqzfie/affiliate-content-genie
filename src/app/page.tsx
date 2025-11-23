@@ -692,13 +692,23 @@ export default function Home() {
     setIsLoading(true);
     
     // Auto-analyze before generating content
+    const analyzePayload: { productLink?: string; productTitle?: string; productImages?: string[] } = {};
+    
     if (productLink) {
+      analyzePayload.productLink = productLink;
+    } else if (productTitle || productImagePreviews.length > 0) {
+      // Use title and/or images if no product link
+      if (productTitle) analyzePayload.productTitle = productTitle;
+      if (productImagePreviews.length > 0) analyzePayload.productImages = productImagePreviews;
+    }
+    
+    if (Object.keys(analyzePayload).length > 0) {
       try {
-        console.log('🔍 Starting auto-analyze for:', productLink);
+        console.log('🔍 Starting auto-analyze with:', analyzePayload);
         const analyzeResponse = await fetch(`${API_URL}/analyze`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productLink }),
+          body: JSON.stringify(analyzePayload),
         });
         
         if (analyzeResponse.ok) {
@@ -716,7 +726,7 @@ export default function Home() {
         // Don't stop generation if analysis fails
       }
     } else {
-      console.log('ℹ️ No product link provided, skipping analysis');
+      console.log('ℹ️ No product data provided for analysis');
     }
     setError(null);
     setGeneratedContent({ video: null, post: null });
