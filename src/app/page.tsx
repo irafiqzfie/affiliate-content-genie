@@ -2112,26 +2112,42 @@ export default function Home() {
                         <p className="input-section-group-description">Describe the product you want content for</p>
                       </div>
 
-                      <div className="form-group">
-                        <label htmlFor="productTitle" className="input-label">Product Title</label>
-                        <input
-                          id="productTitle"
-                          name="productTitle"
-                          type="text"
-                          className="input-field"
-                          value={productTitle}
-                          onChange={(e) => setProductTitle(e.target.value)}
-                          placeholder="Enter product name or title..."
-                          aria-label="Product Title"
-                        />
+                      <div className="form-grid-2col">
+                        <div className="form-group">
+                          <label htmlFor="productTitle" className="input-label">Product Title</label>
+                          <input
+                            id="productTitle"
+                            name="productTitle"
+                            type="text"
+                            className="input-field"
+                            value={productTitle}
+                            onChange={(e) => setProductTitle(e.target.value)}
+                            placeholder="Enter product name or title..."
+                            aria-label="Product Title"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label htmlFor="customDescription" className="input-label">Custom Description <span className="optional-label">(Optional)</span></label>
+                          <textarea
+                            id="customDescription"
+                            name="customDescription"
+                            className="textarea-field compact-textarea"
+                            value={customDescription}
+                            onChange={(e) => setCustomDescription(e.target.value)}
+                            placeholder="Add custom description or let AI auto-generate..."
+                            aria-label="Custom Description"
+                            rows={2}
+                          />
+                        </div>
                       </div>
 
                       <div className="form-group">
                         <label htmlFor="productImage" className="input-label">
                           Product Images <span className="input-label-caption">(up to 5)</span>
                         </label>
-                        <div className="image-upload-container">
-                          <div className="image-preview-grid gallery-grid">
+                        <div className="image-upload-container compact">
+                          <div className="image-preview-grid compact-gallery">
                             {productImagePreviews.map((preview, index) => (
                               <div key={index} className="image-preview-item gallery-tile">
                                 <Image 

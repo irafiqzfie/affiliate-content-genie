@@ -934,11 +934,11 @@ body {
 
 /* Input Section Groups - Visual Separation */
 .input-section-group {
-  padding: 1.5rem;
+  padding: 1rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--border-radius);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .input-section-group:last-child {
@@ -946,13 +946,13 @@ body {
 }
 
 .input-section-group-header {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   padding-bottom: 0.75rem;
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .input-section-group-title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--primary-text-color);
   margin: 0 0 0.25rem 0;
@@ -961,10 +961,63 @@ body {
 }
 
 .input-section-group-description {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--secondary-text-color);
   line-height: 1.4;
   margin: 0;
+}
+
+/* 2-Column Grid Layout */
+.form-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-grid-2col .form-group {
+  margin-bottom: 0;
+}
+
+/* Compact Gallery */
+.compact-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.compact-tile {
+  width: 80px;
+  height: 80px;
+}
+
+.compact-tile .image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.url-input-inline {
+  height: 80px;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--secondary-text-color);
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  text-align: center;
+  width: 100%;
+}
+
+.url-input-inline:focus {
+  outline: none;
+  border-color: var(--gradient-orange);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.compact-textarea {
+  min-height: 60px !important;
+  resize: vertical;
 }
 
 /* Collapsible Section */
@@ -1496,9 +1549,9 @@ body {
 
 .advanced-options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Slightly narrower */
-    gap: 0.5rem 1.5rem; /* Reduced gap */
-    margin-top: 0; /* Remove top margin */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 0;
 }
 
 .form-group.full-width {
