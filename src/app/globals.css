@@ -5199,6 +5199,178 @@ body {
   }
 }
 
+/* Post History Styles */
+.post-history-container {
+  margin-top: 1.5rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.post-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.post-history-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-text-color);
+}
+
+.post-count {
+  font-size: 0.85rem;
+  color: var(--secondary-text-color);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.post-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 500px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.post-history-list::-webkit-scrollbar {
+  display: none;
+}
+
+.post-history-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--secondary-text-color);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-subtitle {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  opacity: 0.7;
+}
+
+.history-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.history-item-image {
+  flex-shrink: 0;
+}
+
+.history-item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.history-platform-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--secondary-text-color);
+  background: rgba(255, 123, 0, 0.1);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.history-platform-badge svg {
+  flex-shrink: 0;
+}
+
+.history-timestamp {
+  font-size: 0.8rem;
+  color: var(--secondary-text-color);
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.history-caption {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--primary-text-color);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.history-link {
+  font-size: 0.85rem;
+  color: var(--gradient-orange);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: opacity 0.2s ease;
+}
+
+.history-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .post-history-container {
+    padding: 1rem;
+  }
+
+  .history-item {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .history-item-image {
+    width: 100%;
+  }
+
+  .history-item-image img {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
 
 
 

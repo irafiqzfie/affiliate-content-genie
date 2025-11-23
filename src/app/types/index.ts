@@ -34,7 +34,7 @@ export interface ScheduledPost {
   imageUrl: string;
   caption: string;
   affiliateLink?: string;
-  status: 'Scheduled';
+  status: 'Scheduled' | 'Posted';
   createdAt?: string;
 }
 

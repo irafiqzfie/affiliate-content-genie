@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
 import { SavedItemsList } from '@/app/components/SavedContent';
-import { ScheduledPostsList } from '@/app/components/Scheduler';
+import { ScheduledPostsList, PostHistory } from '@/app/components/Scheduler';
 // import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
@@ -42,7 +42,7 @@ interface ScheduledPost {
   imageUrl: string;
   caption: string;
   affiliateLink?: string;
-  status: 'Scheduled';
+  status: 'Scheduled' | 'Posted';
 }
 
 
@@ -229,6 +229,7 @@ export default function Home() {
   const [productFeatures, setProductFeatures] = useState<string[] | null>(null);
   const [affiliatePotential, setAffiliatePotential] = useState<string | null>(null);
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
+  const [postedPosts, setPostedPosts] = useState<ScheduledPost[]>([]);
   const [schedulingPlatform, setSchedulingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [affiliateLink, setAffiliateLink] = useState('');
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -351,7 +352,14 @@ export default function Home() {
             const scheduled = await scheduledRes.json();
             
             setSavedList(Array.isArray(saved) ? saved.sort((a, b) => b.id - a.id) : []); 
-            setScheduledPosts(Array.isArray(scheduled) ? scheduled.sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime()) : []);
+            
+            // Separate scheduled and posted posts
+            const allPosts = Array.isArray(scheduled) ? scheduled : [];
+            const scheduledOnly = allPosts.filter(post => post.status === 'Scheduled').sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime());
+            const postedOnly = allPosts.filter(post => post.status === 'Posted').sort((a, b) => new Date(b.createdAt || b.scheduledTime).getTime() - new Date(a.createdAt || a.scheduledTime).getTime());
+            
+            setScheduledPosts(scheduledOnly);
+            setPostedPosts(postedOnly);
         } catch (err) {
             console.error("Failed to load initial data", err);
             setError("Could not connect to the server to load your data. Please try again later.");
@@ -2523,6 +2531,11 @@ export default function Home() {
                   </>
                 )}
         </div>
+        
+        {/* Post History - only show in Post tab */}
+        {activeOutputTab === 'post' && postedPosts.length > 0 && (
+          <PostHistory posts={postedPosts} />
+        )}
         </>
       )}
     </>
