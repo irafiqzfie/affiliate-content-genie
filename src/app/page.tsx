@@ -2511,7 +2511,7 @@ export default function Home() {
         <div className="output-container">
             {activeOutputTab === 'info' ? (
               <div className="info-tab-content">
-                {(trendscore !== null || productSummary || affiliatePotential || productFeatures) && (
+                {(trendscore !== null || productSummary || affiliatePotential || productFeatures) ? (
                   <div className="analysis-inline-section">
                     <div className="analysis-inline-header">
                       <span>📊</span>
@@ -2556,6 +2556,12 @@ export default function Home() {
                         </div>
                       )}
                     </div>
+                  </div>
+                ) : (
+                  <div className="info-placeholder">
+                    <div className="info-placeholder-icon">📊</div>
+                    <h3>No Analysis Data Yet</h3>
+                    <p>Product analysis information will appear here after you analyze a product link.</p>
                   </div>
                 )}
               </div>

@@ -2121,6 +2121,34 @@ body {
   letter-spacing: 0.05em;
 }
 
+/* Info Tab Placeholder */
+.info-placeholder {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 123, 0, 0.03);
+  border: 2px dashed rgba(255, 123, 0, 0.2);
+  border-radius: var(--border-radius);
+  color: var(--secondary-text-color);
+}
+
+.info-placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.info-placeholder h3 {
+  font-size: 1.5rem;
+  color: var(--primary-text-color);
+  margin-bottom: 0.5rem;
+}
+
+.info-placeholder p {
+  font-size: 1rem;
+  color: var(--secondary-text-color);
+  margin: 0;
+}
+
 .standard-section-row {
     display: grid;
     gap: var(--spacing-section);
