@@ -2131,19 +2131,34 @@ body {
 
 /* Body Card Subsections */
 .body-card-content {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0;
 }
 
 .body-subsection {
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid var(--glass-border);
+    border-right: 1px solid var(--glass-border);
 }
 
 .body-subsection:last-child {
-    border-bottom: none;
+    border-right: none;
+}
+
+@media (max-width: 968px) {
+    .body-card-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .body-subsection {
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .body-subsection:last-child {
+        border-bottom: none;
+    }
 }
 
 .subsection-header {

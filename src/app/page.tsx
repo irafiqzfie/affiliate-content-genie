@@ -21,6 +21,8 @@ interface ParsedContent {
   broll?: string[];
   hook?: string[];
   body?: string[];
+  'body-long'?: string[];
+  'body-hook'?: string[];
   cta?: string[];
   imagePrompt?: string[];
 }
@@ -262,6 +264,8 @@ export default function Home() {
         '💡 Video Idea:': 'idea',
         '🎥 B-roll Suggestions:': 'broll',
         '✍️ Hook:': 'hook',
+        '📄 Post Body (Long-Form):': 'body-long',
+        '🎯 Post Body (Hook/Short):': 'body-hook',
         '📄 Post Body:': 'body',
         '🔗 Call to Action:': 'cta',
         '🖼️ Image Prompt:': 'imagePrompt',
@@ -309,6 +313,8 @@ export default function Home() {
         broll: '🎥 B-roll Suggestions:',
         hook: '✍️ Hook:',
         body: '📄 Post Body:',
+        'body-long': '📄 Post Body (Long-Form):',
+        'body-hook': '🎯 Post Body (Hook/Short):',
         cta: '🔗 Call to Action:',
         imagePrompt: '🖼️ Image Prompt:',
     };
@@ -1570,33 +1576,37 @@ export default function Home() {
 
     const renderBodyCard = (section: {key: string; title: string; icon: string;}) => {
         const { key, title, icon } = section;
-        const content = editableContent[activeOutputTab]?.[key as keyof ParsedContent];
-        const selectedIndex = selectedOptionIndexes[key] ?? 0;
-        const selectedOption = content?.[selectedIndex];
         
-        // Split content into long-form and hook
-        // Assume the content is stored as a string with potential sections
-        const longFormKey = `${activeOutputTab}-${key}-long-${selectedIndex}`;
-        const hookKey = `${activeOutputTab}-${key}-hook-${selectedIndex}`;
+        // Get content for both body-long and body-hook separately
+        const longFormContent = editableContent[activeOutputTab]?.['body-long'];
+        const hookContent = editableContent[activeOutputTab]?.['body-hook'];
+        
+        const selectedIndex = selectedOptionIndexes[key] ?? 0;
+        const selectedLongForm = longFormContent?.[selectedIndex];
+        const selectedHook = hookContent?.[selectedIndex];
+        
+        // Define keys for both subsections
+        const longFormKey = `${activeOutputTab}-body-long-${selectedIndex}`;
+        const hookKey = `${activeOutputTab}-body-hook-${selectedIndex}`;
         const isEditingLongForm = editingKey === longFormKey;
         const isEditingHook = editingKey === hookKey;
         
-        const renderSubsection = (subsectionTitle: string, subsectionKey: string, isEditing: boolean) => {
+        const renderSubsection = (subsectionTitle: string, subsectionKey: string, isEditing: boolean, subsectionContent: string[] | undefined, selectedOption: string | undefined) => {
             return (
                 <div className="body-subsection">
                     <div className="subsection-header">
                         <h4>{subsectionTitle}</h4>
                     </div>
                     <div className="subsection-content">
-                        {isLoading && !content && <div className="skeleton-loader"></div>}
-                        {!isLoading && (!content || content.length === 0) && <p className="placeholder-text">Content will appear here once generated.</p>}
+                        {isLoading && !subsectionContent && <div className="skeleton-loader"></div>}
+                        {!isLoading && (!subsectionContent || subsectionContent.length === 0) && <p className="placeholder-text">Content will appear here once generated.</p>}
                         
-                        {content && content.length > 0 && selectedOption !== undefined && (
+                        {subsectionContent && subsectionContent.length > 0 && selectedOption !== undefined && (
                             isEditing ? (
                                 <RichTextEditor
                                     value={editText}
                                     onChange={setEditText}
-                                    onSave={() => handleSaveEdit(key, selectedIndex)}
+                                    onSave={() => handleSaveEdit(subsectionKey.includes('body-long') ? 'body-long' : 'body-hook', selectedIndex)}
                                     onCancel={handleCancelEdit}
                                 />
                             ) : (
@@ -1638,7 +1648,7 @@ export default function Home() {
                 <div className="card-header">
                     <h3>{icon} {title}</h3>
                     <div className="card-header-actions">
-                        {content && content.length > 0 && (
+                        {(longFormContent || hookContent) && (longFormContent?.length || hookContent?.length) && (
                             <>
                                 <button
                                     className="refresh-button"
@@ -1653,7 +1663,7 @@ export default function Home() {
                                     </svg>
                                 </button>
                                 <div className="option-selector">
-                                    {[0, 1].map(index => (
+                                    {[0, 1, 2].map(index => (
                                         <button
                                             key={index}
                                             className={`option-number ${selectedIndex === index ? 'active' : ''}`}
@@ -1669,8 +1679,8 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="body-card-content">
-                    {renderSubsection("📝 Long-Form Content", longFormKey, isEditingLongForm)}
-                    {renderSubsection("🎯 Hook / Short Version", hookKey, isEditingHook)}
+                    {renderSubsection("📝 Long-Form Content", longFormKey, isEditingLongForm, longFormContent, selectedLongForm)}
+                    {renderSubsection("🎯 Hook / Short Version", hookKey, isEditingHook, hookContent, selectedHook)}
                 </div>
             </div>
         );

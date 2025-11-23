@@ -64,10 +64,15 @@ The output MUST be in the following strict Markdown format. Start with the video
 2. [Second Hook Option]
 3. [Third Hook Option]
 
-📄 Post Body:
-1. [First Post Body Option - The main text of the post, highlighting benefits and features]
-2. [Second Post Body Option]
-3. [Third Post Body Option]
+📄 Post Body (Long-Form):
+1. [First Long-Form Post Body Option - A comprehensive, detailed post text (3-5 paragraphs) highlighting benefits, features, and personal experience]
+2. [Second Long-Form Post Body Option]
+3. [Third Long-Form Post Body Option]
+
+🎯 Post Body (Hook/Short):
+1. [First Short Hook Option - A punchy, attention-grabbing 1-2 sentence version perfect for quick engagement]
+2. [Second Short Hook Option]
+3. [Third Short Hook Option]
 
 🔗 Call to Action:
 1. [First CTA Option - A clear instruction telling the user what to do next]
