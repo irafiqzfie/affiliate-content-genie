@@ -84,13 +84,27 @@ export async function POST(request: Request) {
       }, { status: 503 });
     }
     
-    const newItem = await prisma.savedItem.create({ data: {
-      userId: userId,
+    // Build data object conditionally
+    const dataToCreate: {
+      title: string;
+      productLink: string | null;
+      video: string;
+      post: string;
+      userId?: string | null;
+    } = {
       title,
       productLink: productLink || null,
       video: content.video || '',
       post: content.post || ''
-    }});
+    };
+    
+    if (userId !== null) {
+      dataToCreate.userId = userId;
+    }
+    
+    const newItem = await prisma.savedItem.create({ 
+      data: dataToCreate
+    });
 
     console.log('✅ Item saved successfully:', newItem.id);
     return NextResponse.json(newItem, { status: 201 });
