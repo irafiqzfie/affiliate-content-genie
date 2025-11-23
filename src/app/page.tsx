@@ -1679,6 +1679,74 @@ export default function Home() {
         );
     };
 
+    const renderImageGenerationCard = () => {
+        const imageKey = `post-image-generation`;
+        const isLoadingImage = imageLoadingStates[imageKey];
+        const generatedImage = generatedImages[imageKey];
+
+        return (
+            <div className="output-card visual-card">
+                <div className="card-header">
+                    <h3>🖼️ Product Image</h3>
+                </div>
+                <div className="visual-card-body">
+                    <div className="visualization-panel">
+                        {isLoadingImage && (
+                            <div className="image-loading-indicator">
+                                <div className="spinner image-spinner"></div>
+                                <span>Generating Image...</span>
+                            </div>
+                        )}
+                        {generatedImage && (
+                            <div className="image-result-container">
+                                <Image
+                                    src={generatedImage}
+                                    alt="Generated product image"
+                                    className="generated-image"
+                                    width={480}
+                                    height={270}
+                                    unoptimized
+                                />
+                                <div className="image-fallback" style={{ position: 'absolute', bottom: 8, left: 8, right: 48, color: 'var(--secondary-text-color)', fontSize: '0.8rem' }}>
+                                    <a href={generatedImage} target="_blank" rel="noreferrer">Open image in new tab</a>
+                                </div>
+                                <a href={generatedImage} download="product-visualization.jpg" className="download-media-button" aria-label="Download Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        )}
+                        {!isLoadingImage && !generatedImage && (
+                            <div className="visualization-actions">
+                                <button 
+                                    className="visualize-button"
+                                    onClick={() => handleGenerateImage(imageKey, '')}
+                                    disabled={isLoadingImage}
+                                >
+                                    🎨 Generate Product Image
+                                </button>
+                                <p className="visualization-hint">
+                                    Uses your uploaded product image to create a clean studio shot
+                                </p>
+                            </div>
+                        )}
+                        {!generatedImage && !isLoadingImage && (
+                            <div className="visualization-placeholder">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                    <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                </svg>
+                                <p>Click Generate to create your product image</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderPromptCard = (section: {key: string; title: string; icon: string;}, isVisual = false) => {
         if (!section) return <div/>;
         
@@ -2390,9 +2458,10 @@ export default function Home() {
         <div className="output-container">
             {activeOutputTab === 'post' ? (
                   <>
-                    {/* Body section */}
+                    {/* Row 1: Body + Image Generation */}
                     <div className="standard-section-row">
                       {renderPromptCard(sectionsConfig.find(s => s.key === 'body')!)}
+                      {renderImageGenerationCard()}
                     </div>
                     {/* Row 2: Hook + Hashtags + CTA */}
                     <div className="three-column-row">
