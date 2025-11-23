@@ -2617,133 +2617,6 @@ export default function Home() {
                   </>
                 )}
         </div>
-
-        {/* Post Preview Section */}
-        {generatedContent.post && editableContent.post && !error && (
-          <div className="post-preview-section">
-            <div className="preview-header">
-              <h2>📱 Post Preview</h2>
-              <p>Review your content before posting to social media</p>
-            </div>
-
-            <div className="preview-container">
-              <div className="preview-card">
-                <div className="preview-card-header">
-                  <span className="preview-icon">📝</span>
-                  <h3>Post Content</h3>
-                </div>
-                
-                <div className="preview-content">
-                  {/* Show selected post text */}
-                  {editableContent.post.hook && editableContent.post.hook.length > 0 && (
-                    <div className="preview-text-section">
-                      <label className="preview-label">Hook (Short-form)</label>
-                      <div className="preview-text">
-                        {stripHtml(editableContent.post.hook[selectedOptionIndexes['hook'] ?? 0])}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {editableContent.post.body && editableContent.post.body.length > 0 && (
-                    <div className="preview-text-section">
-                      <label className="preview-label">Body (Long-form)</label>
-                      <div className="preview-text">
-                        {stripHtml(editableContent.post.body[selectedOptionIndexes['body'] ?? 0])}
-                      </div>
-                    </div>
-                  )}
-
-                  {editableContent.post.cta && editableContent.post.cta.length > 0 && (
-                    <div className="preview-text-section">
-                      <label className="preview-label">Call to Action</label>
-                      <div className="preview-text">
-                        {stripHtml(editableContent.post.cta[selectedOptionIndexes['cta'] ?? 0])}
-                      </div>
-                    </div>
-                  )}
-
-                  {editableContent.post.hashtags && editableContent.post.hashtags.length > 0 && (
-                    <div className="preview-text-section">
-                      <label className="preview-label">Hashtags</label>
-                      <div className="preview-text preview-hashtags">
-                        {stripHtml(editableContent.post.hashtags[selectedOptionIndexes['hashtags'] ?? 0])}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Generated Image Preview */}
-                  {generatedImages['body'] && (
-                    <div className="preview-image-section">
-                      <label className="preview-label">Generated Image</label>
-                      <div className="preview-image-container">
-                        <Image 
-                          src={generatedImages['body']} 
-                          alt="Generated post image" 
-                          width={400}
-                          height={400}
-                          className="preview-image"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Affiliate Link Input */}
-                  <div className="preview-affiliate-section">
-                    <label htmlFor="affiliateLink" className="preview-label">
-                      🔗 Affiliate Link (Optional)
-                      <span className="preview-label-hint">Will be posted as a comment</span>
-                    </label>
-                    <input
-                      type="url"
-                      id="affiliateLink"
-                      value={affiliateLink}
-                      onChange={(e) => setAffiliateLink(e.target.value)}
-                      placeholder="https://example.com/product?ref=..."
-                      className="affiliate-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="preview-actions">
-                  <button
-                    className="preview-btn btn-secondary"
-                    onClick={async () => {
-                      setSaveButtonState('loading');
-                      try {
-                        await handleSaveToList();
-                        setSaveButtonState('success');
-                        setTimeout(() => setSaveButtonState('idle'), 2000);
-                      } catch {
-                        setSaveButtonState('error');
-                        setTimeout(() => setSaveButtonState('idle'), 2000);
-                      }
-                    }}
-                    disabled={saveButtonState === 'loading'}
-                  >
-                    {saveButtonState === 'loading' && '⏳ Saving...'}
-                    {saveButtonState === 'success' && '✅ Saved!'}
-                    {saveButtonState === 'error' && '❌ Failed'}
-                    {saveButtonState === 'idle' && '💾 Save Draft'}
-                  </button>
-
-                  <button
-                    className="preview-btn btn-primary"
-                    onClick={() => {
-                      setPendingPlatform('Threads');
-                      setShowPostConfirmation(true);
-                    }}
-                    disabled={!session}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 192 192">
-                      <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6866C105.707 61.7589 111.932 64.1498 116.137 68.848C118.675 71.6555 120.342 75.0943 121.142 79.1583C115.316 76.9103 108.644 75.7828 101.337 75.7828C74.0963 75.7828 58.7056 88.9788 58.7056 108.159C58.7056 117.207 62.1986 125.202 68.5695 130.45C74.5103 135.331 82.5887 137.827 91.9257 137.827C108.593 137.827 119.69 130.242 125.556 115.693C129.445 125.418 136.331 132.224 146.212 135.965L154.193 120.276C147.347 117.801 143.132 113.536 141.537 108.221C139.455 101.333 139.455 92.4562 141.537 88.9883ZM97.4576 121.866C86.8339 121.866 80.8128 117.498 80.8128 108.159C80.8128 98.8205 86.8339 94.4524 97.4576 94.4524C103.42 94.4524 109.022 95.4805 113.783 97.4524C113.783 116.632 106.668 121.866 97.4576 121.866Z"/>
-                    </svg>
-                    {session ? 'Post to Threads' : '🔒 Login to Post'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         </>
       )}
     </>
@@ -2760,6 +2633,97 @@ export default function Home() {
   
   const renderSchedulerPage = () => (
     <>
+      {/* Ready to Post - Minimalist Post Preview */}
+      {generatedContent.post && editableContent.post && !error && (
+        <div className="ready-to-post-section">
+          <div className="section-header">
+            <h2>📱 Ready to Post</h2>
+          </div>
+
+          <div className="minimal-preview-card">
+            {/* Image Preview */}
+            {generatedImages['body'] && (
+              <div className="minimal-preview-image">
+                <Image 
+                  src={generatedImages['body']} 
+                  alt="Post preview" 
+                  width={400}
+                  height={400}
+                  className="preview-img"
+                />
+              </div>
+            )}
+
+            {/* Post Text Preview */}
+            <div className="minimal-preview-text">
+              {(() => {
+                const hook = editableContent.post.hook?.[selectedOptionIndexes['hook'] ?? 0];
+                const body = editableContent.post.body?.[selectedOptionIndexes['body'] ?? 0];
+                const cta = editableContent.post.cta?.[selectedOptionIndexes['cta'] ?? 0];
+                const hashtags = editableContent.post.hashtags?.[selectedOptionIndexes['hashtags'] ?? 0];
+                
+                const parts = [];
+                if (hook) parts.push(stripHtml(hook));
+                if (body) parts.push(stripHtml(body));
+                if (cta) parts.push(stripHtml(cta));
+                if (hashtags) parts.push(stripHtml(hashtags));
+                
+                return parts.join('\n\n');
+              })()}
+            </div>
+
+            {/* Affiliate Link */}
+            <div className="minimal-affiliate">
+              <input
+                type="url"
+                value={affiliateLink}
+                onChange={(e) => setAffiliateLink(e.target.value)}
+                placeholder="🔗 Affiliate link (optional - posted as comment)"
+                className="minimal-affiliate-input"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="minimal-preview-actions">
+              <button
+                className="minimal-btn btn-save"
+                onClick={async () => {
+                  setSaveButtonState('loading');
+                  try {
+                    await handleSaveToList();
+                    setSaveButtonState('success');
+                    setTimeout(() => setSaveButtonState('idle'), 2000);
+                  } catch {
+                    setSaveButtonState('error');
+                    setTimeout(() => setSaveButtonState('idle'), 2000);
+                  }
+                }}
+                disabled={saveButtonState === 'loading'}
+              >
+                {saveButtonState === 'loading' && '⏳'}
+                {saveButtonState === 'success' && '✅'}
+                {saveButtonState === 'error' && '❌'}
+                {saveButtonState === 'idle' && '💾 Save Draft'}
+              </button>
+
+              <button
+                className="minimal-btn btn-post"
+                onClick={() => {
+                  setPendingPlatform('Threads');
+                  setShowPostConfirmation(true);
+                }}
+                disabled={!session}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 192 192">
+                  <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6866C105.707 61.7589 111.932 64.1498 116.137 68.848C118.675 71.6555 120.342 75.0943 121.142 79.1583C115.316 76.9103 108.644 75.7828 101.337 75.7828C74.0963 75.7828 58.7056 88.9788 58.7056 108.159C58.7056 117.207 62.1986 125.202 68.5695 130.45C74.5103 135.331 82.5887 137.827 91.9257 137.827C108.593 137.827 119.69 130.242 125.556 115.693C129.445 125.418 136.331 132.224 146.212 135.965L154.193 120.276C147.347 117.801 143.132 113.536 141.537 108.221C139.455 101.333 139.455 92.4562 141.537 88.9883ZM97.4576 121.866C86.8339 121.866 80.8128 117.498 80.8128 108.159C80.8128 98.8205 86.8339 94.4524 97.4576 94.4524C103.42 94.4524 109.022 95.4805 113.783 97.4524C113.783 116.632 106.668 121.866 97.4576 121.866Z"/>
+                </svg>
+                {session ? 'Post to Threads' : '🔒 Login'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ScheduledPostsList 
         scheduledPosts={scheduledPosts}
         onDeletePost={handleDeleteScheduledPost}
