@@ -2136,6 +2136,13 @@ body {
     gap: 0;
 }
 
+/* Post layout: Body column (65%) + Image column (35%) */
+.standard-section-row {
+    display: grid;
+    grid-template-columns: 65fr 35fr;
+    gap: 1rem;
+}
+
 .body-subsection {
     display: flex;
     flex-direction: column;

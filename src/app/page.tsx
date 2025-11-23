@@ -774,7 +774,7 @@ export default function Home() {
         }
         
         // Use standardized prompt for all image generations
-        const standardizedPrompt = 'Extract the product from the reference image and preserve it exactly as-is — same shape, same angles, same materials, same logo, no redesigning or enhancing the product. Place the extracted product in a minimalist studio lighting setup: soft diffused white light, gentle ground shadow, clean neutral white background, no reflections, no extra props, no text, no branding. Keep the product centered, sharp, and untouched. Only change the background and lighting style.';
+        const standardizedPrompt = 'Extract the product from the reference image and preserve it exactly as-is — same shape, same angles, same materials, same logo, no redesigning or enhancing the product. Place the extracted product in a minimalist studio lighting setup: soft diffused white light, gentle ground shadow, clean neutral background (light grey), no reflections, no extra props, no text, no branding. Keep the product centered, sharp, and untouched. Only change the background and lighting style.';
         
         const requestBody = { 
           prompt: standardizedPrompt,
@@ -911,7 +911,15 @@ export default function Home() {
         autoVisualize(editableContent.video.idea, 'video', 'idea');
         autoVisualize(editableContent.video.broll, 'video', 'broll');
     }
-  }, [editableContent, handleGenerateImage, generatedImages, imageLoadingStates]);
+    
+    // Auto-generate product image for post tab
+    if (editableContent?.post) {
+        const imageKey = 'post-image-generation';
+        if (!generatedImages[imageKey] && !imageLoadingStates[imageKey] && productImagePreviews.length > 0) {
+            handleGenerateImage(imageKey, '');
+        }
+    }
+  }, [editableContent, handleGenerateImage, generatedImages, imageLoadingStates, productImagePreviews]);
 
   const handleCopy = (key: string, text?: string) => {
     if (!text) return;
@@ -1718,27 +1726,13 @@ export default function Home() {
                                 </a>
                             </div>
                         )}
-                        {!isLoadingImage && !generatedImage && (
-                            <div className="visualization-actions">
-                                <button 
-                                    className="visualize-button"
-                                    onClick={() => handleGenerateImage(imageKey, '')}
-                                    disabled={isLoadingImage}
-                                >
-                                    🎨 Generate Product Image
-                                </button>
-                                <p className="visualization-hint">
-                                    Uses your uploaded product image to create a clean studio shot
-                                </p>
-                            </div>
-                        )}
                         {!generatedImage && !isLoadingImage && (
                             <div className="visualization-placeholder">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
                                     <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                                     <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
                                 </svg>
-                                <p>Click Generate to create your product image</p>
+                                <p>Product image will appear here</p>
                             </div>
                         )}
                     </div>
