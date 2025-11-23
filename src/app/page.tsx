@@ -1568,8 +1568,121 @@ export default function Home() {
             return resultArray;
         }, [] as ({ key: string; title: string; icon: string; })[][]);
 
+    const renderBodyCard = (section: {key: string; title: string; icon: string;}) => {
+        const { key, title, icon } = section;
+        const content = editableContent[activeOutputTab]?.[key as keyof ParsedContent];
+        const selectedIndex = selectedOptionIndexes[key] ?? 0;
+        const selectedOption = content?.[selectedIndex];
+        
+        // Split content into long-form and hook
+        // Assume the content is stored as a string with potential sections
+        const longFormKey = `${activeOutputTab}-${key}-long-${selectedIndex}`;
+        const hookKey = `${activeOutputTab}-${key}-hook-${selectedIndex}`;
+        const isEditingLongForm = editingKey === longFormKey;
+        const isEditingHook = editingKey === hookKey;
+        
+        const renderSubsection = (subsectionTitle: string, subsectionKey: string, isEditing: boolean) => {
+            return (
+                <div className="body-subsection">
+                    <div className="subsection-header">
+                        <h4>{subsectionTitle}</h4>
+                    </div>
+                    <div className="subsection-content">
+                        {isLoading && !content && <div className="skeleton-loader"></div>}
+                        {!isLoading && (!content || content.length === 0) && <p className="placeholder-text">Content will appear here once generated.</p>}
+                        
+                        {content && content.length > 0 && selectedOption !== undefined && (
+                            isEditing ? (
+                                <RichTextEditor
+                                    value={editText}
+                                    onChange={setEditText}
+                                    onSave={() => handleSaveEdit(key, selectedIndex)}
+                                    onCancel={handleCancelEdit}
+                                />
+                            ) : (
+                                <div className="option-display-area">
+                                    <div className="prose" dangerouslySetInnerHTML={{ __html: selectedOption }} />
+                                    <div className="option-actions">
+                                        <button 
+                                            className="edit-button"
+                                            onClick={() => handleEdit(subsectionKey, selectedOption)}
+                                            aria-label="Edit this option"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                                <path fillRule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                            </svg>
+                                        </button>
+                                        <button 
+                                            className="copy-button" 
+                                            onClick={(e) => { e.stopPropagation(); handleCopy(subsectionKey, stripHtml(selectedOption)); }}
+                                            aria-label="Copy content"
+                                        >
+                                            <svg fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z" />
+                                                <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5-.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
+                                            </svg>
+                                            <span className="copy-tooltip">{copiedStates[subsectionKey] ? 'Copied!' : 'Copy'}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )
+                        )}
+                    </div>
+                </div>
+            );
+        };
+        
+        return (
+            <div className="output-card">
+                <div className="card-header">
+                    <h3>{icon} {title}</h3>
+                    <div className="card-header-actions">
+                        {content && content.length > 0 && (
+                            <>
+                                <button
+                                    className="refresh-button"
+                                    onClick={(e) => { e.stopPropagation(); handleRefreshSection(key); }}
+                                    disabled={isLoading}
+                                    aria-label={`Refresh ${title}`}
+                                    title={`Regenerate ${title}`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                                    </svg>
+                                </button>
+                                <div className="option-selector">
+                                    {[0, 1].map(index => (
+                                        <button
+                                            key={index}
+                                            className={`option-number ${selectedIndex === index ? 'active' : ''}`}
+                                            onClick={(e) => { e.stopPropagation(); handleOptionSelect(key, index); }}
+                                            aria-label={`Select option ${index + 1}`}
+                                        >
+                                            {index + 1}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+                <div className="body-card-content">
+                    {renderSubsection("📝 Long-Form Content", longFormKey, isEditingLongForm)}
+                    {renderSubsection("🎯 Hook / Short Version", hookKey, isEditingHook)}
+                </div>
+            </div>
+        );
+    };
+
     const renderPromptCard = (section: {key: string; title: string; icon: string;}, isVisual = false) => {
         if (!section) return <div/>;
+        
+        // Special handling for body section with two subsections
+        if (section.key === 'body') {
+            return renderBodyCard(section);
+        }
         
         const { key, title, icon } = section;
         const richTextFields = new Set(['body', 'caption']);
