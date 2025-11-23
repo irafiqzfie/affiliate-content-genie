@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       userId?: string | null;
     } = {
       title,
-      productLink: productLink || null,
+      productLink: productLink && productLink.trim() !== '' ? productLink : null,
       video: content.video || '',
       post: content.post || ''
     };

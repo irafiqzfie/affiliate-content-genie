@@ -1193,7 +1193,7 @@ export default function Home() {
 
     const newItemPayload = {
       title,
-      productLink: productLink || null,
+      productLink: productLink || '',
       content: {
           video: videoContent,
           post: postContent,
@@ -2634,7 +2634,7 @@ export default function Home() {
   const renderSchedulerPage = () => (
     <>
       {/* Ready to Post - Minimalist Post Preview */}
-      {generatedContent.post && editableContent.post && !error && (
+      {generatedContent.post && editableContent.post && (
         <div className="ready-to-post-section">
           <div className="section-header">
             <h2>📱 Ready to Post</h2>
