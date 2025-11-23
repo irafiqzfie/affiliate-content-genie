@@ -2113,39 +2113,54 @@ export default function Home() {
                       </div>
 
                       <div className="form-grid-2col">
-                        <div className="form-group">
-                          <label htmlFor="productTitle" className="input-label">Product Title</label>
-                          <input
-                            id="productTitle"
-                            name="productTitle"
-                            type="text"
-                            className="input-field"
-                            value={productTitle}
-                            onChange={(e) => setProductTitle(e.target.value)}
-                            placeholder="Enter product name or title..."
-                            aria-label="Product Title"
-                          />
+                        <div className="left-col-stack">
+                          <div className="form-group">
+                            <label htmlFor="productTitle" className="input-label">Product Title</label>
+                            <input
+                              id="productTitle"
+                              name="productTitle"
+                              type="text"
+                              className="input-field"
+                              value={productTitle}
+                              onChange={(e) => setProductTitle(e.target.value)}
+                              placeholder="Enter product name or title..."
+                              aria-label="Product Title"
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label htmlFor="customDescription" className="input-label">Custom Description <span className="optional-label">(Optional)</span></label>
+                            <textarea
+                              id="customDescription"
+                              name="customDescription"
+                              className="textarea-field compact-textarea"
+                              value={customDescription}
+                              onChange={(e) => setCustomDescription(e.target.value)}
+                              placeholder="Add custom description or let AI auto-generate..."
+                              aria-label="Custom Description"
+                              rows={3}
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label htmlFor="productLink" className="input-label">Shopee Product Link <span className="optional-label">(Optional)</span></label>
+                            <input
+                              id="productLink"
+                              name="productLink"
+                              type="url"
+                              className="input-field"
+                              value={productLink}
+                              onChange={handleProductLinkChange}
+                              placeholder="https://shopee.com/..."
+                              aria-label="Shopee Product Link"
+                            />
+                          </div>
                         </div>
 
                         <div className="form-group">
-                          <label htmlFor="customDescription" className="input-label">Custom Description <span className="optional-label">(Optional)</span></label>
-                          <textarea
-                            id="customDescription"
-                            name="customDescription"
-                            className="textarea-field compact-textarea"
-                            value={customDescription}
-                            onChange={(e) => setCustomDescription(e.target.value)}
-                            placeholder="Add custom description or let AI auto-generate..."
-                            aria-label="Custom Description"
-                            rows={2}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="productImage" className="input-label">
-                          Product Images <span className="input-label-caption">(up to 5)</span>
-                        </label>
+                          <label htmlFor="productImage" className="input-label">
+                            Product Images <span className="input-label-caption">(up to 5)</span>
+                          </label>
                         <div className="image-upload-container compact">
                           <div className="image-preview-grid compact-gallery">
                             {productImagePreviews.map((preview, index) => (
@@ -2251,60 +2266,8 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-
-                      <div className="form-group description-group compact">
-                        <label htmlFor="customDescription" className="input-label">Custom Description <span className="optional-label">(Optional)</span></label>
-                        <textarea
-                          id="customDescription"
-                          name="customDescription"
-                          className="textarea-field enhanced-textarea"
-                          value={customDescription}
-                          onChange={(e) => setCustomDescription(e.target.value)}
-                          placeholder="Click to add a custom description or let AI auto-generate it..."
-                          aria-label="Custom Description"
-                          rows={2}
-                        />
-                      </div>
                     </div>
 
-                    {/* External Import Block - Collapsible */}
-                    <div className="collapsible-section">
-                      <div 
-                        className="collapsible-header"
-                        onClick={() => setIsShopeeImportOpen(!isShopeeImportOpen)}
-                      >
-                        <div className="collapsible-header-content">
-                          <span>🔗</span>
-                          <div>
-                            <h3 className="collapsible-title">Import from E-commerce Link</h3>
-                            <p className="collapsible-subtitle">Paste a Shopee product URL for quick import</p>
-                          </div>
-                        </div>
-                        <svg className={`collapsible-icon ${isShopeeImportOpen ? 'open' : ''}`} xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                          <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                      </div>
-                      <div className={`collapsible-content ${isShopeeImportOpen ? 'open' : ''}`}>
-                        <div className="collapsible-content-inner">
-                          <div className="form-group">
-                            <label htmlFor="productLink" className="input-label">
-                              Shopee Product Link
-                            </label>
-                            <input
-                              id="productLink"
-                              name="productLink"
-                              type="url"
-                              className="input-field"
-                              value={productLink}
-                              onChange={handleProductLinkChange}
-                              placeholder="https://shopee.com/..."
-                              aria-label="Shopee Product Link"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
                     {/* Content Style Block */}
                     <div className="input-section-group">
                       <div className="input-section-group-header">
