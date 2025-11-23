@@ -83,11 +83,6 @@ The output MUST be in the following strict Markdown format. Start with the video
 1. [First Hashtags Option]
 2. [Second Hashtags Option]
 3. [Third Hashtags Option]
-
-🖼️ Image Prompt:
-1. [First Image Prompt - If product images are uploaded: Describe modifications/enhancements to the uploaded image (e.g., "Transform the uploaded image by increasing vibrancy and adding a lifestyle background while keeping the product identical"). If no images uploaded: Create a descriptive prompt for an AI image generator to create a visually appealing product image from scratch]
-2. [Second Image Prompt - Follow the same rule: enhance uploaded images OR generate from scratch]
-3. [Third Image Prompt - Follow the same rule: enhance uploaded images OR generate from scratch]
 ---POST END---
 `;
 

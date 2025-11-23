@@ -24,7 +24,6 @@ interface ParsedContent {
   'body-long'?: string[];
   'body-hook'?: string[];
   cta?: string[];
-  imagePrompt?: string[];
 }
 
 interface SavedItem {
@@ -187,11 +186,10 @@ const sectionsConfigVideo = [
 ];
 
 const sectionsConfigPost = [
-  { key: 'body', title: 'Post Body', icon: '📄' },
-  { key: 'imagePrompt', title: 'Image Prompt', icon: '🖼️' },
   { key: 'hook', title: 'Hook', icon: '✍️' },
-  { key: 'hashtags', title: 'Hashtags', icon: '🔖' },
+  { key: 'body', title: 'Post Body', icon: '📄' },
   { key: 'cta', title: 'Call to Action', icon: '🔗' },
+  { key: 'hashtags', title: 'Hashtags', icon: '🔖' },
 ];
 
 
@@ -268,7 +266,6 @@ export default function Home() {
         '🎯 Post Body (Hook/Short):': 'body-hook',
         '📄 Post Body:': 'body',
         '🔗 Call to Action:': 'cta',
-        '🖼️ Image Prompt:': 'imagePrompt',
     };
 
     const paddedContent = '\n' + content;
@@ -316,7 +313,6 @@ export default function Home() {
         'body-long': '📄 Post Body (Long-Form):',
         'body-hook': '🎯 Post Body (Hook/Short):',
         cta: '🔗 Call to Action:',
-        imagePrompt: '🖼️ Image Prompt:',
     };
     
     const config = type === 'video' ? sectionsConfigVideo : sectionsConfigPost;
@@ -777,10 +773,11 @@ export default function Home() {
           console.log('🖼️ Using uploaded image as reference for image generation');
         }
         
-        // Send the AI-generated image prompt directly without modification
-        // The AI already provides detailed, optimized prompts for image generation
+        // Use standardized prompt for all image generations
+        const standardizedPrompt = 'Extract the product from the reference image and preserve it exactly as-is — same shape, same angles, same materials, same logo, no redesigning or enhancing the product. Place the extracted product in a minimalist studio lighting setup: soft diffused white light, gentle ground shadow, clean neutral white background, no reflections, no extra props, no text, no branding. Keep the product centered, sharp, and untouched. Only change the background and lighting style.';
+        
         const requestBody = { 
-          prompt: promptText,
+          prompt: standardizedPrompt,
           conditionImage, // Include the uploaded image if available
           transformation: hasUploadedImages ? 'enhance' : 'generate' // Indicate transformation type
         };
@@ -913,9 +910,6 @@ export default function Home() {
     if (editableContent?.video) {
         autoVisualize(editableContent.video.idea, 'video', 'idea');
         autoVisualize(editableContent.video.broll, 'video', 'broll');
-    }
-    if (editableContent?.post) {
-        autoVisualize(editableContent.post.imagePrompt, 'post', 'imagePrompt');
     }
   }, [editableContent, handleGenerateImage, generatedImages, imageLoadingStates]);
 
@@ -1277,9 +1271,15 @@ export default function Home() {
     setSchedulingPlatform(platform);
 
     const postContent = editableContent.post;
-    const selectedImageIndex = selectedOptionIndexes['imagePrompt'] ?? 0;
-    const imageKey = `post-imagePrompt-${selectedImageIndex}`;
-    let imageUrl = generatedImages[imageKey];
+    
+    // Get the first available generated image (from any section)
+    let imageUrl: string | null = null;
+    for (const key in generatedImages) {
+      if (generatedImages[key] && key.startsWith('post-')) {
+        imageUrl = generatedImages[key];
+        break;
+      }
+    }
     
     const selectedBodyIndex = selectedOptionIndexes['body'] ?? 0;
     const captionText = postContent?.body?.[selectedBodyIndex];
@@ -1553,14 +1553,7 @@ export default function Home() {
   };
 
   const renderGeneratorPage = () => {
-    const visualizableKeys = new Set(
-        activeOutputTab === 'video' 
-        ? [] 
-        : ['imagePrompt']
-    );
-
-    const visualizableSections = sectionsConfig.filter(s => visualizableKeys.has(s.key));
-    const nonVisualizableSections = sectionsConfig.filter(s => !visualizableKeys.has(s.key));
+    const nonVisualizableSections = sectionsConfig;
 
     const chunkedNonVisualizableSections = nonVisualizableSections
         .reduce((resultArray, item, index) => { 
@@ -2397,10 +2390,9 @@ export default function Home() {
         <div className="output-container">
             {activeOutputTab === 'post' ? (
                   <>
-                    {/* Row 1: Body + Image Prompt */}
+                    {/* Body section */}
                     <div className="standard-section-row">
                       {renderPromptCard(sectionsConfig.find(s => s.key === 'body')!)}
-                      {renderPromptCard(sectionsConfig.find(s => s.key === 'imagePrompt')!, true)}
                     </div>
                     {/* Row 2: Hook + Hashtags + CTA */}
                     <div className="three-column-row">
@@ -2411,9 +2403,6 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    {visualizableSections.map(section => 
-                         React.cloneElement(renderPromptCard(section, true), { key: section.key })
-                    )}
                     {chunkedNonVisualizableSections.map((pair, index) => (
                         <div key={index} className="standard-section-row">
                             {renderPromptCard(pair[0])}
