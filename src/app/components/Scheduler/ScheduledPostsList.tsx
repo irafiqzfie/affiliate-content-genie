@@ -44,24 +44,26 @@ export function ScheduledPostsList({ scheduledPosts, onDeletePost, onPostNow }: 
             return (
               <li key={post.id} className={`scheduled-item ${isExpanded ? 'expanded' : ''}`}>
                 <div className="scheduled-item-content">
-                  <div className="scheduled-item-preview">
-                    <Image 
-                      src={post.imageUrl} 
-                      alt="Post preview" 
-                      width={isExpanded ? 400 : 120} 
-                      height={isExpanded ? 300 : 80} 
-                      unoptimized 
-                      style={{ 
-                        width: isExpanded ? '100%' : '120px',
-                        height: 'auto',
-                        maxHeight: isExpanded ? '400px' : '80px',
-                        objectFit: 'cover',
-                        borderRadius: '8px',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => toggleExpanded(post.id)}
-                    />
-                  </div>
+                  {post.imageUrl && (
+                    <div className="scheduled-item-preview">
+                      <Image 
+                        src={post.imageUrl} 
+                        alt="Post preview" 
+                        width={isExpanded ? 400 : 120} 
+                        height={isExpanded ? 300 : 80} 
+                        unoptimized 
+                        style={{ 
+                          width: isExpanded ? '100%' : '120px',
+                          height: 'auto',
+                          maxHeight: isExpanded ? '400px' : '80px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => toggleExpanded(post.id)}
+                      />
+                    </div>
+                  )}
                   <div className="scheduled-item-details">
                     <div className="scheduled-item-header">
                       <span className={`platform-tag ${post.platform.toLowerCase()}`}>

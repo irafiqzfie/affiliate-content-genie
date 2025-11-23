@@ -43,13 +43,13 @@ export async function POST(request: Request) {
     console.log('👤 User ID (JWT mode):', userId);
 
     const body = await request.json();
-    console.log('📦 Request body:', { platform: body.platform, scheduledTime: body.scheduledTime, status: body.status, hasAffiliateLink: !!body.affiliateLink });
+    console.log('📦 Request body:', { platform: body.platform, scheduledTime: body.scheduledTime, status: body.status, hasAffiliateLink: !!body.affiliateLink, hasImage: !!body.imageUrl });
     
     const { platform, scheduledTime, imageUrl, caption, affiliateLink, status } = body;
 
-    if (!platform || !scheduledTime || !imageUrl || !caption || !status) {
+    if (!platform || !scheduledTime || !caption || !status) {
       console.log('❌ Missing required fields');
-      return NextResponse.json({ message: 'Missing required fields: platform, scheduledTime, imageUrl, caption, and status are required' }, { status: 400 });
+      return NextResponse.json({ message: 'Missing required fields: platform, scheduledTime, caption, and status are required' }, { status: 400 });
     }
 
     console.log('💾 Attempting to save to database...');

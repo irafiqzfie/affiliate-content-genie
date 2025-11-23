@@ -40,7 +40,7 @@ interface ScheduledPost {
   id: number;
   platform: 'Facebook' | 'Threads';
   scheduledTime: string; // ISO string
-  imageUrl: string;
+  imageUrl: string | null;
   caption: string;
   affiliateLink?: string;
   status: 'Scheduled' | 'Posted';
@@ -1371,9 +1371,6 @@ export default function Home() {
                   throw new Error('Image URL is invalid. Please generate a new image.');
               }
           }
-        } else {
-          // Text only - use placeholder image
-          finalImageUrl = 'https://via.placeholder.com/800x800/1a1c30/ffffff?text=Text+Only+Post';
         }
 
         // Auto-schedule for immediate posting
@@ -1382,7 +1379,7 @@ export default function Home() {
         const newPostPayload = {
             platform: pendingPlatform,
             scheduledTime: scheduledDateTime,
-            imageUrl: finalImageUrl || '',
+            imageUrl: (options.includeImage && !options.textOnly && finalImageUrl) ? finalImageUrl : null,
             caption: stripHtml(captionText),
             affiliateLink: affiliateLink || undefined,
             status: 'Scheduled' as const,

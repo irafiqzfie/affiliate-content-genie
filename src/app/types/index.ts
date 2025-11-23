@@ -31,7 +31,7 @@ export interface ScheduledPost {
   id: number;
   platform: 'Facebook' | 'Threads';
   scheduledTime: string; // ISO string
-  imageUrl: string;
+  imageUrl: string | null;
   caption: string;
   affiliateLink?: string;
   status: 'Scheduled' | 'Posted';

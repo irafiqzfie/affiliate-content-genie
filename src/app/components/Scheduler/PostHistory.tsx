@@ -59,15 +59,17 @@ export function PostHistory({ posts }: PostHistoryProps) {
       <div className="post-history-list">
         {posts.map(post => (
           <div key={post.id} className="history-item">
-            <div className="history-item-image">
-              <Image 
-                src={post.imageUrl} 
-                alt="Post thumbnail" 
-                width={80} 
-                height={80}
-                style={{ objectFit: 'cover', borderRadius: '8px' }}
-              />
-            </div>
+            {post.imageUrl && (
+              <div className="history-item-image">
+                <Image 
+                  src={post.imageUrl} 
+                  alt="Post thumbnail" 
+                  width={80} 
+                  height={80}
+                  style={{ objectFit: 'cover', borderRadius: '8px' }}
+                />
+              </div>
+            )}
             <div className="history-item-content">
               <div className="history-item-header">
                 <div className="history-platform-badge">
