@@ -694,6 +694,7 @@ export default function Home() {
     // Auto-analyze before generating content
     if (productLink) {
       try {
+        console.log('🔍 Starting auto-analyze for:', productLink);
         const analyzeResponse = await fetch(`${API_URL}/analyze`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -702,15 +703,20 @@ export default function Home() {
         
         if (analyzeResponse.ok) {
           const analysisData = await analyzeResponse.json();
+          console.log('✅ Analysis data received:', analysisData);
           setTrendscore(analysisData.trendscore ?? null);
           setProductSummary(analysisData.productSummary || '');
           setAffiliatePotential(analysisData.affiliatePotential || '');
           setProductFeatures(analysisData.productFeatures || []);
+        } else {
+          console.warn('⚠️ Analysis response not OK:', analyzeResponse.status);
         }
       } catch (err) {
-        console.warn('Analysis failed, continuing with generation:', err);
+        console.warn('❌ Analysis failed, continuing with generation:', err);
         // Don't stop generation if analysis fails
       }
+    } else {
+      console.log('ℹ️ No product link provided, skipping analysis');
     }
     setError(null);
     setGeneratedContent({ video: null, post: null });
@@ -2574,7 +2580,7 @@ export default function Home() {
                   <div className="info-placeholder">
                     <div className="info-placeholder-icon">📊</div>
                     <h3>No Analysis Data Yet</h3>
-                    <p>Product analysis information will appear here after you analyze a product link.</p>
+                    <p>Product analysis requires a Shopee product link. Add a product link and generate content to see analysis data here.</p>
                   </div>
                 )}
               </>
