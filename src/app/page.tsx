@@ -2710,7 +2710,7 @@ export default function Home() {
                     onClick={async () => {
                       setSaveButtonState('loading');
                       try {
-                        await handleSaveContent();
+                        await handleSaveToList();
                         setSaveButtonState('success');
                         setTimeout(() => setSaveButtonState('idle'), 2000);
                       } catch {
