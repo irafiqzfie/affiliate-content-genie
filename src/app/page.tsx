@@ -228,7 +228,6 @@ export default function Home() {
   const [productSummary, setProductSummary] = useState<string | null>(null);
   const [productFeatures, setProductFeatures] = useState<string[] | null>(null);
   const [affiliatePotential, setAffiliatePotential] = useState<string | null>(null);
-  const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
   const [schedulingPlatform, setSchedulingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [affiliateLink, setAffiliateLink] = useState('');
@@ -1268,21 +1267,8 @@ export default function Home() {
     setEditText('');
   };
 
-  const handleOpenSocialModal = () => {
-    setSchedulingPlatform(null);
-    setIsSocialModalOpen(true);
-  };
-
-  const handleCloseSocialModal = () => {
-    setIsSocialModalOpen(false);
-    setSchedulingPlatform(null);
-  };
-
-  const handleSchedulePost = async () => {
-    if (!schedulingPlatform) {
-        alert("Please select a platform.");
-        return;
-    }
+  const handleSchedulePost = async (platform: 'Facebook' | 'Threads') => {
+    setSchedulingPlatform(platform);
 
     const postContent = editableContent.post;
     const selectedImageIndex = selectedOptionIndexes['imagePrompt'] ?? 0;
@@ -1358,7 +1344,8 @@ export default function Home() {
         const updatedPosts = [...scheduledPosts, scheduledPost].sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime());
         setScheduledPosts(updatedPosts);
         
-        handleCloseSocialModal();
+        setSchedulingPlatform(null);
+        alert(`Post saved for ${platform}!`);
     } catch (err) {
         console.error(err);
         const errorMsg = err instanceof Error ? err.message : 'Could not schedule the post. Please try again.';
@@ -1557,85 +1544,6 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const renderSocialModal = () => {
-    if (!isSocialModalOpen) return null;
-
-    const postContent = editableContent.post;
-    const selectedImageIndex = selectedOptionIndexes['imagePrompt'] ?? 0;
-    const selectedBodyIndex = selectedOptionIndexes['body'] ?? 0;
-    
-    const imageKey = `post-imagePrompt-${selectedImageIndex}`;
-    const imageUrl = generatedImages[imageKey];
-    const captionText = postContent?.body?.[selectedBodyIndex];
-    
-    const finalImageUrl = imageUrl;
-    const finalCaption = captionText ? stripHtml(captionText) : "Generate content to create a post.";
-
-    const handlePlatformSelect = (platform: 'Facebook' | 'Threads') => {
-        setAffiliateLink('');
-        setSchedulingPlatform(platform);
-    };
-
-    return (
-        <div className="modal-overlay" onClick={handleCloseSocialModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h3>{schedulingPlatform ? `Save Post for ${schedulingPlatform}` : 'Save Post'}</h3>
-                    <button className="modal-close-button" onClick={handleCloseSocialModal} aria-label="Close modal">&times;</button>
-                </div>
-                <div className="modal-body">
-                    <div className="modal-preview">
-                        <h4>Preview</h4>
-                        {finalImageUrl ? (
-                            <Image src={finalImageUrl} alt="Post preview" className="modal-preview-image" width={480} height={320} unoptimized />
-                        ) : (
-                            <div className="modal-preview-image-placeholder">No image generated</div>
-                        )}
-                        <p className="modal-preview-caption">{finalCaption}</p>
-                    </div>
-
-                    {schedulingPlatform && (
-                        <div className="modal-scheduling-view">
-                            <div className="schedule-form">
-                                <div className="schedule-input-group">
-                                    <label htmlFor="affiliate-link">Affiliate Link (Optional)</label>
-                                    <input 
-                                        id="affiliate-link" 
-                                        className="schedule-input" 
-                                        type="url" 
-                                        placeholder="https://example.com/affiliate-link"
-                                        value={affiliateLink} 
-                                        onChange={e => setAffiliateLink(e.target.value)} 
-                                    />
-                                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>Will be posted as a comment on Threads</small>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                     {!schedulingPlatform && !finalImageUrl && (
-                        <div className="modal-info">
-                            <p>Please generate content and an image for the &apos;Post&apos; format before scheduling.</p>
-                        </div>
-                     )}
-                </div>
-                <div className="modal-footer">
-                    {schedulingPlatform ? (
-                        <>
-                            <button className="modal-footer-button secondary" onClick={() => setSchedulingPlatform(null)}>Back</button>
-                            <button className="modal-footer-button primary" onClick={handleSchedulePost}>Save Post</button>
-                        </>
-                    ) : (
-                        <>
-                         <button className="social-platform-button facebook" onClick={() => handlePlatformSelect('Facebook')} disabled={!finalImageUrl}>Save for Facebook</button>
-                         <button className="social-platform-button threads" onClick={() => handlePlatformSelect('Threads')} disabled={!finalImageUrl}>Save for Threads</button>
-                        </>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
   };
 
   const renderGeneratorPage = () => {
@@ -2328,9 +2236,24 @@ export default function Home() {
               {saveButtonState === 'success' && 'Saved!'}
               {saveButtonState === 'error' && 'Failed'}
             </button>
-            <button onClick={handleOpenSocialModal} className="output-action-btn primary">
-              🗓️ Schedule
-            </button>
+            {activeOutputTab === 'post' && (
+              <>
+                <button 
+                  onClick={() => handleSchedulePost('Facebook')} 
+                  className="output-action-btn primary"
+                  disabled={isLoading}
+                >
+                  📘 Facebook
+                </button>
+                <button 
+                  onClick={() => handleSchedulePost('Threads')} 
+                  className="output-action-btn primary"
+                  disabled={isLoading}
+                >
+                  🧵 Threads
+                </button>
+              </>
+            )}
             <button onClick={handleDownloadTxt} className="output-action-btn">
               ⬇️ Download
             </button>
@@ -2379,7 +2302,6 @@ export default function Home() {
         </div>
         </>
       )}
-      {renderSocialModal()}
     </>
   );
   }
