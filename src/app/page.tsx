@@ -1382,7 +1382,7 @@ export default function Home() {
             imageUrl: (options.includeImage && !options.textOnly && finalImageUrl) ? finalImageUrl : null,
             caption: stripHtml(captionText),
             affiliateLink: affiliateLink || undefined,
-            status: 'Scheduled' as const,
+            status: 'Posted' as const, // Mark as Posted immediately
         };
 
         const response = await fetch(`${API_URL}/scheduled-posts`, {
@@ -1397,12 +1397,14 @@ export default function Home() {
         }
 
         const scheduledPost = await response.json();
-        const updatedPosts = [...scheduledPosts, scheduledPost].sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime());
-        setScheduledPosts(updatedPosts);
+        
+        // Add to posted posts (since status is 'Posted')
+        const updatedPostedPosts = [scheduledPost, ...postedPosts];
+        setPostedPosts(updatedPostedPosts);
         
         setSchedulingPlatform(null);
         setPendingPlatform(null);
-        alert(`Post saved for ${pendingPlatform}!`);
+        alert(`Post published to ${pendingPlatform}!`);
     } catch (err) {
         console.error(err);
         const errorMsg = err instanceof Error ? err.message : 'Could not schedule the post. Please try again.';
