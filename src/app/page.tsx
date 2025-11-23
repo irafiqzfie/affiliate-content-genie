@@ -224,7 +224,7 @@ export default function Home() {
   const [selectedOptionIndexes, setSelectedOptionIndexes] = useState<Record<string, number>>({});
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler'>('generator');
-  const [activeOutputTab, setActiveOutputTab] = useState<'video' | 'post'>('video');
+  const [activeOutputTab, setActiveOutputTab] = useState<'info' | 'post' | 'video'>('info');
   const [trendscore, setTrendscore] = useState<number | null>(null);
   const [productSummary, setProductSummary] = useState<string | null>(null);
   const [productFeatures, setProductFeatures] = useState<string[] | null>(null);
@@ -2360,56 +2360,6 @@ export default function Home() {
                     </button>
                 </form>
                 </div>
-                
-                {(trendscore !== null || productSummary || affiliatePotential || productFeatures) && (
-                  <div className="analysis-column">
-                    <div className="analysis-inline-section">
-                      <div className="analysis-inline-header">
-                        <span>📊</span>
-                        <h3>AI Analysis</h3>
-                      </div>
-                      
-                      <div className="analysis-inline-content">
-                        {trendscore !== null && (
-                          <div className="analysis-inline-item">
-                            <h4>Trend Score</h4>
-                            <div className="trend-score-display">
-                              <div className="trend-score-fill" style={{ width: `${trendscore}%` }}></div>
-                              <span className="trend-score-label">{trendscore}/100</span>
-                            </div>
-                          </div>
-                        )}
-
-                        {affiliatePotential && (
-                          <div className="analysis-inline-item">
-                            <h4>Affiliate Potential</h4>
-                            <span className={`potential-badge potential-${affiliatePotential.toLowerCase()}`}>
-                              {affiliatePotential}
-                            </span>
-                          </div>
-                        )}
-
-                        {productSummary && (
-                          <div className="analysis-inline-item">
-                            <h4>Product Summary</h4>
-                            <div className="analysis-content">{productSummary}</div>
-                          </div>
-                        )}
-
-                        {productFeatures && productFeatures.length > 0 && (
-                          <div className="analysis-inline-item">
-                            <h4>Key Features</h4>
-                            <ul className="features-list">
-                              {productFeatures.map((feature, index) => (
-                                <li key={index}>{feature}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
             </div>
         </div>
       </div>
@@ -2474,11 +2424,11 @@ export default function Home() {
             <div className="output-tab-selector">
               <button 
                 type="button" 
-                className={`output-tab-btn ${activeOutputTab === 'video' ? 'active' : ''}`} 
-                onClick={() => setActiveOutputTab('video')}
+                className={`output-tab-btn ${activeOutputTab === 'info' ? 'active' : ''}`} 
+                onClick={() => setActiveOutputTab('info')}
                 disabled={!generatedContent.video && !generatedContent.post}
               >
-                🎬 Video
+                📊 Info
               </button>
               <button 
                 type="button" 
@@ -2487,6 +2437,14 @@ export default function Home() {
                 disabled={!generatedContent.video && !generatedContent.post}
               >
                 ✍️ Post
+              </button>
+              <button 
+                type="button" 
+                className={`output-tab-btn ${activeOutputTab === 'video' ? 'active' : ''}`} 
+                onClick={() => setActiveOutputTab('video')}
+                disabled={!generatedContent.video && !generatedContent.post}
+              >
+                🎬 Video
               </button>
             </div>
           </div>
@@ -2543,7 +2501,57 @@ export default function Home() {
       {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || error)) && (
         <>
         <div className="output-container">
-            {activeOutputTab === 'post' ? (
+            {activeOutputTab === 'info' ? (
+              <div className="info-tab-content">
+                {(trendscore !== null || productSummary || affiliatePotential || productFeatures) && (
+                  <div className="analysis-inline-section">
+                    <div className="analysis-inline-header">
+                      <span>📊</span>
+                      <h3>AI Analysis</h3>
+                    </div>
+                    
+                    <div className="analysis-inline-content">
+                      {trendscore !== null && (
+                        <div className="analysis-inline-item">
+                          <h4>Trend Score</h4>
+                          <div className="trend-score-display">
+                            <div className="trend-score-fill" style={{ width: `${trendscore}%` }}></div>
+                            <span className="trend-score-label">{trendscore}/100</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {affiliatePotential && (
+                        <div className="analysis-inline-item">
+                          <h4>Affiliate Potential</h4>
+                          <span className={`potential-badge potential-${affiliatePotential.toLowerCase()}`}>
+                            {affiliatePotential}
+                          </span>
+                        </div>
+                      )}
+
+                      {productSummary && (
+                        <div className="analysis-inline-item">
+                          <h4>Product Summary</h4>
+                          <div className="analysis-content">{productSummary}</div>
+                        </div>
+                      )}
+
+                      {productFeatures && productFeatures.length > 0 && (
+                        <div className="analysis-inline-item">
+                          <h4>Key Features</h4>
+                          <ul className="features-list">
+                            {productFeatures.map((feature, index) => (
+                              <li key={index}>{feature}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : activeOutputTab === 'post' ? (
                   <>
                     {/* Post Body with embedded image */}
                     {renderPromptCard(sectionsConfig.find(s => s.key === 'body')!)}
