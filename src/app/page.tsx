@@ -690,6 +690,28 @@ export default function Home() {
     setHasGeneratedAttempt(true);
 
     setIsLoading(true);
+    
+    // Auto-analyze before generating content
+    if (productLink) {
+      try {
+        const analyzeResponse = await fetch(`${API_URL}/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productLink }),
+        });
+        
+        if (analyzeResponse.ok) {
+          const analysisData = await analyzeResponse.json();
+          setTrendscore(analysisData.trendscore ?? null);
+          setProductSummary(analysisData.productSummary || '');
+          setAffiliatePotential(analysisData.affiliatePotential || '');
+          setProductFeatures(analysisData.productFeatures || []);
+        }
+      } catch (err) {
+        console.warn('Analysis failed, continuing with generation:', err);
+        // Don't stop generation if analysis fails
+      }
+    }
     setError(null);
     setGeneratedContent({ video: null, post: null });
     setEditableContent({ video: null, post: null });
@@ -2252,26 +2274,16 @@ export default function Home() {
                             <label htmlFor="productLink" className="input-label">
                               Shopee Product Link
                             </label>
-                            <div className="input-with-button inline-button">
-                              <input
-                                id="productLink"
-                                name="productLink"
-                                type="url"
-                                className="input-field"
-                                value={productLink}
-                                onChange={handleProductLinkChange}
-                                placeholder="https://shopee.com/..."
-                                aria-label="Shopee Product Link"
-                              />
-                              <button 
-                                  type="button" 
-                                  className="analyze-button" 
-                                  onClick={handleAnalyze} 
-                                  disabled={(!productLink && !productTitle && !customDescription) || isAnalyzing || isLoading}
-                              >
-                                  {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-                              </button>
-                            </div>
+                            <input
+                              id="productLink"
+                              name="productLink"
+                              type="url"
+                              className="input-field"
+                              value={productLink}
+                              onChange={handleProductLinkChange}
+                              placeholder="https://shopee.com/..."
+                              aria-label="Shopee Product Link"
+                            />
                           </div>
                         </div>
                       </div>
@@ -2283,7 +2295,7 @@ export default function Home() {
                         <h3 className="input-section-group-title">Content Style</h3>
                         <p className="input-section-group-description">Customize the tone, format, and narrative style</p>
                       </div>
-                      <fieldset className="advanced-options-fieldset" disabled={isAnalyzing}>
+                      <fieldset className="advanced-options-fieldset">
                         <div className="advanced-options-grid">
                             <div className="form-group featured">
                                 <div className="tooltip-wrapper">
@@ -2363,7 +2375,7 @@ export default function Home() {
                       </fieldset>
                     </div>
 
-                    <button type="submit" className="generate-button" disabled={isLoading || isAnalyzing || (!productLink && !productTitle)}>
+                    <button type="submit" className="generate-button" disabled={isLoading || (!productLink && !productTitle)}>
                       {isLoading ? 'Generating...' : '✨ Generate Content'}
                     </button>
                 </form>
