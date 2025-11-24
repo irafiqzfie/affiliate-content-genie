@@ -49,10 +49,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid JSON in request body' }, { status: 400 });
     }
 
-    console.log('📦 Request body:', { title: body.title, productLink: body.productLink, hasContent: !!body.content });
+    console.log('📦 Request body:', { title: body.title, productLink: body.productLink, hasContent: !!body.content, hasImageUrl: !!body.imageUrl });
     console.log('📦 Full request body:', JSON.stringify(body, null, 2));
     
-    const { title, productLink, content } = body;
+    const { title, productLink, content, imageUrl } = body;
 
     if (!title || !content) {
       console.log('❌ Missing required fields:', { title: !!title, productLink: !!productLink, content: !!content });
@@ -90,6 +90,7 @@ export async function POST(request: Request) {
       productLink: string | null;
       video: string;
       post: string;
+      imageUrl?: string | null;
       userId?: string | null;
     } = {
       title,
@@ -97,6 +98,11 @@ export async function POST(request: Request) {
       video: content.video || '',
       post: content.post || ''
     };
+    
+    // Include imageUrl if provided
+    if (imageUrl && imageUrl.trim() !== '') {
+      dataToCreate.imageUrl = imageUrl;
+    }
     
     if (userId !== null) {
       dataToCreate.userId = userId;

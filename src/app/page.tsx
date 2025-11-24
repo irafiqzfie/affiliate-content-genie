@@ -33,6 +33,7 @@ interface SavedItem {
   productLink: string | null;
   video: string;
   post: string;
+  imageUrl?: string | null;
   createdAt?: string;
 }
 
@@ -1192,18 +1193,53 @@ export default function Home() {
       return;
     }
 
-    const newItemPayload = {
-      title,
-      productLink: productLink || '',
-      content: {
-          video: videoContent,
-          post: postContent,
-      },
-    };
-
     try {
-        console.log('📤 Attempting to save item:', newItemPayload);
-        console.log('📤 Stringified payload:', JSON.stringify(newItemPayload, null, 2));
+        // Get the first available generated image (from post sections)
+        let blobImageUrl: string | null = null;
+        for (const key in generatedImages) {
+          if (generatedImages[key] && key.startsWith('post-')) {
+            const imageData = generatedImages[key];
+            
+            // If it's already a blob URL (starts with https://), use it directly
+            if (imageData && imageData.startsWith('https://')) {
+              blobImageUrl = imageData;
+              console.log('🖼️ Using existing blob URL:', blobImageUrl);
+              break;
+            }
+            
+            // If it's a base64 data URL, upload to Vercel Blob
+            if (imageData && imageData.startsWith('data:image/')) {
+              console.log('📤 Uploading image to Vercel Blob...');
+              
+              const uploadResponse = await fetch(`${API_URL}/upload-image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageData })
+              });
+              
+              if (uploadResponse.ok) {
+                const uploadData = await uploadResponse.json();
+                blobImageUrl = uploadData.url;
+                console.log('✅ Image uploaded to blob:', blobImageUrl);
+              } else {
+                console.warn('⚠️ Image upload failed, continuing without image');
+              }
+            }
+            break;
+          }
+        }
+
+        const newItemPayload = {
+          title,
+          productLink: productLink || '',
+          content: {
+              video: videoContent,
+              post: postContent,
+          },
+          imageUrl: blobImageUrl,
+        };
+
+        console.log('📤 Attempting to save item:', { ...newItemPayload, imageUrl: blobImageUrl ? 'included' : 'none' });
         
         const response = await fetch(`${API_URL}/saved-items`, {
             method: 'POST',
@@ -1286,6 +1322,14 @@ export default function Home() {
         video: parseContent(item.video),
         post: parseContent(item.post),
     });
+    
+    // Restore the saved image to generatedImages state
+    if (item.imageUrl) {
+      setGeneratedImages({ 'post-hook': item.imageUrl });
+    } else {
+      setGeneratedImages({});
+    }
+    
     setActiveOutputTab('video');
     setTrendscore(null);
     setProductSummary(null);

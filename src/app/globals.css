@@ -3148,6 +3148,16 @@ body {
     opacity: 1;
 }
 
+.saved-item-image {
+    flex-shrink: 0;
+    width: 120px;
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+}
+
 .saved-item-info {
     display: flex;
     flex-direction: column;

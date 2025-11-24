@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { SavedItem } from '@/app/types';
 
 interface SavedItemsListProps {
@@ -77,6 +78,17 @@ export function SavedItemsList({ savedList, onLoadItem, onDeleteItem }: SavedIte
           <ul className="saved-list">
             {processedSavedList.map(item => (
               <li key={item.id} className="saved-item">
+                {item.imageUrl && (
+                  <div className="saved-item-image">
+                    <Image 
+                      src={item.imageUrl} 
+                      alt={item.title}
+                      width={120}
+                      height={90}
+                      style={{ objectFit: 'cover', borderRadius: '8px' }}
+                    />
+                  </div>
+                )}
                 <div className="saved-item-info">
                   <span className="saved-item-type">🎬 Video + ✍️ Post</span>
                   <span className="saved-item-title">{item.title}</span>
