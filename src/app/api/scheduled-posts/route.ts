@@ -63,7 +63,14 @@ export async function POST(request: Request) {
     }
     
     // Build data object conditionally to avoid passing undefined/null for required fields
-    const postData: any = {
+    const postData: {
+      platform: string;
+      scheduledTime: Date;
+      caption: string;
+      status: string;
+      imageUrl?: string;
+      affiliateLink?: string;
+    } = {
       platform,
       scheduledTime: new Date(scheduledTime),
       caption,
