@@ -1325,7 +1325,8 @@ export default function Home() {
     
     // Restore the saved image to generatedImages state
     if (item.imageUrl) {
-      setGeneratedImages({ 'post-hook': item.imageUrl });
+      // Use 'post-image-generation' key to match UI expectations and prevent auto-regeneration
+      setGeneratedImages({ 'post-image-generation': item.imageUrl });
     } else {
       setGeneratedImages({});
     }
