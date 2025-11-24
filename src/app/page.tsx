@@ -2660,7 +2660,7 @@ export default function Home() {
                 <span className="post-timestamp">{new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span>
               </div>
 
-              {/* Post Text */}
+              {/* Post Text - Full visible text, no truncation */}
               <div className="scheduled-post-text">
                 {(() => {
                   const hook = editableContent.post.hook?.[selectedOptionIndexes['hook'] ?? 0];
@@ -2672,59 +2672,9 @@ export default function Home() {
                   if (body) parts.push(stripHtml(body));
                   if (cta) parts.push(stripHtml(cta));
                   
-                  const fullText = parts.join('\n\n');
-                  // Truncate if too long
-                  return fullText.length > 200 ? fullText.substring(0, 200) + '...' : fullText;
+                  return parts.join('\n\n');
                 })()}
               </div>
-
-              {/* Collapsible Details */}
-              <details className="post-details">
-                <summary className="details-toggle">Show more details</summary>
-                <div className="details-content">
-                  {/* Full Text */}
-                  <div className="detail-section">
-                    <span className="detail-label">Full Post:</span>
-                    <div className="detail-text">
-                      {(() => {
-                        const hook = editableContent.post.hook?.[selectedOptionIndexes['hook'] ?? 0];
-                        const body = editableContent.post.body?.[selectedOptionIndexes['body'] ?? 0];
-                        const cta = editableContent.post.cta?.[selectedOptionIndexes['cta'] ?? 0];
-                        
-                        const parts = [];
-                        if (hook) parts.push(stripHtml(hook));
-                        if (body) parts.push(stripHtml(body));
-                        if (cta) parts.push(stripHtml(cta));
-                        
-                        return parts.join('\n\n');
-                      })()}
-                    </div>
-                  </div>
-
-                  {/* Hashtags */}
-                  {editableContent.post.hashtags?.[selectedOptionIndexes['hashtags'] ?? 0] && (
-                    <div className="detail-section">
-                      <span className="detail-label">Hashtags:</span>
-                      <div className="detail-hashtags">
-                        {stripHtml(editableContent.post.hashtags[selectedOptionIndexes['hashtags'] ?? 0])}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Affiliate Link Input */}
-                  <div className="detail-section">
-                    <span className="detail-label">Affiliate Link (optional):</span>
-                    <input
-                      type="url"
-                      value={affiliateLink}
-                      onChange={(e) => setAffiliateLink(e.target.value)}
-                      placeholder="https://example.com/product?ref=..."
-                      className="affiliate-link-input"
-                    />
-                    <small className="input-hint">Will be posted as a comment</small>
-                  </div>
-                </div>
-              </details>
 
               {/* Action Buttons */}
               <div className="scheduled-post-actions">
