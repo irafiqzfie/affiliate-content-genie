@@ -1499,6 +1499,10 @@ export default function Home() {
         setSchedulingPlatform(null);
         setPendingPlatform(null);
         
+        // Clear the preview after successful posting
+        setGeneratedContent({ video: generatedContent.video, post: null });
+        setEditableContent({ video: editableContent.video, post: null });
+        
         const platformNames = platforms.join(' and ');
         alert(`Post published to ${platformNames}!`);
     } catch (err) {
@@ -2678,29 +2682,45 @@ export default function Home() {
   
   const renderSchedulerPage = () => (
     <>
-      {/* Ready to Post - Minimalist Card Preview */}
+      {/* Ready to Post - Dark Card Preview */}
       {generatedContent.post && editableContent.post && (
         <div className="scheduled-posts-section">
           <h2 className="section-title">Scheduled Posts</h2>
 
-          <div className="post-preview-card-minimal">
-            {/* Image First */}
+          <div className="scheduled-preview-card">
+            {/* Image on Top */}
             {generatedImages['body'] && (
-              <div className="preview-image-wrapper">
+              <div className="scheduled-preview-image">
                 <Image 
                   src={generatedImages['body']} 
                   alt="Post preview" 
-                  width={600}
-                  height={400}
-                  className="preview-post-image"
+                  width={320}
+                  height={180}
+                  className="scheduled-image"
                   unoptimized
                 />
               </div>
             )}
 
-            {/* Post Text */}
-            <div className="preview-text-wrapper">
-              <p className="preview-post-text">
+            {/* Content Section */}
+            <div className="scheduled-preview-content">
+              {/* Platform Badge & Timestamp */}
+              <div className="scheduled-preview-meta">
+                <span className="scheduled-platform-badge">Threads</span>
+                <span className="scheduled-preview-time">
+                  {new Date().toLocaleString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric', 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true 
+                  })}
+                </span>
+              </div>
+
+              {/* Post Text - Truncated */}
+              <p className="scheduled-preview-text">
                 {(() => {
                   const hook = editableContent.post.hook?.[selectedOptionIndexes['hook'] ?? 0];
                   const body = editableContent.post.body?.[selectedOptionIndexes['body'] ?? 0];
@@ -2711,32 +2731,34 @@ export default function Home() {
                   if (body) parts.push(stripHtml(body));
                   if (cta) parts.push(stripHtml(cta));
                   
-                  return parts.join('\n\n');
+                  const fullText = parts.join('\n\n');
+                  // Truncate to ~100 chars for compact preview
+                  return fullText.length > 100 ? fullText.substring(0, 100) + '...' : fullText;
                 })()}
               </p>
-            </div>
 
-            {/* Action Buttons at Bottom */}
-            <div className="preview-card-actions">
-              <button
-                className="preview-action-btn preview-btn-cancel"
-                onClick={() => {
-                  if (window.confirm('Discard this post preview?')) {
-                    // Clear preview or navigate away
-                  }
-                }}
-              >
-                🗑️ Cancel
-              </button>
-              <button
-                className="preview-action-btn preview-btn-post"
-                onClick={() => {
-                  setShowPostConfirmation(true);
-                }}
-                disabled={!session}
-              >
-                📤 Post Now
-              </button>
+              {/* Action Buttons */}
+              <div className="scheduled-preview-actions">
+                <button
+                  className="scheduled-action-btn scheduled-btn-post"
+                  onClick={() => {
+                    setShowPostConfirmation(true);
+                  }}
+                  disabled={!session}
+                >
+                  📤 Post Now
+                </button>
+                <button
+                  className="scheduled-action-btn scheduled-btn-cancel"
+                  onClick={() => {
+                    if (window.confirm('Discard this post preview?')) {
+                      // Clear preview or navigate away
+                    }
+                  }}
+                >
+                  🗑️ Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
