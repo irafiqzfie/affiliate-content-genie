@@ -2685,14 +2685,14 @@ export default function Home() {
       {/* Ready to Post - Dark Card Preview */}
       {generatedContent.post && editableContent.post && (
         <div className="scheduled-posts-section">
-          <h2 className="section-title">Scheduled Posts</h2>
+          <h2 className="section-title">Ready To Post</h2>
 
           <div className="scheduled-preview-card">
             {/* Image on Top */}
-            {generatedImages['body'] && (
+            {generatedImages['post-image-generation'] && (
               <div className="scheduled-preview-image">
                 <Image 
-                  src={generatedImages['body']} 
+                  src={generatedImages['post-image-generation']} 
                   alt="Post preview" 
                   width={320}
                   height={180}
