@@ -62,14 +62,25 @@ export async function POST(request: Request) {
       }, { status: 503 });
     }
     
-    const newPost = await prisma.scheduledPost.create({ data: {
+    // Build data object conditionally to avoid passing undefined/null for required fields
+    const postData: any = {
       platform,
       scheduledTime: new Date(scheduledTime),
-      imageUrl,
       caption,
-      affiliateLink: affiliateLink || null,
       status
-    }});
+    };
+
+    // Only add imageUrl if it exists and is not null
+    if (imageUrl && imageUrl !== null) {
+      postData.imageUrl = imageUrl;
+    }
+
+    // Only add affiliateLink if it exists
+    if (affiliateLink) {
+      postData.affiliateLink = affiliateLink;
+    }
+
+    const newPost = await prisma.scheduledPost.create({ data: postData });
 
     console.log('✅ Post scheduled successfully:', newPost.id);
     return NextResponse.json(newPost, { status: 201 });

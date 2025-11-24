@@ -35,7 +35,7 @@ model ScheduledPost {
   userId        String?
   platform      String
   scheduledTime DateTime
-  imageUrl      String
+  imageUrl      String?
   caption       String
   status        String
   affiliateLink String?
