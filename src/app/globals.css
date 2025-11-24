@@ -5971,28 +5971,38 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
-.scheduled-post-image {
-  width: 100%;
-  aspect-ratio: 4/3;
+.scheduled-card-layout {
+  display: flex;
+  gap: 0;
+}
+
+.scheduled-post-thumbnail {
+  flex-shrink: 0;
+  width: 280px;
+  height: 200px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.3);
 }
 
-.scheduled-post-image .post-img {
+.scheduled-post-thumbnail .post-thumbnail-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 .scheduled-post-content {
+  flex: 1;
   padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .scheduled-post-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .platform-selection {
@@ -6054,10 +6064,16 @@ body {
 
 .scheduled-post-text {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9375rem;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.5;
   white-space: pre-wrap;
   margin-bottom: 1rem;
+  flex: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -6163,18 +6179,18 @@ body {
 .scheduled-post-actions {
   display: flex;
   gap: 0.75rem;
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .action-btn {
   flex: 1;
-  padding: 0.875rem 1.25rem;
-  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
   border: none;
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
