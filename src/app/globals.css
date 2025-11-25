@@ -6004,9 +6004,18 @@ body {
   margin-bottom: 1rem;
 }
 
+/* Grid container for multiple preview cards */
+.ready-to-post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
 /* Dark Scheduled Post Preview Card */
 .scheduled-preview-card {
-  max-width: 320px;
+  width: 100%;
+  max-width: 400px;
   background: rgba(30, 30, 35, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;

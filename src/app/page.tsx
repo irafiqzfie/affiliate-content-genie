@@ -2861,87 +2861,89 @@ export default function Home() {
         <div className="scheduled-posts-section">
           <h2 className="section-title">Ready To Post</h2>
 
-          {readyToPostItems.map((item) => (
-            <div key={item.id} className="scheduled-preview-card">
-              {/* Image on Top */}
-              {item.imageUrl && (
-                <div className="scheduled-preview-image">
-                  <Image 
-                    src={item.imageUrl} 
-                    alt="Post preview" 
-                    width={320}
-                    height={180}
-                    className="scheduled-image"
-                    unoptimized
-                  />
-                </div>
-              )}
+          <div className="ready-to-post-grid">
+            {readyToPostItems.map((item) => (
+              <div key={item.id} className="scheduled-preview-card">
+                {/* Image on Top */}
+                {item.imageUrl && (
+                  <div className="scheduled-preview-image">
+                    <Image 
+                      src={item.imageUrl} 
+                      alt="Post preview" 
+                      width={320}
+                      height={180}
+                      className="scheduled-image"
+                      unoptimized
+                    />
+                  </div>
+                )}
 
-              {/* Content Section */}
-              <div className="scheduled-preview-content">
-                {/* Platform Badge & Timestamp */}
-                <div className="scheduled-preview-meta">
-                  <span className="scheduled-platform-badge">Threads</span>
-                  <span className="scheduled-preview-time">
-                    {new Date(item.timestamp).toLocaleString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric', 
-                      year: 'numeric', 
-                      hour: 'numeric', 
-                      minute: '2-digit', 
-                      hour12: true 
-                    })}
-                  </span>
-                </div>
+                {/* Content Section */}
+                <div className="scheduled-preview-content">
+                  {/* Platform Badge & Timestamp */}
+                  <div className="scheduled-preview-meta">
+                    <span className="scheduled-platform-badge">Threads</span>
+                    <span className="scheduled-preview-time">
+                      {new Date(item.timestamp).toLocaleString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric', 
+                        hour: 'numeric', 
+                        minute: '2-digit', 
+                        hour12: true 
+                      })}
+                    </span>
+                  </div>
 
-                {/* Post Text - Truncated */}
-                <p className="scheduled-preview-text">
-                  {(() => {
-                    const hook = item.content.post?.hook?.[item.selectedIndexes['hook'] ?? 0];
-                    const body = item.content.post?.body?.[item.selectedIndexes['body'] ?? 0];
-                    const cta = item.content.post?.cta?.[item.selectedIndexes['cta'] ?? 0];
-                    
-                    const parts = [];
-                    if (hook) parts.push(stripHtml(hook));
-                    if (body) parts.push(stripHtml(body));
-                    if (cta) parts.push(stripHtml(cta));
-                    
-                    const fullText = parts.join('\n\n');
-                    // Truncate to ~100 chars for compact preview
-                    return fullText.length > 100 ? fullText.substring(0, 100) + '...' : fullText;
-                  })()}
-                </p>
+                  {/* Post Text - Truncated */}
+                  <p className="scheduled-preview-text">
+                    {(() => {
+                      const hook = item.content.post?.hook?.[item.selectedIndexes['hook'] ?? 0];
+                      const body = item.content.post?.body?.[item.selectedIndexes['body'] ?? 0];
+                      const cta = item.content.post?.cta?.[item.selectedIndexes['cta'] ?? 0];
+                      
+                      const parts = [];
+                      if (hook) parts.push(stripHtml(hook));
+                      if (body) parts.push(stripHtml(body));
+                      if (cta) parts.push(stripHtml(cta));
+                      
+                      const fullText = parts.join('\n\n');
+                      // Truncate to ~100 chars for compact preview
+                      return fullText.length > 100 ? fullText.substring(0, 100) + '...' : fullText;
+                    })()}
+                  </p>
 
-                {/* Action Buttons */}
-                <div className="scheduled-preview-actions">
-                  <button
-                    className="scheduled-action-btn scheduled-btn-post"
-                    onClick={() => {
-                      // Set current content to this item's content for posting
-                      setEditableContent(item.content);
-                      setSelectedOptionIndexes(item.selectedIndexes);
-                      setGeneratedImages({ 'post-image-generation': item.imageUrl });
-                      setShowPostConfirmation(true);
-                    }}
-                    disabled={!session}
-                  >
-                    📤 Post Now
-                  </button>
-                  <button
-                    className="scheduled-action-btn scheduled-btn-cancel"
-                    onClick={() => {
-                      if (window.confirm('Remove this post from preview?')) {
-                        setReadyToPostItems(prev => prev.filter(p => p.id !== item.id));
-                        console.log('✅ Post removed from preview');
-                      }
-                    }}
-                  >
-                    🗑️ Remove
-                  </button>
+                  {/* Action Buttons */}
+                  <div className="scheduled-preview-actions">
+                    <button
+                      className="scheduled-action-btn scheduled-btn-post"
+                      onClick={() => {
+                        // Set current content to this item's content for posting
+                        setEditableContent(item.content);
+                        setSelectedOptionIndexes(item.selectedIndexes);
+                        setGeneratedImages({ 'post-image-generation': item.imageUrl });
+                        setShowPostConfirmation(true);
+                      }}
+                      disabled={!session}
+                    >
+                      📤 Post Now
+                    </button>
+                    <button
+                      className="scheduled-action-btn scheduled-btn-cancel"
+                      onClick={() => {
+                        if (window.confirm('Remove this post from preview?')) {
+                          setReadyToPostItems(prev => prev.filter(p => p.id !== item.id));
+                          console.log('✅ Post removed from preview');
+                        }
+                      }}
+                    >
+                      🗑️ Remove
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
