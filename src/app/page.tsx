@@ -1341,11 +1341,53 @@ export default function Home() {
       setGeneratedImages({});
     }
     
+    // Parse and restore Info tab data from saved info string
+    if (item.info) {
+      try {
+        // Extract trendscore
+        const trendscoreMatch = item.info.match(/Trend Score[:\s]*(\d+)/i);
+        if (trendscoreMatch) {
+          setTrendscore(parseInt(trendscoreMatch[1], 10));
+        }
+        
+        // Extract affiliate potential
+        const potentialMatch = item.info.match(/Affiliate Potential[:\s]*(High|Medium|Low)/i);
+        if (potentialMatch) {
+          setAffiliatePotential(potentialMatch[1]);
+        }
+        
+        // Extract product summary
+        const summaryMatch = item.info.match(/Product Summary[:\s]*\n([^\n]+(?:\n(?!(?:Key Features|Trend Score|Affiliate Potential))[^\n]+)*)/i);
+        if (summaryMatch) {
+          setProductSummary(summaryMatch[1].trim());
+        }
+        
+        // Extract key features
+        const featuresMatch = item.info.match(/Key Features[:\s]*\n((?:[-•]\s*.+\n?)+)/i);
+        if (featuresMatch) {
+          const features = featuresMatch[1]
+            .split('\n')
+            .map(line => line.replace(/^[-•]\s*/, '').trim())
+            .filter(line => line.length > 0);
+          setProductFeatures(features);
+        }
+      } catch (error) {
+        console.error('Error parsing saved info:', error);
+        // If parsing fails, reset to null
+        setTrendscore(null);
+        setProductSummary(null);
+        setAffiliatePotential(null);
+        setProductFeatures(null);
+      }
+    } else {
+      // No saved info, reset states
+      setTrendscore(null);
+      setProductSummary(null);
+      setAffiliatePotential(null);
+      setProductFeatures(null);
+    }
+    
     setActiveOutputTab('video');
-    setTrendscore(null);
-    setProductSummary(null);
-    setProductFeatures(null);
-    setAffiliatePotential(null);
     initializeOptionIndexes();
     setCurrentPage('generator');
     setHasGeneratedAttempt(true);
