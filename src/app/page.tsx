@@ -694,7 +694,6 @@ export default function Home() {
 
     // mark that user attempted generation so UI shows output area (even if empty/loading)
     setHasGeneratedAttempt(true);
-    setShowReadyToPost(true); // Show "Ready To Post" for newly generated content
 
     setIsLoading(true);
     
@@ -2693,6 +2692,7 @@ export default function Home() {
             {(generatedContent.post && editableContent.post) && (
               <button 
                 onClick={() => {
+                  setShowReadyToPost(true); // Enable "Ready To Post" preview
                   setCurrentPage('scheduler');
                   // Scroll to top after navigation
                   setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
