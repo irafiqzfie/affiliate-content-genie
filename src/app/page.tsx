@@ -1190,7 +1190,32 @@ export default function Home() {
     // Ensure we always send non-empty strings for content
     const videoContent = generatedContent.video || '';
     const postContent = generatedContent.post || '';
-    const infoContent = generatedContent.info || '';
+    
+    // Serialize Info tab data into a structured string
+    let infoContent = '';
+    if (trendscore !== null || productSummary || affiliatePotential || (productFeatures && productFeatures.length > 0)) {
+      const infoParts: string[] = [];
+      
+      if (trendscore !== null) {
+        infoParts.push(`Trend Score: ${trendscore}`);
+      }
+      
+      if (affiliatePotential) {
+        infoParts.push(`Affiliate Potential: ${affiliatePotential}`);
+      }
+      
+      if (productSummary) {
+        infoParts.push(`Product Summary:\n${productSummary}`);
+      }
+      
+      if (productFeatures && productFeatures.length > 0) {
+        infoParts.push(`Key Features:\n${productFeatures.map(f => `- ${f}`).join('\n')}`);
+      }
+      
+      infoContent = infoParts.join('\n\n');
+    } else {
+      infoContent = generatedContent.info || '';
+    }
     
     // Don't save if all are empty
     if (!videoContent && !postContent && !infoContent) {
