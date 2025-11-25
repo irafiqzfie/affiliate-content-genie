@@ -239,6 +239,7 @@ export default function Home() {
   const [affiliateLink, setAffiliateLink] = useState('');
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
+  const [showReadyToPost, setShowReadyToPost] = useState(false); // Separate flag for "Ready To Post" preview
   const [isShopeeImportOpen, setIsShopeeImportOpen] = useState(false);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<'Threads' | 'Facebook'>>(new Set(['Threads']));
 
@@ -693,6 +694,7 @@ export default function Home() {
 
     // mark that user attempted generation so UI shows output area (even if empty/loading)
     setHasGeneratedAttempt(true);
+    setShowReadyToPost(true); // Show "Ready To Post" for newly generated content
 
     setIsLoading(true);
     
@@ -1176,6 +1178,7 @@ export default function Home() {
     setAffiliatePotential(null);
     setActiveOutputTab('video');
     setHasGeneratedAttempt(false);
+    setShowReadyToPost(false); // Reset "Ready To Post" flag
     localStorage.removeItem(LOCAL_STORAGE_KEY);
   };
 
@@ -1421,6 +1424,7 @@ export default function Home() {
     initializeOptionIndexes();
     setCurrentPage('generator');
     setHasGeneratedAttempt(true); // Show output section for loaded content
+    setShowReadyToPost(false); // Don't show "Ready To Post" for loaded items
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
@@ -2837,7 +2841,7 @@ export default function Home() {
   const renderSchedulerPage = () => (
     <>
       {/* Ready to Post - Dark Card Preview */}
-      {generatedContent.post && editableContent.post && (
+      {showReadyToPost && generatedContent.post && editableContent.post && (
         <div className="scheduled-posts-section">
           <h2 className="section-title">Ready To Post</h2>
 
@@ -2911,6 +2915,7 @@ export default function Home() {
                       setEditableContent({ video: null, post: null, info: null });
                       setGeneratedImages({});
                       setHasGeneratedAttempt(false);
+                      setShowReadyToPost(false); // Hide "Ready To Post" preview
                       console.log('✅ Post preview cleared');
                     }
                   }}
