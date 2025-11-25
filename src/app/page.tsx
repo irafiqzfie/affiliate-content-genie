@@ -1420,7 +1420,7 @@ export default function Home() {
     setActiveOutputTab('video');
     initializeOptionIndexes();
     setCurrentPage('generator');
-    setHasGeneratedAttempt(true);
+    setHasGeneratedAttempt(false); // Don't show "Ready To Post" for loaded items
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
