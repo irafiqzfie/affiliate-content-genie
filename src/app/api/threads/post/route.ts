@@ -103,6 +103,18 @@ export async function POST(request: NextRequest) {
     if (!containerResponse.ok) {
       const errorData = await containerResponse.json();
       console.error('Threads container creation failed:', errorData);
+      
+      // Check if it's an expired token error
+      if (errorData.error?.code === 190 || errorData.error?.message?.includes('expired')) {
+        return NextResponse.json(
+          { 
+            error: 'Your Threads session has expired. Please sign out and sign back in to reconnect your account.',
+            details: errorData 
+          },
+          { status: 401 }
+        );
+      }
+      
       return NextResponse.json(
         { 
           error: 'Failed to create Threads post container',
