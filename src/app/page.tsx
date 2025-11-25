@@ -2710,7 +2710,7 @@ export default function Home() {
                       </div>
                     )}
                   </>
-                )}
+                ) : null}
               </>
             ) : activeOutputTab === 'post' ? (
                   <>
