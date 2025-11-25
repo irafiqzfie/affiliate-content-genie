@@ -1467,13 +1467,82 @@ export default function Home() {
         const postPromises = platforms.map(async (platform) => {
           setSchedulingPlatform(platform);
           
+          const caption = stripHtml(captionText);
+          const mediaUrl = (options.includeImage && !options.textOnly && finalImageUrl) ? finalImageUrl : null;
+          
+          // First, post to Threads API
+          console.log('🚀 Posting to Threads with:', {
+            text: caption.substring(0, 50) + '...',
+            mediaUrl: mediaUrl || '(text-only)',
+            mediaType: mediaUrl ? 'IMAGE' : 'TEXT'
+          });
+          
+          const threadsResponse = await fetch(`${API_URL}/threads/post`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text: caption,
+              ...(mediaUrl && { mediaUrl, mediaType: 'IMAGE' })
+            })
+          });
+
+          const threadsData = await threadsResponse.json();
+
+          if (!threadsResponse.ok) {
+            console.error('❌ Threads API error:', threadsData);
+            throw new Error(threadsData.error || threadsData.details?.error?.message || `Failed to post to ${platform}`);
+          }
+
+          console.log('✅ Successfully posted to Threads!', { postId: threadsData.postId });
+
+          // If there's an affiliate link, post it as a reply/comment with CTA
+          if (affiliateLink && threadsData.postId) {
+            console.log('💬 Posting affiliate link with CTA as comment...');
+            
+            // Get the CTA text from generated content
+            const postContent = editableContent.post;
+            const selectedCtaIndex = selectedOptionIndexes['cta'] ?? 0;
+            const ctaText = postContent?.cta?.[selectedCtaIndex];
+            
+            // Build the comment text: CTA + affiliate link
+            const commentText = ctaText 
+              ? `${stripHtml(ctaText)}\n\n🔗 ${affiliateLink}`
+              : `🔗 ${affiliateLink}`;
+            
+            try {
+              const replyResponse = await fetch(`${API_URL}/threads/reply`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  postId: threadsData.postId,
+                  text: commentText
+                })
+              });
+
+              const replyData = await replyResponse.json();
+
+              if (replyResponse.ok) {
+                console.log('✅ Affiliate link with CTA posted as comment!');
+              } else {
+                console.warn('⚠️ Failed to post affiliate link:', replyData);
+              }
+            } catch (replyErr) {
+              console.warn('⚠️ Error posting affiliate link comment:', replyErr);
+            }
+          }
+          
+          // Then save to database
           const newPostPayload = {
               platform: platform,
               scheduledTime: scheduledDateTime,
-              imageUrl: (options.includeImage && !options.textOnly && finalImageUrl) ? finalImageUrl : null,
-              caption: stripHtml(captionText),
+              imageUrl: mediaUrl,
+              caption: caption,
               affiliateLink: affiliateLink || undefined,
-              status: 'Posted' as const, // Mark as Posted immediately
+              status: 'Posted' as const,
           };
 
           const response = await fetch(`${API_URL}/scheduled-posts`, {
