@@ -783,11 +783,12 @@ export default function Home() {
         throw new Error('Generated content was in an unexpected format. Please try again.');
       }
       
-      const newGenerated = { video: videoContent, post: postContent };
+      const newGenerated = { video: videoContent, post: postContent, info: infoContent };
       setGeneratedContent(newGenerated);
       setEditableContent({
           video: parseContent(videoContent),
           post: parseContent(postContent),
+          info: parseContent(infoContent),
       });
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newGenerated));
       initializeOptionIndexes();
