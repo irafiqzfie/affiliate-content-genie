@@ -1549,12 +1549,20 @@ export default function Home() {
         const postPromises = platforms.map(async (platform) => {
           setSchedulingPlatform(platform);
           
-          const caption = stripHtml(captionText);
+          let caption = stripHtml(captionText);
+          
+          // Threads has a 500-character limit - truncate if needed
+          if (platform === 'Threads' && caption.length > 500) {
+            console.warn(`⚠️ Caption too long for Threads (${caption.length} chars), truncating to 500...`);
+            caption = caption.substring(0, 497) + '...';
+          }
+          
           const mediaUrl = (options.includeImage && !options.textOnly && finalImageUrl) ? finalImageUrl : null;
           
           // First, post to Threads API
           console.log('🚀 Posting to Threads with:', {
             text: caption.substring(0, 50) + '...',
+            textLength: caption.length,
             mediaUrl: mediaUrl || '(text-only)',
             mediaType: mediaUrl ? 'IMAGE' : 'TEXT'
           });
