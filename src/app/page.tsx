@@ -2898,7 +2898,12 @@ export default function Home() {
                   className="scheduled-action-btn scheduled-btn-cancel"
                   onClick={() => {
                     if (window.confirm('Discard this post preview?')) {
-                      // Clear preview or navigate away
+                      // Clear the preview by resetting content
+                      setGeneratedContent({ video: null, post: null, info: null });
+                      setEditableContent({ video: null, post: null, info: null });
+                      setGeneratedImages({});
+                      setHasGeneratedAttempt(false);
+                      console.log('✅ Post preview cleared');
                     }
                   }}
                 >
