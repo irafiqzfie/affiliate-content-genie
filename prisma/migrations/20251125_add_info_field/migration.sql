@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "SavedItem" ADD COLUMN IF NOT EXISTS "info" TEXT NOT NULL DEFAULT '';
