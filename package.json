@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma db push --schema=prisma/schema.clean.prisma --accept-data-loss --skip-generate && prisma generate --schema=prisma/schema.clean.prisma && next build --turbopack",
+    "build": "node scripts/deploy-db.js && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate --schema=prisma/schema.clean.prisma || echo 'Prisma generate skipped'",
