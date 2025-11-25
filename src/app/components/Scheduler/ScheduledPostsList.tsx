@@ -14,14 +14,7 @@ export function ScheduledPostsList({ scheduledPosts, onDeletePost, onPostNow }: 
   const [expandedPostId, setExpandedPostId] = useState<number | null>(null);
 
   if (scheduledPosts.length === 0) {
-    return (
-      <div className="scheduler-page">
-        <div className="empty-scheduler-page">
-          <h2>No Saved Posts</h2>
-          <p>Use the &quot;🗓️ Schedule&quot; button to save posts for later.</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const toggleExpanded = (postId: number) => {
