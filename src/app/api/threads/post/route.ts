@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Container created:', creationId);
 
-    // Step 1.5: Wait for container to be ready (for both images and videos)
+    // Step 1.5: Wait for container to be ready (ONLY for media posts)
     if (mediaUrl) {
       console.log('⏳ Waiting for media container to be ready...');
       
@@ -164,6 +164,8 @@ export async function POST(request: NextRequest) {
       }
       
       console.log('✅ Media container ready for publishing');
+    } else {
+      console.log('📝 Text-only post - publishing immediately');
     }
 
     // Step 2: Publish the container
