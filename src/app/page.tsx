@@ -212,7 +212,7 @@ export default function Home() {
   const [advancedInputs, setAdvancedInputs] = useState(initialAdvancedInputs);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState<{ video: string | null, post: string | null }>({ video: null, post: null });
+  const [generatedContent, setGeneratedContent] = useState<{ video: string | null, post: string | null, info: string | null }>({ video: null, post: null, info: null });
   const [editableContent, setEditableContent] = useState<{ video: ParsedContent | null, post: ParsedContent | null }>({ video: null, post: null });
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
