@@ -117,56 +117,52 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Container created:', creationId);
 
-    // Step 1.5: Wait for container to be ready (ONLY for media posts)
-    if (mediaUrl) {
-      console.log('⏳ Waiting for media container to be ready...');
+    // Step 1.5: Wait for container to be ready
+    console.log('⏳ Waiting for container to be ready...');
+    
+    let statusAttempts = 0;
+    const maxAttempts = mediaUrl ? (mediaType === 'VIDEO' ? 30 : 10) : 5; // 30s for video, 10s for images, 5s for text
+    let isReady = false;
+    
+    while (statusAttempts < maxAttempts && !isReady) {
+      // Check container status
+      const statusUrl = `https://graph.threads.net/v1.0/${creationId}?fields=status,error_message&access_token=${accessToken}`;
+      const statusResponse = await fetch(statusUrl);
       
-      let statusAttempts = 0;
-      const maxAttempts = mediaType === 'VIDEO' ? 30 : 10; // 30s for video, 10s for images
-      let isReady = false;
-      
-      while (statusAttempts < maxAttempts && !isReady) {
-        // Check container status
-        const statusUrl = `https://graph.threads.net/v1.0/${creationId}?fields=status,error_message&access_token=${accessToken}`;
-        const statusResponse = await fetch(statusUrl);
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        console.log(`📊 Container status (attempt ${statusAttempts + 1}):`, statusData.status);
         
-        if (statusResponse.ok) {
-          const statusData = await statusResponse.json();
-          console.log(`📊 Container status (attempt ${statusAttempts + 1}):`, statusData.status);
-          
-          if (statusData.status === 'FINISHED') {
-            isReady = true;
-            break;
-          } else if (statusData.status === 'ERROR') {
-            return NextResponse.json(
-              { 
-                error: 'Media processing failed',
-                details: statusData.error_message || 'Unknown error during media processing'
-              },
-              { status: 400 }
-            );
-          }
+        if (statusData.status === 'FINISHED') {
+          isReady = true;
+          break;
+        } else if (statusData.status === 'ERROR') {
+          return NextResponse.json(
+            { 
+              error: 'Container processing failed',
+              details: statusData.error_message || 'Unknown error during processing'
+            },
+            { status: 400 }
+          );
         }
-        
-        // Wait 1 second before checking again
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        statusAttempts++;
       }
       
-      if (!isReady) {
-        return NextResponse.json(
-          { 
-            error: 'Media processing timeout',
-            details: `Media took too long to process. Please try again.`
-          },
-          { status: 408 }
-        );
-      }
-      
-      console.log('✅ Media container ready for publishing');
-    } else {
-      console.log('📝 Text-only post - publishing immediately');
+      // Wait 1 second before checking again
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      statusAttempts++;
     }
+    
+    if (!isReady) {
+      return NextResponse.json(
+        { 
+          error: 'Container processing timeout',
+          details: `Container took too long to process. Please try again.`
+        },
+        { status: 408 }
+      );
+    }
+    
+    console.log('✅ Container ready for publishing');
 
     // Step 2: Publish the container
     const publishUrl = `https://graph.threads.net/v1.0/${userId}/threads_publish`;

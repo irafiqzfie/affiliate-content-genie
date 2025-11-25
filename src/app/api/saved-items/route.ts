@@ -69,8 +69,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid field types: productLink must be a string or null' }, { status: 400 });
     }
 
-    if (typeof content !== 'object' || !content.video || !content.post || !content.info) {
-      console.log('❌ Invalid content structure:', { contentType: typeof content, hasVideo: content?.video, hasPost: content?.post, hasInfo: content?.info });
+    if (typeof content !== 'object' || !('video' in content) || !('post' in content) || !('info' in content)) {
+      console.log('❌ Invalid content structure:', { contentType: typeof content, hasVideo: 'video' in (content || {}), hasPost: 'post' in (content || {}), hasInfo: 'info' in (content || {}) });
       return NextResponse.json({ message: 'Invalid content structure: content must have video, post, and info properties' }, { status: 400 });
     }
 
