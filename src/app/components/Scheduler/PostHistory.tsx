@@ -5,9 +5,11 @@ import Image from 'next/image';
 
 interface PostHistoryProps {
   posts: ScheduledPost[];
+  onDeletePost: (id: number) => void;
+  onClearAll: () => void;
 }
 
-export function PostHistory({ posts }: PostHistoryProps) {
+export function PostHistory({ posts, onDeletePost, onClearAll }: PostHistoryProps) {
   if (posts.length === 0) {
     return (
       <div className="post-history-empty">
@@ -50,11 +52,26 @@ export function PostHistory({ posts }: PostHistoryProps) {
     });
   };
 
+  const handleClearAll = () => {
+    if (window.confirm(`Are you sure you want to delete all ${posts.length} post${posts.length !== 1 ? 's' : ''} from history? This cannot be undone.`)) {
+      onClearAll();
+    }
+  };
+
   return (
     <div className="post-history-container">
       <div className="post-history-header">
-        <h3>📜 Post History</h3>
-        <span className="post-count">{posts.length} post{posts.length !== 1 ? 's' : ''}</span>
+        <div>
+          <h3>📜 Post History</h3>
+          <span className="post-count">{posts.length} post{posts.length !== 1 ? 's' : ''}</span>
+        </div>
+        <button 
+          onClick={handleClearAll}
+          className="clear-all-btn"
+          title="Clear all post history"
+        >
+          🗑️ Clear All
+        </button>
       </div>
       <div className="post-history-list">
         {posts.map(post => (
@@ -99,6 +116,17 @@ export function PostHistory({ posts }: PostHistoryProps) {
                 </a>
               )}
             </div>
+            <button
+              className="history-delete-btn"
+              onClick={() => {
+                if (window.confirm('Delete this post from history?')) {
+                  onDeletePost(post.id);
+                }
+              }}
+              title="Delete post"
+            >
+              🗑️
+            </button>
           </div>
         ))}
       </div>

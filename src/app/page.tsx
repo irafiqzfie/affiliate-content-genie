@@ -1713,6 +1713,53 @@ export default function Home() {
     }
   };
 
+  const handleDeletePostedPost = async (id: number) => {
+    const originalPosts = [...postedPosts];
+    const updatedPosts = postedPosts.filter(post => post.id !== id);
+    setPostedPosts(updatedPosts);
+
+    try {
+        const response = await fetch(`${API_URL}/scheduled-posts/${id}`, { method: 'DELETE' });
+        if (!response.ok) {
+            setPostedPosts(originalPosts);
+            throw new Error('Failed to delete post from history.');
+        }
+        console.log('✅ Post deleted from history');
+    } catch (err) {
+        console.error(err);
+        setError('Could not delete the post. Please try again.');
+        setPostedPosts(originalPosts);
+    }
+  };
+
+  const handleClearAllPostedPosts = async () => {
+    const originalPosts = [...postedPosts];
+    const postIds = postedPosts.map(p => p.id);
+    
+    // Optimistically clear the UI
+    setPostedPosts([]);
+
+    try {
+        // Delete all posts from database
+        const deletePromises = postIds.map(id => 
+            fetch(`${API_URL}/scheduled-posts/${id}`, { method: 'DELETE' })
+        );
+        
+        const results = await Promise.all(deletePromises);
+        const failedDeletes = results.filter(r => !r.ok);
+        
+        if (failedDeletes.length > 0) {
+            throw new Error(`Failed to delete ${failedDeletes.length} post(s)`);
+        }
+        
+        console.log(`✅ Cleared all ${postIds.length} posts from history`);
+    } catch (err) {
+        console.error(err);
+        setError('Could not clear all posts. Please try again.');
+        setPostedPosts(originalPosts);
+    }
+  };
+
   const handlePostNow = async (post: ScheduledPost) => {
     if (!session) {
       setError('Please sign in with Threads to post.');
@@ -2961,7 +3008,11 @@ export default function Home() {
         onDeletePost={handleDeleteScheduledPost}
         onPostNow={handlePostNow}
       />
-      <PostHistory posts={postedPosts} />
+      <PostHistory 
+        posts={postedPosts} 
+        onDeletePost={handleDeletePostedPost}
+        onClearAll={handleClearAllPostedPosts}
+      />
     </>
   );
 

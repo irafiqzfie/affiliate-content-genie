@@ -65,9 +65,9 @@ The output MUST be in the following strict Markdown format. Start with the video
 3. [Third Hook Option]
 
 📄 Post Body (Long-Form):
-1. [First Long-Form Post Body Option - A comprehensive, detailed post text (3-5 paragraphs) highlighting benefits, features, and personal experience. MAXIMUM 450 characters. Keep it coherent, persuasive, and focused while respecting this hard character limit]
-2. [Second Long-Form Post Body Option - MAXIMUM 450 characters]
-3. [Third Long-Form Post Body Option - MAXIMUM 450 characters]
+1. [First Long-Form Post Body Option - A comprehensive, detailed post text (3-5 paragraphs) highlighting benefits, features, and personal experience. MAXIMUM 400 characters. Keep it coherent, persuasive, and focused while respecting this hard character limit]
+2. [Second Long-Form Post Body Option - MAXIMUM 400 characters]
+3. [Third Long-Form Post Body Option - MAXIMUM 400 characters]
 
 🎯 Post Body (Hook/Short):
 1. [First Short Hook Option - A punchy, attention-grabbing 1-2 sentence version perfect for quick engagement]
