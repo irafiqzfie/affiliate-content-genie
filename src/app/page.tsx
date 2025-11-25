@@ -775,11 +775,13 @@ export default function Home() {
       
       const videoContentMatch = content.match(/---VIDEO START---([\s\S]*?)---VIDEO END---/);
       const postContentMatch = content.match(/---POST START---([\s\S]*?)---POST END---/);
+      const infoContentMatch = content.match(/---INFO START---([\s\S]*?)---INFO END---/);
 
       const videoContent = videoContentMatch ? videoContentMatch[1].trim() : '';
       const postContent = postContentMatch ? postContentMatch[1].trim() : '';
+      const infoContent = infoContentMatch ? infoContentMatch[1].trim() : '';
       
-      if (!videoContent && !postContent) {
+      if (!videoContent && !postContent && !infoContent) {
         throw new Error('Generated content was in an unexpected format. Please try again.');
       }
       
