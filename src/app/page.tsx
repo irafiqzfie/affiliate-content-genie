@@ -213,7 +213,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<{ video: string | null, post: string | null, info: string | null }>({ video: null, post: null, info: null });
-  const [editableContent, setEditableContent] = useState<{ video: ParsedContent | null, post: ParsedContent | null }>({ video: null, post: null });
+  const [editableContent, setEditableContent] = useState<{ video: ParsedContent | null, post: ParsedContent | null, info: ParsedContent | null }>({ video: null, post: null, info: null });
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -383,10 +383,12 @@ export default function Home() {
             if (savedData && typeof savedData === 'object' && ('video' in savedData || 'post' in savedData)) {
                 const videoContent = savedData.video || '';
                 const postContent = savedData.post || '';
-                setGeneratedContent({ video: videoContent, post: postContent });
+                const infoContent = savedData.info || '';
+                setGeneratedContent({ video: videoContent, post: postContent, info: infoContent });
                 setEditableContent({
                     video: parseContent(videoContent),
                     post: parseContent(postContent),
+                    info: parseContent(infoContent),
                 });
                 initializeOptionIndexes();
             } else {
@@ -732,8 +734,8 @@ export default function Home() {
       console.log('ℹ️ No product data provided for analysis');
     }
     setError(null);
-    setGeneratedContent({ video: null, post: null });
-    setEditableContent({ video: null, post: null });
+    setGeneratedContent({ video: null, post: null, info: null });
+    setEditableContent({ video: null, post: null, info: null });
     setGeneratedImages({});
     setGeneratedVideos({});
     setVideoLoadingStates({});
@@ -1155,8 +1157,8 @@ export default function Home() {
   };
 
   const handleClear = () => {
-    setGeneratedContent({ video: null, post: null });
-    setEditableContent({ video: null, post: null });
+    setGeneratedContent({ video: null, post: null, info: null });
+    setEditableContent({ video: null, post: null, info: null });
     setEditingKey(null);
     setProductLink('');
     setAdvancedInputs(initialAdvancedInputs);
@@ -1575,8 +1577,8 @@ export default function Home() {
         setPendingPlatform(null);
         
         // Clear the preview after successful posting
-        setGeneratedContent({ video: generatedContent.video, post: null });
-        setEditableContent({ video: editableContent.video, post: null });
+        setGeneratedContent({ video: generatedContent.video, post: null, info: generatedContent.info });
+        setEditableContent({ video: editableContent.video, post: null, info: editableContent.info });
         
         const platformNames = platforms.join(' and ');
         alert(`Post published to ${platformNames}!`);
