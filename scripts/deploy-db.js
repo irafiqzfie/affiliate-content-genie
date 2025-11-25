@@ -3,16 +3,25 @@
 /**
  * Database deployment script for Vercel
  * Ensures schema changes are applied before building
- * Updated: 2025-11-25
+ * Updated: 2025-11-25 v3
  */
 
 const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
-console.log('🔧 Starting database deployment (v2)...');
+console.log('🔧 Starting database deployment (v3)...');
 console.log('📋 Environment check:', {
   hasDatabaseUrl: !!process.env.DATABASE_URL,
   nodeEnv: process.env.NODE_ENV
 });
+
+// Clean Prisma Client cache
+const prismaClientPath = path.join(__dirname, '..', 'node_modules', '.prisma', 'client');
+if (fs.existsSync(prismaClientPath)) {
+  console.log('🧹 Cleaning old Prisma Client cache...');
+  fs.rmSync(prismaClientPath, { recursive: true, force: true });
+}
 
 try {
   // Apply migrations

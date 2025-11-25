@@ -7,7 +7,6 @@
     "build": "node scripts/deploy-db.js && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate --schema=prisma/schema.clean.prisma || echo 'Prisma generate skipped'",
     "prisma:generate": "prisma generate --schema=prisma/schema.clean.prisma",
     "prisma:push": "prisma db push --schema=prisma/schema.clean.prisma --accept-data-loss && prisma generate --schema=prisma/schema.clean.prisma",
     "prisma:migrate": "prisma migrate dev --name init --schema=prisma/schema.clean.prisma",
