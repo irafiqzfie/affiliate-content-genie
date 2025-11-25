@@ -1359,12 +1359,17 @@ export default function Home() {
     });
     
     // Restore the saved image to generatedImages state
+    // This prevents auto-generation in the useEffect
     if (item.imageUrl) {
       // Use 'post-image-generation' key to match UI expectations and prevent auto-regeneration
       setGeneratedImages({ 'post-image-generation': item.imageUrl });
+      console.log('🖼️ Restored saved image from blob:', item.imageUrl);
     } else {
       setGeneratedImages({});
     }
+    
+    // Clear product image previews to prevent auto-generation trigger
+    setProductImagePreviews([]);
     
     // Parse and restore Info tab data from saved info string
     if (item.info) {
