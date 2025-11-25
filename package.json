@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "npm run prisma:push && next build --turbopack",
+    "build": "prisma db push --schema=prisma/schema.clean.prisma --accept-data-loss --skip-generate && prisma generate --schema=prisma/schema.clean.prisma && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "echo 'Skipping Prisma generate - will use cached engines'",
+    "postinstall": "prisma generate --schema=prisma/schema.clean.prisma || echo 'Prisma generate skipped'",
     "prisma:generate": "prisma generate --schema=prisma/schema.clean.prisma",
     "prisma:push": "prisma db push --schema=prisma/schema.clean.prisma --accept-data-loss && prisma generate --schema=prisma/schema.clean.prisma",
     "prisma:migrate": "prisma migrate dev --name init --schema=prisma/schema.clean.prisma",
