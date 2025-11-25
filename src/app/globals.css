@@ -5642,6 +5642,43 @@ body {
   opacity: 0.8;
 }
 
+.input-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.affiliate-link-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: var(--primary-text-color);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.affiliate-link-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(102, 126, 234, 0.5);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.affiliate-link-input::placeholder {
+  color: var(--secondary-text-color);
+  opacity: 0.5;
+}
+
+.input-hint {
+  color: var(--secondary-text-color);
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-left: 0.25rem;
+}
+
 .modal-footer {
   display: flex;
   gap: 0.75rem;

@@ -18,6 +18,7 @@ export interface PostOptions {
   useLongForm: boolean;
   useHook: boolean;
   selectedPlatforms: Array<'Facebook' | 'Threads'>;
+  affiliateLink?: string;
 }
 
 export default function PostConfirmationModal({
@@ -34,6 +35,7 @@ export default function PostConfirmationModal({
   const [useLongForm, setUseLongForm] = useState(hasLongForm && !hasHook);
   const [useHook, setUseHook] = useState(hasHook);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<'Facebook' | 'Threads'>>(new Set(['Threads']));
+  const [affiliateLink, setAffiliateLink] = useState('');
 
   if (!isOpen) return null;
 
@@ -93,7 +95,8 @@ export default function PostConfirmationModal({
       textOnly,
       useLongForm,
       useHook,
-      selectedPlatforms: Array.from(selectedPlatforms)
+      selectedPlatforms: Array.from(selectedPlatforms),
+      affiliateLink: affiliateLink.trim() || undefined
     });
   };
 
@@ -219,6 +222,20 @@ export default function PostConfirmationModal({
                   </span>
                 </span>
               </label>
+            </div>
+
+            <div className="option-section">
+              <h3>Affiliate Link (Optional)</h3>
+              <div className="input-field-wrapper">
+                <input
+                  type="url"
+                  className="affiliate-link-input"
+                  placeholder="https://example.com/affiliate-link"
+                  value={affiliateLink}
+                  onChange={(e) => setAffiliateLink(e.target.value)}
+                />
+                <small className="input-hint">Will be posted as a comment after the main post</small>
+              </div>
             </div>
           </div>
         </div>
