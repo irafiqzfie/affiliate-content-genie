@@ -2817,7 +2817,11 @@ export default function Home() {
               >
                 <span className="tab-icon">📮</span>
                 <span className="tab-label">Posts</span>
-                {scheduledPosts.length > 0 && <span className="count-badge">{scheduledPosts.length}</span>}
+                {(() => {
+                  const readyToPostCount = scheduledPosts.filter(p => p.status === 'Scheduled').length + 
+                    (generatedContent.post && editableContent.post ? 1 : 0);
+                  return readyToPostCount > 0 ? <span className="count-badge">{readyToPostCount}</span> : null;
+                })()}
               </button>
             </>
           )}
