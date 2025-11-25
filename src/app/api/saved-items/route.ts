@@ -69,9 +69,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid field types: productLink must be a string or null' }, { status: 400 });
     }
 
-    if (typeof content !== 'object' || !content.video || !content.post) {
-      console.log('❌ Invalid content structure:', { contentType: typeof content, hasVideo: content?.video, hasPost: content?.post });
-      return NextResponse.json({ message: 'Invalid content structure: content must have video and post properties' }, { status: 400 });
+    if (typeof content !== 'object' || !content.video || !content.post || !content.info) {
+      console.log('❌ Invalid content structure:', { contentType: typeof content, hasVideo: content?.video, hasPost: content?.post, hasInfo: content?.info });
+      return NextResponse.json({ message: 'Invalid content structure: content must have video, post, and info properties' }, { status: 400 });
     }
 
     console.log('💾 Attempting to save to database...');
@@ -90,13 +90,15 @@ export async function POST(request: Request) {
       productLink: string | null;
       video: string;
       post: string;
+      info: string;
       imageUrl?: string | null;
       userId?: string | null;
     } = {
       title,
       productLink: productLink && productLink.trim() !== '' ? productLink : null,
       video: content.video || '',
-      post: content.post || ''
+      post: content.post || '',
+      info: content.info || ''
     };
     
     // Include imageUrl if provided

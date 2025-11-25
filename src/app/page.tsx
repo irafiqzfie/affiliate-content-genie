@@ -33,6 +33,7 @@ interface SavedItem {
   productLink: string | null;
   video: string;
   post: string;
+  info: string;
   imageUrl?: string | null;
   createdAt?: string;
 }
@@ -1184,9 +1185,10 @@ export default function Home() {
     // Ensure we always send non-empty strings for content
     const videoContent = generatedContent.video || '';
     const postContent = generatedContent.post || '';
+    const infoContent = generatedContent.info || '';
     
-    // Don't save if both are empty
-    if (!videoContent && !postContent) {
+    // Don't save if all are empty
+    if (!videoContent && !postContent && !infoContent) {
       setError('No content to save. Please generate content first.');
       setSaveButtonState('error');
       setTimeout(() => setSaveButtonState('idle'), 2000);
@@ -1235,6 +1237,7 @@ export default function Home() {
           content: {
               video: videoContent,
               post: postContent,
+              info: infoContent,
           },
           imageUrl: blobImageUrl,
         };
@@ -1317,10 +1320,12 @@ export default function Home() {
     setGeneratedContent({
       video: item.video,
       post: item.post,
+      info: item.info,
     });
     setEditableContent({
         video: parseContent(item.video),
         post: parseContent(item.post),
+        info: parseContent(item.info),
     });
     
     // Restore the saved image to generatedImages state
@@ -2705,12 +2710,6 @@ export default function Home() {
                       </div>
                     )}
                   </>
-                ) : (
-                  <div className="info-placeholder">
-                    <div className="info-placeholder-icon">📊</div>
-                    <h3>No Analysis Data Yet</h3>
-                    <p>Product analysis requires a Shopee product link. Add a product link and generate content to see analysis data here.</p>
-                  </div>
                 )}
               </>
             ) : activeOutputTab === 'post' ? (
