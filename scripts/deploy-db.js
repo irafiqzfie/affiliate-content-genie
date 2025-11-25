@@ -3,11 +3,16 @@
 /**
  * Database deployment script for Vercel
  * Ensures schema changes are applied before building
+ * Updated: 2025-11-25
  */
 
 const { execSync } = require('child_process');
 
-console.log('🔧 Starting database deployment...');
+console.log('🔧 Starting database deployment (v2)...');
+console.log('📋 Environment check:', {
+  hasDatabaseUrl: !!process.env.DATABASE_URL,
+  nodeEnv: process.env.NODE_ENV
+});
 
 try {
   // Apply migrations
@@ -20,8 +25,8 @@ try {
   console.log('✅ Migrations applied successfully');
   
   // Generate Prisma Client with no cache
-  console.log('⚙️ Generating fresh Prisma Client...');
-  execSync('npx prisma generate --schema=prisma/schema.clean.prisma --no-engine', {
+  console.log('⚙️ Generating fresh Prisma Client (force regenerate)...');
+  execSync('npx prisma generate --schema=prisma/schema.clean.prisma', {
     stdio: 'inherit',
     env: process.env
   });
@@ -41,7 +46,7 @@ try {
       env: process.env
     });
     
-    execSync('npx prisma generate --schema=prisma/schema.clean.prisma --no-engine', {
+    execSync('npx prisma generate --schema=prisma/schema.clean.prisma', {
       stdio: 'inherit',
       env: process.env
     });
