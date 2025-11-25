@@ -237,6 +237,7 @@ export default function Home() {
   const [showPostConfirmation, setShowPostConfirmation] = useState(false);
   const [pendingPlatform, setPendingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [affiliateLink, setAffiliateLink] = useState('');
+  const [currentPostingItemId, setCurrentPostingItemId] = useState<string | null>(null);
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
   const [showReadyToPost, setShowReadyToPost] = useState(false); // Separate flag for "Ready To Post" preview
@@ -1669,6 +1670,13 @@ export default function Home() {
         setSchedulingPlatform(null);
         setPendingPlatform(null);
         
+        // Remove the posted item from Ready To Post if it came from there
+        if (currentPostingItemId) {
+          setReadyToPostItems(prev => prev.filter(p => p.id !== currentPostingItemId));
+          setCurrentPostingItemId(null);
+          console.log('✅ Posted item removed from Ready To Post');
+        }
+        
         // Clear the preview after successful posting
         setGeneratedContent({ video: generatedContent.video, post: null, info: generatedContent.info });
         setEditableContent({ video: editableContent.video, post: null, info: editableContent.info });
@@ -2922,6 +2930,7 @@ export default function Home() {
                         setEditableContent(item.content);
                         setSelectedOptionIndexes(item.selectedIndexes);
                         setGeneratedImages({ 'post-image-generation': item.imageUrl });
+                        setCurrentPostingItemId(item.id); // Track which item is being posted
                         setShowPostConfirmation(true);
                       }}
                       disabled={!session}
