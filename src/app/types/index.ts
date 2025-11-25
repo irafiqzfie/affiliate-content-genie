@@ -17,6 +17,7 @@ export interface SavedItem {
   productLink: string | null;
   video: string;
   post: string;
+  info: string;
   imageUrl?: string | null;
   createdAt?: string;
 }
