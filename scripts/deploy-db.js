@@ -3,27 +3,27 @@
 /**
  * Database deployment script for Vercel
  * Ensures schema changes are applied before building
- * Updated: 2025-11-25 v3
+ * Updated: 2025-11-25 v4 - Simplified for Windows compatibility
  */
 
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔧 Starting database deployment (v3)...');
+console.log('🔧 Starting database deployment (v4)...');
 console.log('📋 Environment check:', {
   hasDatabaseUrl: !!process.env.DATABASE_URL,
   nodeEnv: process.env.NODE_ENV
 });
 
-// Clean Prisma Client cache
-const prismaClientPath = path.join(__dirname, '..', 'node_modules', '.prisma', 'client');
-if (fs.existsSync(prismaClientPath)) {
-  console.log('🧹 Cleaning old Prisma Client cache...');
-  fs.rmSync(prismaClientPath, { recursive: true, force: true });
-}
-
 try {
+  // Check if DATABASE_URL is set - if not, skip migrations (local dev without DB)
+  if (!process.env.DATABASE_URL) {
+    console.log('⚠️ DATABASE_URL not set - skipping migrations (local dev)');
+    console.log('✅ Database deployment skipped');
+    process.exit(0);
+  }
+
   // Apply migrations
   console.log('📤 Applying migrations...');
   execSync('npx prisma migrate deploy --schema=prisma/schema.clean.prisma', {
@@ -33,8 +33,8 @@ try {
   
   console.log('✅ Migrations applied successfully');
   
-  // Generate Prisma Client with no cache
-  console.log('⚙️ Generating fresh Prisma Client (force regenerate)...');
+  // Generate Prisma Client
+  console.log('⚙️ Generating Prisma Client...');
   execSync('npx prisma generate --schema=prisma/schema.clean.prisma', {
     stdio: 'inherit',
     env: process.env
