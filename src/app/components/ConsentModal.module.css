@@ -267,45 +267,57 @@
 }
 
 .consentModalFooter {
-  padding: 1rem 2rem 2rem !important;
+  padding: 2rem 3rem 3rem !important;
   display: flex !important;
-  gap: 1rem !important;
+  gap: 1.5rem !important;
   border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   flex-shrink: 0 !important;
 }
 
 .footerButton {
   flex: 1 !important;
-  padding: 1rem 2rem !important;
+  padding: 3rem 5rem !important;
   border: none !important;
-  border-radius: 12px !important;
-  font-size: 1rem !important;
-  font-weight: 600 !important;
+  border-radius: 16px !important;
+  font-size: 1.65rem !important;
+  font-weight: 700 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 0.5rem !important;
+  min-height: 110px !important;
 }
 
 .cancelButton {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05)) !important;
+  border: 2px solid rgba(255, 255, 255, 0.15) !important;
   color: var(--primary-text-color) !important;
 }
 
 .cancelButton:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08)) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
 }
 
 .authorizeButton {
-  background: linear-gradient(135deg, var(--primary-color), #d946ef) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
   color: white !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35) !important;
+  border: none !important;
 }
 
 .authorizeButton:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5) !important;
+  background: linear-gradient(135deg, #7a8efc 0%, #8857b2 50%, #f5a3ff 100%) !important;
+}
+
+.authorizeButton:active {
+  transform: translateY(-1px) !important;
 }
 
 .authorizeButton:disabled {
@@ -315,5 +327,5 @@
 
 .authorizeButton:disabled:hover {
   transform: none !important;
-  box-shadow: none !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35) !important;
 }

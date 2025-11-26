@@ -21,6 +21,19 @@
   --border-radius: 8px;
   --button-radius: 9999px;
   
+  /* Border Radius Scale */
+  --radius-sm: 6px;      /* Small UI elements */
+  --radius-md: 12px;     /* Cards, modals, sections */
+  --radius-lg: 16px;     /* Large surfaces, featured */
+  --radius-full: 9999px; /* Pills, fully rounded */
+  
+  /* Shadow Elevation System */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.35);
+  
   /* Layout Variables */
   --content-max-width: 1600px;
   --content-padding: 0.5rem;
@@ -789,7 +802,11 @@ body {
 
 .form-card:hover, .output-card:hover {
   border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .input-form {
@@ -810,14 +827,15 @@ body {
   padding: var(--spacing-md);
   background: linear-gradient(135deg, rgba(255, 123, 0, 0.08) 0%, rgba(0, 170, 255, 0.08) 100%);
   border: 2px solid rgba(255, 123, 0, 0.3);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   margin-bottom: var(--spacing-sm);
   transition: all var(--transition-base) ease;
 }
 
 .form-group.featured:hover {
-  border-color: rgba(255, 123, 0, 0.4);
-  background: linear-gradient(135deg, rgba(255, 123, 0, 0.1) 0%, rgba(0, 170, 255, 0.1) 100%);
+  border-color: rgba(255, 123, 0, 0.5);
+  background: linear-gradient(135deg, rgba(255, 123, 0, 0.12) 0%, rgba(0, 170, 255, 0.12) 100%);
+  box-shadow: 0 4px 16px rgba(255, 123, 0, 0.15);
 }
 
 .form-group.featured .input-label {
@@ -1074,16 +1092,19 @@ body {
 
 .input-field, .select-field {
   width: 100%;
-  padding: 16px;
+  padding: 1rem 1.25rem;
   font-size: var(--font-size-base);
   font-family: 'Inter', sans-serif;
   line-height: var(--line-height-normal);
   background-color: rgba(13, 15, 27, 0.8);
   border: 2px solid var(--glass-border);
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-md);
   color: var(--primary-text-color);
   transition: all var(--transition-base) ease;
   backdrop-filter: blur(8px);
+  min-height: 48px;
+  display: flex;
+  align-items: center;
 }
 
 .input-field:hover, .select-field:hover {
@@ -1097,8 +1118,8 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23c5d0e0' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
-    background-size: 1em;
-    padding-right: 2.5rem;
+    background-size: 1.25em;
+    padding-right: 2.75rem;
     cursor: pointer;
 }
 
@@ -1154,6 +1175,43 @@ body {
   border-color: var(--focus-ring-color);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
   background-color: rgba(13, 15, 27, 0.95);
+}
+
+/* Input & Textarea Validation States */
+.input-field.success,
+.textarea-field.success {
+  border-color: var(--success-color);
+  background: rgba(74, 222, 128, 0.05);
+}
+
+.input-field.success:focus,
+.textarea-field.success:focus {
+  border-color: var(--success-color);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.15);
+}
+
+.input-field.error,
+.textarea-field.error {
+  border-color: var(--error-color);
+  background: rgba(248, 113, 113, 0.05);
+}
+
+.input-field.error:focus,
+.textarea-field.error:focus {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+}
+
+.input-field.warning,
+.textarea-field.warning {
+  border-color: var(--warning-color);
+  background: rgba(251, 191, 36, 0.05);
+}
+
+.input-field.warning:focus,
+.textarea-field.warning:focus {
+  border-color: var(--warning-color);
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
 }
 
 /* Product Input Section */
@@ -2673,7 +2731,8 @@ body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: var(--spacing-content);
+    padding: calc(var(--spacing-content) * 3);
+    min-height: 80px;
     background: none;
     border: none;
     color: var(--primary-text-color);
@@ -2685,19 +2744,22 @@ body {
 .accordion-header h3 {
     font-size: 1.1rem;
     font-weight: 600;
+    flex: 1;
+    min-width: 0;
 }
 
 .input-title,
 .output-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
   margin: 0;
-  font-size: 1.08rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--primary-text-color);
   letter-spacing: 0.01em;
   text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  flex: 1;
 }
 
 .pill-icon {
