@@ -404,7 +404,7 @@ body {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-xs) var(--spacing-sm);  /* Reduced by half: 8px vertical, 16px horizontal */
+  padding: 4px var(--spacing-sm);  /* Ultra-compact: 4px vertical, 16px horizontal */
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -1713,6 +1713,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  padding: 0.75rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: rgba(100, 116, 139, 0.08);
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 6px;
 }
 
 .section-header.compact {
@@ -1727,8 +1732,9 @@ body {
 }
 
 .section-title {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-text-color);
 }
 
 .section-subtitle {
@@ -6537,11 +6543,15 @@ body {
 
 .section-header {
   margin-bottom: 1rem;
+  padding: 0.75rem 0.75rem;
+  background: rgba(100, 116, 139, 0.08);
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 6px;
 }
 
 .section-header h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--primary-text-color);
   margin: 0;
   display: flex;
