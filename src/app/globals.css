@@ -38,7 +38,7 @@
   /* Layout Variables */
   --content-max-width: 1600px;
   --content-padding: 0.5rem;
-  --spacing-section: 16px;  /* Uniform vertical gap between card sections */
+  --spacing-section: 8px;  /* Uniform vertical gap between card sections (reduced) */
   
   /* 8px Spacing System */
   --spacing-xs: 8px;
