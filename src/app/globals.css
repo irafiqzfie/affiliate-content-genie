@@ -460,8 +460,8 @@ body {
 }
 
 .logo-icon {
-  width: 3.25rem;
-  height: 3.25rem;
+  width: 1.75rem;  /* Reduced from 3.25rem */
+  height: 1.75rem;  /* Reduced from 3.25rem */
   object-fit: contain;
   filter: drop-shadow(0 2px 6px rgba(255, 123, 0, 0.4));
   transition: transform 0.3s ease;
@@ -472,7 +472,7 @@ body {
 }
 
 .branding h1 {
-  font-size: 1.5rem;
+  font-size: 1.1rem;  /* Reduced from 1.5rem */
   font-weight: 700;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
@@ -485,7 +485,7 @@ body {
 
 .branding p {
   color: var(--secondary-text-color);
-  font-size: 0.75rem;
+  font-size: 0.65rem;  /* Reduced from 0.75rem */
   margin: 0;
   font-weight: 400;
   font-style: italic;
@@ -4695,22 +4695,22 @@ body {
   }
   
   .logo-icon {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 1.5rem;  /* Reduced proportionally */
+    height: 1.5rem;
   }
   
   .branding h1 {
-    font-size: 1.25rem;
+    font-size: 1rem;  /* Reduced from 1.25rem */
   }
   
   .branding p {
-    font-size: 0.7rem;
+    font-size: 0.6rem;  /* Reduced from 0.7rem */
     padding-left: 0.5rem;
   }
   
   .logo-icon {
-    width: 2rem;
-    height: 2rem;
+    width: 1.5rem;  /* Reduced from 2rem */
+    height: 1.5rem;
   }
   
   .nav-container {
