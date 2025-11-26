@@ -59,13 +59,32 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-      } catch {
+        
+        // Verify the image is actually accessible before posting
+        console.log('📸 Verifying image accessibility:', mediaUrl);
+        const imageCheckResponse = await fetch(mediaUrl, { method: 'HEAD' });
+        if (!imageCheckResponse.ok) {
+          console.error('❌ Image not accessible:', imageCheckResponse.status, imageCheckResponse.statusText);
+          return NextResponse.json(
+            { 
+              error: 'Image URL is not publicly accessible',
+              details: `Threads API requires images to be publicly accessible. The URL returned status ${imageCheckResponse.status}. Please ensure your image storage (Vercel Blob) is configured with public access.`
+            },
+            { status: 400 }
+          );
+        }
+        console.log('✅ Image is publicly accessible');
+      } catch (error) {
+        console.error('❌ Image validation error:', error);
         return NextResponse.json(
-          { error: `Invalid image URL format: ${mediaUrl}. Must be a publicly accessible HTTP/HTTPS URL.` },
+          { 
+            error: `Invalid or inaccessible image URL`,
+            details: error instanceof Error ? error.message : 'Could not access the provided image URL. Ensure it is publicly accessible.'
+          },
           { status: 400 }
         );
       }
-      console.log('📸 Media URL:', mediaUrl);
+      console.log('📸 Media URL validated:', mediaUrl);
     }
 
     // Get access token from session (JWT-only, no database)
@@ -133,8 +152,9 @@ export async function POST(request: NextRequest) {
     console.log('⏳ Waiting for container to be ready...');
     
     let statusAttempts = 0;
-    const maxAttempts = mediaUrl ? (mediaType === 'VIDEO' ? 30 : 10) : 5; // 30s for video, 10s for images, 5s for text
+    const maxAttempts = mediaUrl ? (mediaType === 'VIDEO' ? 30 : 15) : 5; // 15s for images (increased from 10), 30s for video, 5s for text
     let isReady = false;
+    let lastError: string | null = null;
     
     while (statusAttempts < maxAttempts && !isReady) {
       // Check container status
@@ -143,20 +163,27 @@ export async function POST(request: NextRequest) {
       
       if (statusResponse.ok) {
         const statusData = await statusResponse.json();
-        console.log(`📊 Container status (attempt ${statusAttempts + 1}):`, statusData.status);
+        console.log(`📊 Container status (attempt ${statusAttempts + 1}/${maxAttempts}):`, statusData);
         
         if (statusData.status === 'FINISHED') {
           isReady = true;
+          console.log('✅ Container processing complete');
           break;
         } else if (statusData.status === 'ERROR') {
+          lastError = statusData.error_message || 'Unknown processing error';
+          console.error('❌ Container processing error:', lastError);
           return NextResponse.json(
             { 
-              error: 'Container processing failed',
-              details: statusData.error_message || 'Unknown error during processing'
+              error: 'Threads media processing failed',
+              details: `${lastError}. ${mediaUrl ? 'Ensure the image URL is publicly accessible and the image format is supported (JPEG, PNG).' : ''}`
             },
             { status: 400 }
           );
+        } else if (statusData.status === 'IN_PROGRESS') {
+          console.log('⏳ Still processing...');
         }
+      } else {
+        console.warn(`⚠️ Failed to check status (attempt ${statusAttempts + 1})`);
       }
       
       // Wait 1 second before checking again
@@ -167,8 +194,8 @@ export async function POST(request: NextRequest) {
     if (!isReady) {
       return NextResponse.json(
         { 
-          error: 'Container processing timeout',
-          details: `Container took too long to process. Please try again.`
+          error: 'Threads processing timeout',
+          details: `Container took longer than ${maxAttempts} seconds to process. ${mediaUrl ? 'This may indicate the image URL is not accessible or the image format is incompatible. Threads requires JPEG or PNG images.' : 'Please try again.'}`
         },
         { status: 408 }
       );
@@ -193,6 +220,18 @@ export async function POST(request: NextRequest) {
     if (!publishResponse.ok) {
       const errorData = await publishResponse.json();
       console.error('Threads publish failed:', errorData);
+      
+      // Check for specific error codes
+      if (errorData.error?.code === 24 && errorData.error?.error_subcode === 4279009) {
+        return NextResponse.json(
+          { 
+            error: 'Media not found',
+            details: 'Threads could not find or access the image. This usually means: (1) The image URL is not publicly accessible, (2) The image was deleted/expired, or (3) Vercel Blob storage is not properly configured with public access. Please check your BLOB_READ_WRITE_TOKEN environment variable and ensure blob storage has public access enabled.'
+          },
+          { status: 400 }
+        );
+      }
+      
       return NextResponse.json(
         { 
           error: 'Failed to publish Threads post',
