@@ -6114,7 +6114,7 @@ body {
 
 /* Post Confirmation Modal */
 .post-confirmation-modal {
-  max-width: 560px;
+  max-width: 700px;
   width: 90%;
 }
 
@@ -6132,51 +6132,64 @@ body {
 }
 
 .post-confirmation-modal .modal-body {
-  padding: 1.5rem 0;
+  padding: 1.5rem 0 1rem 0;
+  gap: 0.75rem;
 }
 
 .post-confirmation-modal .modal-description {
   color: var(--secondary-text-color);
-  margin-bottom: 1.5rem;
-  font-size: 0.925rem;
+  margin-bottom: 0.75rem;
+  padding: 0 1.5rem;
+  font-size: 0.85rem;
   line-height: 1.5;
 }
 
 .post-options-grid {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
+  padding: 0 1.5rem;
 }
 
 .option-section {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.option-section:first-child {
+  margin-bottom: 0.5rem;
+}
+
+.platforms-container {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .option-section h3 {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--primary-text-color);
+  color: var(--secondary-text-color);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.625rem 0;
   padding-bottom: 0;
-  opacity: 0.9;
+  opacity: 0.7;
 }
 
 .card-option {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
   background: rgba(255, 255, 255, 0.04);
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   position: relative;
 }
 
@@ -6214,10 +6227,10 @@ body {
 }
 
 .card-icon {
-  font-size: 2rem;
+  font-size: 1.75rem;
   line-height: 1;
   flex-shrink: 0;
-  margin-top: 0.25rem;
+  margin-top: 0.125rem;
 }
 
 .card-text {
@@ -6236,9 +6249,9 @@ body {
 
 .card-text small {
   color: var(--secondary-text-color);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  opacity: 0.85;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  opacity: 0.65;
 }
 
 .section-description {
@@ -6246,6 +6259,21 @@ body {
   font-size: 0.85rem;
   margin: 0 0 1rem 0;
   line-height: 1.5;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  flex: 1;
+  min-width: 160px;
 }
 
 .checkbox-option:last-child {
@@ -6301,16 +6329,33 @@ body {
 
 .checkbox-label {
   display: flex;
-  align-items: flex-start;
-  gap: 0.875rem;
+  align-items: center;
+  gap: 0.625rem;
   flex: 1;
   cursor: pointer;
 }
 
 .option-icon {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   line-height: 1;
   flex-shrink: 0;
+}
+
+.platforms-container .checkbox-option .option-text {
+  display: none;
+}
+
+.platforms-container .checkbox-option .option-icon {
+  margin: 0;
+}
+
+.platforms-container .checkbox-label {
+  gap: 0.5rem;
+}
+
+.platforms-container .checkbox-label strong {
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .option-text {
@@ -6381,7 +6426,7 @@ body {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
-  padding-top: 1.25rem;
+  padding: 1.25rem 1.5rem 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
