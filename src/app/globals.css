@@ -38,6 +38,7 @@
   /* Layout Variables */
   --content-max-width: 1600px;
   --content-padding: 0.5rem;
+  --spacing-section: 16px;  /* Uniform vertical gap between card sections */
   
   /* 8px Spacing System */
   --spacing-xs: 8px;
@@ -2514,7 +2515,7 @@ body {
 
 .three-column-row {
     display: grid;
-    gap: 0.5rem;
+    gap: var(--spacing-section);  /* 16px uniform gap (standardized from 0.5rem) */
     grid-template-columns: repeat(3, 1fr);
     align-items: stretch;
 }
@@ -2691,7 +2692,7 @@ body {
 .standard-section-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    gap: var(--spacing-section);  /* Standardized 16px gap */
     align-items: stretch;
 }
 
