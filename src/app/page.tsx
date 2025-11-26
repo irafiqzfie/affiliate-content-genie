@@ -1490,14 +1490,19 @@ export default function Home() {
       }
     }
     
-    // Determine caption based on user selection
+    // Determine caption based on post type selection
     let captionText = '';
     const selectedBodyHookIndex = selectedOptionIndexes['body-hook'] ?? 0;
     const selectedBodyLongIndex = selectedOptionIndexes['body-long'] ?? 0;
     
-    if (options.useHook && postContent?.['body-hook']?.[selectedBodyHookIndex]) {
+    // Parse the postType to determine which content to use
+    const useHook = options.postType === 'short-hook-picture' || options.postType === 'short-hook-text';
+    const useLongForm = options.postType === 'long-form-text';
+    const includeImage = options.postType === 'short-hook-picture';
+    
+    if (useHook && postContent?.['body-hook']?.[selectedBodyHookIndex]) {
       captionText = postContent['body-hook'][selectedBodyHookIndex];
-    } else if (options.useLongForm && postContent?.['body-long']?.[selectedBodyLongIndex]) {
+    } else if (useLongForm && postContent?.['body-long']?.[selectedBodyLongIndex]) {
       captionText = postContent['body-long'][selectedBodyLongIndex];
     }
 
@@ -1507,11 +1512,9 @@ export default function Home() {
     }
 
     // Check if image is required and available
-    if (options.includeImage && !options.textOnly) {
-      if (!imageUrl) {
-        alert("Image was selected but no generated image is available.");
-        return;
-      }
+    if (includeImage && !imageUrl) {
+      alert("Image was selected but no generated image is available.");
+      return;
     }
 
     setIsLoading(true);
@@ -1521,7 +1524,7 @@ export default function Home() {
         let finalImageUrl = imageUrl;
         
         // Only process image if user wants to include it
-        if (options.includeImage && !options.textOnly && imageUrl) {
+        if (includeImage && imageUrl) {
           // Check if image URL is a data URL (base64) - upload to Vercel Blob
           const isDataUrl = imageUrl.startsWith('data:');
           
@@ -1568,7 +1571,7 @@ export default function Home() {
             caption = caption.substring(0, 497) + '...';
           }
           
-          const mediaUrl = (options.includeImage && !options.textOnly && finalImageUrl) ? finalImageUrl : null;
+          const mediaUrl = (includeImage && finalImageUrl) ? finalImageUrl : null;
           
           // First, post to Threads API
           console.log('🚀 Posting to Threads with:', {

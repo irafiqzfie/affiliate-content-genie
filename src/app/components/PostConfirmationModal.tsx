@@ -13,10 +13,7 @@ interface PostConfirmationModalProps {
 }
 
 export interface PostOptions {
-  includeImage: boolean;
-  textOnly: boolean;
-  useLongForm: boolean;
-  useHook: boolean;
+  postType: 'short-hook-picture' | 'short-hook-text' | 'long-form-text';
   selectedPlatforms: Array<'Facebook' | 'Threads'>;
   affiliateLink?: string;
 }
@@ -30,42 +27,13 @@ export default function PostConfirmationModal({
   hasLongForm,
   hasHook
 }: PostConfirmationModalProps) {
-  const [includeImage, setIncludeImage] = useState(hasImage);
-  const [textOnly, setTextOnly] = useState(false);
-  const [useLongForm, setUseLongForm] = useState(hasLongForm && !hasHook);
-  const [useHook, setUseHook] = useState(hasHook);
+  const [postType, setPostType] = useState<'short-hook-picture' | 'short-hook-text' | 'long-form-text'>(
+    hasImage && hasHook ? 'short-hook-picture' : (hasHook ? 'short-hook-text' : 'long-form-text')
+  );
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<'Facebook' | 'Threads'>>(new Set(['Threads']));
   const [affiliateLink, setAffiliateLink] = useState('');
 
   if (!isOpen) return null;
-
-  const handleTextOnlyChange = (checked: boolean) => {
-    setTextOnly(checked);
-    if (checked) {
-      setIncludeImage(false);
-    }
-  };
-
-  const handleIncludeImageChange = (checked: boolean) => {
-    setIncludeImage(checked);
-    if (checked) {
-      setTextOnly(false);
-    }
-  };
-
-  const handleLongFormChange = (checked: boolean) => {
-    setUseLongForm(checked);
-    if (checked) {
-      setUseHook(false);
-    }
-  };
-
-  const handleHookChange = (checked: boolean) => {
-    setUseHook(checked);
-    if (checked) {
-      setUseLongForm(false);
-    }
-  };
 
   const togglePlatform = (plat: 'Facebook' | 'Threads') => {
     const newPlatforms = new Set(selectedPlatforms);
@@ -84,17 +52,16 @@ export default function PostConfirmationModal({
       return;
     }
 
-    // Validate at least one text option is selected
-    if (!useLongForm && !useHook) {
-      alert('Please select at least one text format (Long-form or Hook)');
-      return;
-    }
+    const typeMap = {
+      'short-hook-picture': { useHook: true, includeImage: true, textOnly: false, useLongForm: false },
+      'short-hook-text': { useHook: true, includeImage: false, textOnly: true, useLongForm: false },
+      'long-form-text': { useHook: false, includeImage: false, textOnly: true, useLongForm: true }
+    };
+
+    const typeConfig = typeMap[postType];
 
     onConfirm({
-      includeImage: includeImage && !textOnly,
-      textOnly,
-      useLongForm,
-      useHook,
+      postType,
       selectedPlatforms: Array.from(selectedPlatforms),
       affiliateLink: affiliateLink.trim() || undefined
     });
@@ -156,72 +123,65 @@ export default function PostConfirmationModal({
             </div>
 
             <div className="option-section">
-              <h3>Post Format</h3>
-              <label className="checkbox-option">
-                <input
-                  type="checkbox"
-                  checked={textOnly}
-                  onChange={(e) => handleTextOnlyChange(e.target.checked)}
-                />
-                <span className="checkbox-label">
-                  <span className="option-icon">📝</span>
-                  <span className="option-text">
-                    <strong>Post text only</strong>
-                    <small>No image will be included</small>
+              <h3>Post Type</h3>
+              <p className="section-description">Select the format that works best for your content:</p>
+              
+              {(hasHook && hasImage) && (
+                <label className={`card-option ${postType === 'short-hook-picture' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="postType"
+                    value="short-hook-picture"
+                    checked={postType === 'short-hook-picture'}
+                    onChange={(e) => setPostType(e.target.value as typeof postType)}
+                  />
+                  <span className="card-content">
+                    <span className="card-icon">🎯📸</span>
+                    <span className="card-text">
+                      <strong>Short Hook + Picture</strong>
+                      <small>Punchy attention-grabbing text with generated image</small>
+                    </span>
                   </span>
-                </span>
-              </label>
+                </label>
+              )}
 
-              <label className={`checkbox-option ${!hasImage ? 'disabled' : ''}`}>
-                <input
-                  type="checkbox"
-                  checked={includeImage && !textOnly}
-                  onChange={(e) => handleIncludeImageChange(e.target.checked)}
-                  disabled={!hasImage || textOnly}
-                />
-                <span className="checkbox-label">
-                  <span className="option-icon">🖼️</span>
-                  <span className="option-text">
-                    <strong>Post with picture</strong>
-                    <small>{hasImage ? 'Include generated image' : 'No image available'}</small>
+              {hasHook && (
+                <label className={`card-option ${postType === 'short-hook-text' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="postType"
+                    value="short-hook-text"
+                    checked={postType === 'short-hook-text'}
+                    onChange={(e) => setPostType(e.target.value as typeof postType)}
+                  />
+                  <span className="card-content">
+                    <span className="card-icon">🎯📝</span>
+                    <span className="card-text">
+                      <strong>Short Hook, Text Only</strong>
+                      <small>Punchy attention-grabbing text without image</small>
+                    </span>
                   </span>
-                </span>
-              </label>
-            </div>
+                </label>
+              )}
 
-            <div className="option-section">
-              <h3>Text Content</h3>
-              <label className={`checkbox-option ${!hasLongForm ? 'disabled' : ''}`}>
-                <input
-                  type="checkbox"
-                  checked={useLongForm}
-                  onChange={(e) => handleLongFormChange(e.target.checked)}
-                  disabled={!hasLongForm}
-                />
-                <span className="checkbox-label">
-                  <span className="option-icon">📄</span>
-                  <span className="option-text">
-                    <strong>Use long-form copywriting</strong>
-                    <small>{hasLongForm ? 'Detailed, comprehensive content' : 'Not available'}</small>
+              {hasLongForm && (
+                <label className={`card-option ${postType === 'long-form-text' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="postType"
+                    value="long-form-text"
+                    checked={postType === 'long-form-text'}
+                    onChange={(e) => setPostType(e.target.value as typeof postType)}
+                  />
+                  <span className="card-content">
+                    <span className="card-icon">📄</span>
+                    <span className="card-text">
+                      <strong>Long-Form, Text Only</strong>
+                      <small>Detailed, comprehensive content without image</small>
+                    </span>
                   </span>
-                </span>
-              </label>
-
-              <label className={`checkbox-option ${!hasHook ? 'disabled' : ''}`}>
-                <input
-                  type="checkbox"
-                  checked={useHook}
-                  onChange={(e) => handleHookChange(e.target.checked)}
-                  disabled={!hasHook}
-                />
-                <span className="checkbox-label">
-                  <span className="option-icon">🎯</span>
-                  <span className="option-text">
-                    <strong>Use short-form hook</strong>
-                    <small>{hasHook ? 'Punchy, attention-grabbing' : 'Not available'}</small>
-                  </span>
-                </span>
-              </label>
+                </label>
+              )}
             </div>
 
             <div className="option-section">
@@ -241,7 +201,7 @@ export default function PostConfirmationModal({
         </div>
 
         <div className="modal-footer">
-          <button className="modal-btn secondary" onClick={onClose}>
+          <button className="modal-btn ghost" onClick={onClose}>
             Cancel
           </button>
           <button className="modal-btn primary" onClick={handleSubmit}>
