@@ -121,6 +121,7 @@ button.loading::after,
   border-top-color: currentColor;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+}
 
 /* Button Hierarchy */
 /* PRIMARY - Main actions (solid orange) */
