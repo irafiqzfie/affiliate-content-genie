@@ -17,7 +17,7 @@ export default function AuthButton() {
           <div className="auth-avatar">
             {session.user?.email?.charAt(0).toUpperCase() || session.user?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
-          <span className="auth-email">{session.user?.email || session.user?.name}</span>
+          <span className="auth-email">{session.user?.email?.split('@')[0] || session.user?.name}</span>
         </div>
         <button onClick={() => signOut()} className="auth-button auth-button-signout">
           Sign out
