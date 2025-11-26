@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from 'react';
 import { ScheduledPost } from '@/app/types';
 import Image from 'next/image';
 
@@ -10,6 +11,8 @@ interface PostHistoryProps {
 }
 
 export function PostHistory({ posts, onDeletePost, onClearAll }: PostHistoryProps) {
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
+
   if (posts.length === 0) {
     return (
       <div className="post-history-empty">
@@ -52,6 +55,16 @@ export function PostHistory({ posts, onDeletePost, onClearAll }: PostHistoryProp
     });
   };
 
+  const toggleExpand = (id: number) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedItems(newExpanded);
+  };
+
   const handleClearAll = () => {
     if (window.confirm(`Are you sure you want to delete all ${posts.length} post${posts.length !== 1 ? 's' : ''} from history? This cannot be undone.`)) {
       onClearAll();
@@ -75,14 +88,18 @@ export function PostHistory({ posts, onDeletePost, onClearAll }: PostHistoryProp
       </div>
       <div className="post-history-list">
         {posts.map(post => (
-          <div key={post.id} className="history-item">
+          <div 
+            key={post.id} 
+            className={`history-item ${expandedItems.has(post.id) ? 'expanded' : ''}`}
+            onClick={() => toggleExpand(post.id)}
+          >
             {post.imageUrl && (
               <div className="history-item-image">
                 <Image 
                   src={post.imageUrl} 
                   alt="Post thumbnail" 
-                  width={80} 
-                  height={80}
+                  width={100} 
+                  height={100}
                   style={{ objectFit: 'cover', borderRadius: '8px' }}
                 />
               </div>
@@ -118,7 +135,8 @@ export function PostHistory({ posts, onDeletePost, onClearAll }: PostHistoryProp
             </div>
             <button
               className="history-delete-btn"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (window.confirm('Delete this post from history?')) {
                   onDeletePost(post.id);
                 }

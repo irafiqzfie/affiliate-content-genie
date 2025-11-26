@@ -2916,10 +2916,19 @@ export default function Home() {
     <>
       {/* Ready to Post - Dark Card Preview */}
       {showReadyToPost && readyToPostItems.length > 0 && (
-        <div className="scheduled-posts-section">
-          <h2 className="section-title">Ready To Post</h2>
+        <div className="ready-to-post-section">
+          <div className="scheduled-posts-section">
+            <div>
+              <h2 className="section-title">
+                📤 Ready To Post
+                <span className="status-chip">
+                  <span style={{ fontSize: '0.9rem' }}>✓</span>
+                  Ready
+                </span>
+              </h2>
+            </div>
 
-          <div className="ready-to-post-grid">
+            <div className="ready-to-post-grid">
             {readyToPostItems.map((item) => (
               <div key={item.id} className="scheduled-preview-card">
                 {/* Image on Top */}
@@ -3001,12 +3010,11 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            ))}
+                ))}
+            </div>
           </div>
         </div>
-      )}
-
-      <ScheduledPostsList 
+      )}      <ScheduledPostsList 
         scheduledPosts={scheduledPosts}
         onDeletePost={handleDeleteScheduledPost}
         onPostNow={handlePostNow}
