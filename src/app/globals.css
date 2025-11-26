@@ -11,7 +11,8 @@
   --glass-blur: 12px;
 
   --primary-text-color: #f0f2f5;
-  --secondary-text-color: #c5d0e0;
+  --secondary-text-color: #d0dae8;
+  --tertiary-text-color: #8b97ad;
   --error-color: #f87171;
   --success-color: #4ade80;
   --warning-color: #fbbf24;
@@ -101,7 +102,25 @@ button,
   justify-content: center;
   gap: var(--spacing-xs);
   line-height: var(--line-height-tight);
+  position: relative;
 }
+
+/* Loading state for buttons */
+button.loading,
+.loading[role="button"] {
+  color: transparent;
+}
+
+button.loading::after,
+.loading[role="button"]::after {
+  content: '';
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 
 /* Button Hierarchy */
 /* PRIMARY - Main actions (solid orange) */
@@ -236,7 +255,7 @@ html {
 
 /* Keyboard focus indicators for accessibility */
 *:focus-visible {
-  outline: 2px solid var(--focus-ring-color);
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 4px;
 }
 
@@ -244,9 +263,18 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
+[role="button"]:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--focus-ring-color);
-  outline-offset: 2px;
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 6px;
+  border-radius: 2px;
+}
+
+/* Don't show outline when using mouse (has-pointer) */
+@media (pointer: fine) {
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 body {
@@ -6604,6 +6632,144 @@ body {
 /* Remove old Post Preview styles - keeping for backward compatibility */
 .post-preview-section {
   display: none;
+}
+
+/* Skeleton Loader Animation */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Loading State Spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--focus-ring-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Copy Feedback Animation */
+@keyframes copyPulse {
+  0% {
+    color: var(--success-color);
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    color: var(--primary-text-color);
+    transform: scale(1);
+  }
+}
+
+.copy-feedback {
+  animation: copyPulse 0.6s ease-out forwards;
+}
+
+/* List Stagger Animation */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.list-item {
+  animation: slideInLeft 0.4s ease-out;
+  animation-fill-mode: both;
+}
+
+.list-item:nth-child(1) { animation-delay: 0ms; }
+.list-item:nth-child(2) { animation-delay: 50ms; }
+.list-item:nth-child(3) { animation-delay: 100ms; }
+.list-item:nth-child(4) { animation-delay: 150ms; }
+.list-item:nth-child(5) { animation-delay: 200ms; }
+.list-item:nth-child(n+6) { animation-delay: 250ms; }
+
+/* Link Styling */
+a {
+  color: var(--gradient-blue);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: all var(--transition-base) ease;
+  cursor: pointer;
+}
+
+a:hover {
+  color: #55cdff;
+  text-decoration-thickness: 2px;
+}
+
+a:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+a:active {
+  opacity: 0.8;
+}
+
+/* Button Group Spacing */
+.button-group {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.button-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* Icon Button Styling */
+.icon-button {
+  width: 44px;
+  height: 44px;
+  min-width: unset;
+  padding: 0 !important;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  transition: all var(--transition-base) ease;
+}
+
+.icon-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.08);
+}
+
+.icon-button:active {
+  transform: scale(0.95);
 }
 
 
