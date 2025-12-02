@@ -25,7 +25,19 @@ export default function PostComposer() {
   const [facebookPages, setFacebookPages] = useState<FacebookPage[]>([]);
   const [hasThreads, setHasThreads] = useState(false);
   const [posting, setPosting] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{
+    success?: boolean;
+    partial?: boolean;
+    error?: string;
+    results?: Array<{
+      platform: string;
+      success: boolean;
+      postId?: string;
+      error?: string;
+      pageId?: string;
+      pageName?: string;
+    }>;
+  } | null>(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -231,7 +243,7 @@ export default function PostComposer() {
           
           {result.results && (
             <div className="result-details">
-              {result.results.map((r: any, i: number) => (
+              {result.results.map((r, i: number) => (
                 <div key={i} className={`result-item ${r.success ? 'success' : 'error'}`}>
                   <div className="result-platform">
                     {r.platform === 'threads' ? '🧵 Threads' : '📘 Facebook'}
