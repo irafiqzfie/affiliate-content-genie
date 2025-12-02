@@ -27,8 +27,8 @@ if (!process.env.THREADS_APP_SECRET) {
 }
 
 export const authOptions: NextAuthOptions = {
-  // Disable PrismaAdapter - use JWT-only sessions
-  // ...(PrismaAdapter && prisma ? { adapter: PrismaAdapter(prisma) } : {}),
+  // Enable PrismaAdapter to store accounts in database
+  ...(PrismaAdapter && prisma ? { adapter: PrismaAdapter(prisma) } : {}),
   debug: true, // Enable debug mode to see errors
   providers: [
     FacebookProvider({
@@ -114,7 +114,8 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'jwt'
+    strategy: PrismaAdapter && prisma ? 'database' : 'jwt',
+    maxAge: 60 * 24 * 60 * 60, // 60 days
   },
   pages: {
     signIn: '/',
@@ -201,6 +202,30 @@ export const authOptions: NextAuthOptions = {
         provider: account?.provider,
         profile: profile 
       });
+      
+      // If signing in with Threads, ensure threadsUserId is stored
+      if (account?.provider === 'threads' && profile && user?.id) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const threadsProfile = profile as any;
+          const threadsUserId = threadsProfile.id || threadsProfile.username;
+          
+          // Update the account record to include threadsUserId
+          await prisma.account.updateMany({
+            where: {
+              userId: user.id,
+              provider: 'threads',
+            },
+            data: {
+              threadsUserId: threadsUserId,
+            },
+          });
+          console.log('✅ Updated Threads account with threadsUserId:', threadsUserId);
+        } catch (error) {
+          console.error('❌ Failed to update threadsUserId:', error);
+        }
+      }
+      
       return true;
     },
     async redirect({ url, baseUrl }) {
