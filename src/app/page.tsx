@@ -8,6 +8,7 @@ import AuthButton from './components/AuthButton';
 import { SavedItemsList } from '@/app/components/SavedContent';
 import { ScheduledPostsList, PostHistory } from '@/app/components/Scheduler';
 import PostConfirmationModal, { PostOptions } from './components/PostConfirmationModal';
+import ConnectionsManager from './components/ConnectionsManager';
 // import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
@@ -225,7 +226,7 @@ export default function Home() {
   const [savedList, setSavedList] = useState<SavedItem[]>([]);
   const [selectedOptionIndexes, setSelectedOptionIndexes] = useState<Record<string, number>>({});
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler'>('generator');
+  const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler' | 'connections'>('generator');
   const [activeOutputTab, setActiveOutputTab] = useState<'info' | 'post' | 'video'>('info');
   const [trendscore, setTrendscore] = useState<number | null>(null);
   const [productSummary, setProductSummary] = useState<string | null>(null);
@@ -3076,6 +3077,13 @@ export default function Home() {
                   return readyToPostCount > 0 ? <span className="count-badge">{readyToPostCount}</span> : null;
                 })()}
               </button>
+              <button 
+                className={`unified-tab ${currentPage === 'connections' ? 'active' : ''}`} 
+                onClick={() => setCurrentPage('connections')}
+              >
+                <span className="tab-icon">🔗</span>
+                <span className="tab-label">Connections</span>
+              </button>
             </>
           )}
         </nav>
@@ -3095,6 +3103,7 @@ export default function Home() {
         {currentPage === 'generator' && renderGeneratorPage()}
         {currentPage === 'saved' && session && renderSavedPage()}
         {currentPage === 'scheduler' && session && renderSchedulerPage()}
+        {currentPage === 'connections' && session && <ConnectionsManager />}
         {currentPage === 'saved' && !session && (
           <div className="empty-saved-page">
             <h2>🔒 Login Required</h2>
@@ -3105,6 +3114,12 @@ export default function Home() {
           <div className="empty-saved-page">
             <h2>🔒 Login Required</h2>
             <p>Please sign in to access scheduled posts.</p>
+          </div>
+        )}
+        {currentPage === 'connections' && !session && (
+          <div className="empty-saved-page">
+            <h2>🔒 Login Required</h2>
+            <p>Please sign in to manage your connections.</p>
           </div>
         )}
       </main>
