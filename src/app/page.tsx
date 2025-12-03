@@ -2972,7 +2972,6 @@ export default function Home() {
                   {/* Platform Badge & Timestamp */}
                   <div className="scheduled-preview-meta">
                     <div className="card-badges">
-                      <span className="scheduled-platform-badge-pill">Threads</span>
                       <span className="card-status-ready">
                         <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style={{ marginRight: '3px' }}>
                           <circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.2"/>

@@ -7462,20 +7462,20 @@ body {
 
 /* Primary Action - Post Now with Lift & Glow */
 .scheduled-btn-post {
-  background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+  background: linear-gradient(135deg, #f97316 0%, #2563eb 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
 }
 
 .scheduled-btn-post:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4752c4 0%, #3c45a6 100%);
-  box-shadow: 0 6px 20px rgba(88, 101, 242, 0.5), 0 0 20px rgba(88, 101, 242, 0.3);
+  background: linear-gradient(135deg, #ea580c 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5), 0 0 20px rgba(37, 99, 235, 0.3);
   transform: translateY(-2px);
 }
 
 .scheduled-btn-post:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
 }
 
 /* Secondary Action - Ghost Button */
