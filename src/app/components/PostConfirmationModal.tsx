@@ -119,9 +119,10 @@ export default function PostConfirmationModal({
 
             <div className="option-section">
               <h3>Post Type</h3>
+              <p className="section-description">Choose how your content will appear on social media</p>
               
               {(hasHook && hasImage) && (
-                <label className={`card-option ${postType === 'short-hook-picture' ? 'selected' : ''}`}>
+                <label className={`card-option-compact ${postType === 'short-hook-picture' ? 'selected' : ''}`}>
                   <input
                     type="radio"
                     name="postType"
@@ -129,17 +130,16 @@ export default function PostConfirmationModal({
                     checked={postType === 'short-hook-picture'}
                     onChange={(e) => setPostType(e.target.value as typeof postType)}
                   />
-                  <span className="card-content">
-                    <span className="card-icon">🎯📸</span>
-                    <span className="card-text">
-                      <strong>Short Hook + Picture</strong>
-                    </span>
+                  <span className="compact-icon">🎯📸</span>
+                  <span className="compact-content">
+                    <strong>Short Hook + Picture</strong>
+                    <small>1-2 lines plus attached image. Great for fast scroll.</small>
                   </span>
                 </label>
               )}
 
               {hasHook && (
-                <label className={`card-option ${postType === 'short-hook-text' ? 'selected' : ''}`}>
+                <label className={`card-option-compact ${postType === 'short-hook-text' ? 'selected' : ''}`}>
                   <input
                     type="radio"
                     name="postType"
@@ -147,17 +147,16 @@ export default function PostConfirmationModal({
                     checked={postType === 'short-hook-text'}
                     onChange={(e) => setPostType(e.target.value as typeof postType)}
                   />
-                  <span className="card-content">
-                    <span className="card-icon">🎯📝</span>
-                    <span className="card-text">
-                      <strong>Short Hook, Text Only</strong>
-                    </span>
+                  <span className="compact-icon">🎯📝</span>
+                  <span className="compact-content">
+                    <strong>Short Hook, Text Only</strong>
+                    <small>Quick attention-grabber without media attachment.</small>
                   </span>
                 </label>
               )}
 
               {hasLongForm && (
-                <label className={`card-option ${postType === 'long-form-text' ? 'selected' : ''}`}>
+                <label className={`card-option-compact ${postType === 'long-form-text' ? 'selected' : ''}`}>
                   <input
                     type="radio"
                     name="postType"
@@ -165,11 +164,10 @@ export default function PostConfirmationModal({
                     checked={postType === 'long-form-text'}
                     onChange={(e) => setPostType(e.target.value as typeof postType)}
                   />
-                  <span className="card-content">
-                    <span className="card-icon">📄</span>
-                    <span className="card-text">
-                      <strong>Long-Form, Text Only</strong>
-                    </span>
+                  <span className="compact-icon">📄</span>
+                  <span className="compact-content">
+                    <strong>Long-Form, Text Only</strong>
+                    <small>Full detailed post with storytelling and depth.</small>
                   </span>
                 </label>
               )}
