@@ -242,6 +242,9 @@ export default function Home() {
   const [saveButtonState, setSaveButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
   const [showReadyToPost, setShowReadyToPost] = useState(false); // Separate flag for "Ready To Post" preview
+  const [selectedDetailItem, setSelectedDetailItem] = useState<typeof readyToPostItems[0] | null>(null);
+  const [postFilter, setPostFilter] = useState<'all' | 'scheduled' | 'posted' | 'failed'>('all');
+  const [postSort, setPostSort] = useState<'newest' | 'oldest'>('newest');
   const [readyToPostItems, setReadyToPostItems] = useState<Array<{
     id: string;
     content: { video: ParsedContent | null; post: ParsedContent | null; info: ParsedContent | null };
@@ -2919,83 +2922,142 @@ export default function Home() {
       {showReadyToPost && readyToPostItems.length > 0 && (
         <div className="ready-to-post-section">
           <div className="scheduled-posts-section">
-            <div>
-              <h2 className="section-title">
-                📤 Ready To Post
-                <span className="status-chip">
-                  <span style={{ fontSize: '0.9rem' }}>✓</span>
-                  Ready
-                </span>
-              </h2>
+            <div className="post-section-header">
+              <div className="post-header-title">
+                <h2 className="section-title">
+                  📤 Ready To Post
+                  <span className="status-chip-enhanced">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '4px' }}>
+                      <circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.2"/>
+                      <circle cx="6" cy="6" r="3" fill="currentColor"/>
+                    </svg>
+                    READY
+                  </span>
+                </h2>
+                <p className="post-count-subtext">{readyToPostItems.length} {readyToPostItems.length === 1 ? 'post' : 'posts'} queued</p>
+              </div>
+              
+              {/* Filters and Sort */}
+              <div className="post-filters">
+                <div className="filter-pills">
+                  <button 
+                    className={`filter-pill ${postFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setPostFilter('all')}
+                  >
+                    All
+                  </button>
+                  <button 
+                    className={`filter-pill ${postFilter === 'scheduled' ? 'active' : ''}`}
+                    onClick={() => setPostFilter('scheduled')}
+                  >
+                    Scheduled
+                  </button>
+                  <button 
+                    className={`filter-pill ${postFilter === 'posted' ? 'active' : ''}`}
+                    onClick={() => setPostFilter('posted')}
+                  >
+                    Posted
+                  </button>
+                </div>
+                <select 
+                  className="sort-dropdown"
+                  value={postSort}
+                  onChange={(e) => setPostSort(e.target.value as 'newest' | 'oldest')}
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                </select>
+              </div>
             </div>
 
             <div className="ready-to-post-grid">
             {readyToPostItems.map((item) => (
               <div key={item.id} className="scheduled-preview-card">
-                {/* Image on Top */}
-                {item.imageUrl && (
-                  <div className="scheduled-preview-image">
+                {/* Image on Top - Fixed Height */}
+                <div className="scheduled-preview-image-wrapper">
+                  {item.imageUrl ? (
                     <Image 
                       src={item.imageUrl} 
                       alt="Post preview" 
-                      width={320}
-                      height={180}
+                      fill
                       className="scheduled-image"
+                      style={{ objectFit: 'cover' }}
                       unoptimized
                     />
-                  </div>
-                )}
+                  ) : (
+                    <div className="scheduled-image-placeholder">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                      </svg>
+                    </div>
+                  )}
+                </div>
 
                 {/* Content Section */}
                 <div className="scheduled-preview-content">
                   {/* Platform Badge & Timestamp */}
                   <div className="scheduled-preview-meta">
-                    <span className="scheduled-platform-badge">Threads</span>
+                    <span className="scheduled-platform-badge-pill">Threads</span>
                     <span className="scheduled-preview-time">
                       {new Date(item.timestamp).toLocaleString('en-US', { 
                         month: 'short', 
                         day: 'numeric', 
-                        year: 'numeric', 
                         hour: 'numeric', 
-                        minute: '2-digit', 
-                        hour12: true 
+                        minute: '2-digit'
                       })}
                     </span>
                   </div>
 
+                  {/* Post Title - First line as title */}
+                  <h3 className="scheduled-preview-title">
+                    {(() => {
+                      const hook = item.content.post?.hook?.[item.selectedIndexes['hook'] ?? 0];
+                      const title = stripHtml(hook || 'Untitled Post');
+                      return title.length > 60 ? title.substring(0, 60) + '...' : title;
+                    })()}
+                  </h3>
+
                   {/* Post Text - Truncated */}
                   <p className="scheduled-preview-text">
                     {(() => {
-                      const hook = item.content.post?.hook?.[item.selectedIndexes['hook'] ?? 0];
                       const body = item.content.post?.body?.[item.selectedIndexes['body'] ?? 0];
-                      const cta = item.content.post?.cta?.[item.selectedIndexes['cta'] ?? 0];
-                      
-                      const parts = [];
-                      if (hook) parts.push(stripHtml(hook));
-                      if (body) parts.push(stripHtml(body));
-                      if (cta) parts.push(stripHtml(cta));
-                      
-                      const fullText = parts.join('\n\n');
-                      // Truncate to ~100 chars for compact preview
-                      return fullText.length > 100 ? fullText.substring(0, 100) + '...' : fullText;
+                      const text = stripHtml(body || '');
+                      return text.length > 80 ? text.substring(0, 80) + '...' : text;
                     })()}
                   </p>
+
+                  {/* View Details Link */}
+                  <button 
+                    className="view-details-link"
+                    onClick={() => setSelectedDetailItem(item)}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    View details
+                  </button>
 
                   {/* Action Buttons */}
                   <div className="scheduled-preview-actions">
                     <button
                       className="scheduled-action-btn scheduled-btn-post"
                       onClick={() => {
-                        // Set current content to this item's content for posting
                         setEditableContent(item.content);
                         setSelectedOptionIndexes(item.selectedIndexes);
                         setGeneratedImages({ 'post-image-generation': item.imageUrl });
-                        setCurrentPostingItemId(item.id); // Track which item is being posted
+                        setCurrentPostingItemId(item.id);
                         setShowPostConfirmation(true);
                       }}
                       disabled={!session}
                     >
-                      📤 Post Now
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                      </svg>
+                      Post Now
                     </button>
                     <button
                       className="scheduled-action-btn scheduled-btn-cancel"
@@ -3006,12 +3068,102 @@ export default function Home() {
                         }
                       }}
                     >
-                      🗑️ Remove
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                      Remove
                     </button>
                   </div>
                 </div>
               </div>
                 ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Details Modal */}
+      {selectedDetailItem && (
+        <div className="detail-modal-overlay" onClick={() => setSelectedDetailItem(null)}>
+          <div className="detail-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="detail-modal-close" onClick={() => setSelectedDetailItem(null)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+            
+            <div className="detail-modal-header">
+              <h2>Post Details</h2>
+              <span className="scheduled-platform-badge-pill">Threads</span>
+            </div>
+            
+            {selectedDetailItem.imageUrl && (
+              <div className="detail-modal-image">
+                <Image 
+                  src={selectedDetailItem.imageUrl} 
+                  alt="Post preview" 
+                  width={600}
+                  height={400}
+                  style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+                  unoptimized
+                />
+              </div>
+            )}
+            
+            <div className="detail-modal-body">
+              <div className="detail-section">
+                <h3>Hook</h3>
+                <p>{stripHtml(selectedDetailItem.content.post?.hook?.[selectedDetailItem.selectedIndexes['hook'] ?? 0] || 'N/A')}</p>
+              </div>
+              
+              <div className="detail-section">
+                <h3>Body</h3>
+                <p>{stripHtml(selectedDetailItem.content.post?.body?.[selectedDetailItem.selectedIndexes['body'] ?? 0] || 'N/A')}</p>
+              </div>
+              
+              <div className="detail-section">
+                <h3>Call to Action</h3>
+                <p>{stripHtml(selectedDetailItem.content.post?.cta?.[selectedDetailItem.selectedIndexes['cta'] ?? 0] || 'N/A')}</p>
+              </div>
+              
+              <div className="detail-meta">
+                <div className="detail-meta-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>{new Date(selectedDetailItem.timestamp).toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="detail-modal-actions">
+              <button
+                className="detail-modal-btn detail-btn-post"
+                onClick={() => {
+                  setEditableContent(selectedDetailItem.content);
+                  setSelectedOptionIndexes(selectedDetailItem.selectedIndexes);
+                  setGeneratedImages({ 'post-image-generation': selectedDetailItem.imageUrl });
+                  setCurrentPostingItemId(selectedDetailItem.id);
+                  setShowPostConfirmation(true);
+                  setSelectedDetailItem(null);
+                }}
+                disabled={!session}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+                Post Now
+              </button>
+              <button
+                className="detail-modal-btn detail-btn-close"
+                onClick={() => setSelectedDetailItem(null)}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
