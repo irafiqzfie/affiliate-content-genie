@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './ConsentModal.module.css';
+import { ThreadsIcon } from './ThreadsIcon';
 
 interface AccordionSectionProps {
   title: string;
@@ -74,41 +75,39 @@ export default function ThreadsConsentModal({ isOpen, onClose }: ThreadsConsentM
     <div className={styles.consentModalOverlay} onClick={onClose}>
       <div className={styles.consentModal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.consentModalHeader}>
-          <h2>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '8px' }}>
-              <path d="M12.186 3.998c-1.864 0-3.572.61-4.952 1.64-1.326 1.037-2.335 2.522-2.916 4.294l2.79.89c.456-1.391 1.232-2.496 2.22-3.207.99-.686 2.15-1.073 3.408-1.073 2.636 0 4.767 2.131 4.767 4.767 0 .702-.157 1.373-.44 1.977-.3.64-.753 1.2-1.314 1.626-.558.424-1.22.711-1.93.83v2.934c1.296-.171 2.465-.676 3.415-1.429 1.007-.797 1.805-1.857 2.317-3.078.52-1.247.79-2.63.79-4.086 0-3.9-3.17-7.07-7.07-7.07zM10.928 15.34v2.844c0 .7.566 1.266 1.266 1.266.7 0 1.266-.566 1.266-1.266V15.34h-2.532z"/>
-            </svg>
-            Connect with Threads
-          </h2>
-          <button className={styles.closeButton} onClick={onClose} aria-label="Close">
-            ×
-          </button>
+          <div className={styles.brandingHeader}>
+            <div className={styles.brandingLeft}>
+              <span className={styles.inabizLogo}>INABIZ</span>
+              <span className={styles.brandingDivider}></span>
+              <div className={styles.platformBrand}>
+                <ThreadsIcon size={20} />
+                <span>Threads</span>
+              </div>
+            </div>
+            <button className={styles.closeButton} onClick={onClose} aria-label="Close">
+              ×
+            </button>
+          </div>
+          <h2 className={styles.consentModalTitle}>Connect with Threads</h2>
+          <p className={styles.valueProposition}>
+            Share your affiliate content seamlessly and reach your audience on Threads with one click.
+          </p>
         </div>
 
         <div className={styles.consentModalContent}>
           <div className={styles.modalDescription}>
             <p>
-              <strong>Inabiz Online</strong> would like to connect with your Threads account to enable direct posting to Threads.
+              We&apos;ll use a secure OAuth connection to post your content to Threads. Your credentials are never stored.
             </p>
           </div>
 
           <div className={styles.modalSection}>
-            <h3>📋 What We Will Access</h3>
-            <div className={styles.permissionList}>
-              <div className={styles.permissionItem}>
-                <div className={styles.permissionName}>✓</div>
-                <div className={styles.permissionDesc}>
-                  <strong>Basic Profile</strong>
-                  <p>Your username, name, and profile picture</p>
-                </div>
-              </div>
-              <div className={styles.permissionItem}>
-                <div className={styles.permissionName}>✓</div>
-                <div className={styles.permissionDesc}>
-                  <strong>Content Publishing</strong>
-                  <p>Ability to post text and media to your Threads profile</p>
-                </div>
-              </div>
+            <h3 className={styles.sectionTitle}>✅ What We Will Access</h3>
+            <div className={styles.compactPermissionBox}>
+              <ul>
+                <li><strong>Basic Profile:</strong> Your username, name, and profile picture</li>
+                <li><strong>Content Publishing:</strong> Ability to post text and media to your Threads profile</li>
+              </ul>
             </div>
           </div>
 
@@ -168,40 +167,41 @@ export default function ThreadsConsentModal({ isOpen, onClose }: ThreadsConsentM
               </div>
             </div>
           </AccordionSection>
-
-          <div className="consent-checkbox">
-            <label>
-              <input
-                type="checkbox"
-                checked={isAccepted}
-                onChange={(e) => setIsAccepted(e.target.checked)}
-              />
-              <span>
-                I have read and agree to the{' '}
-                <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-                {' '}and{' '}
-                <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
-              </span>
-            </label>
-          </div>
         </div>
 
         <div className={styles.consentModalFooter}>
-          <button
-            className={styles.cancelButton}
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          
-          <button
-            className="consent-btn consent-btn-accept threads-button"
-            onClick={handleAccept}
-            disabled={!isAccepted || isLoading}
-          >
-            {isLoading ? 'Connecting...' : 'Accept & Continue'}
-          </button>
+          <div className={styles.inlineCheckbox}>
+            <input
+              id="threads-consent"
+              type="checkbox"
+              checked={isAccepted}
+              onChange={(e) => setIsAccepted(e.target.checked)}
+            />
+            <label htmlFor="threads-consent">
+              I have read and agree to the{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+              {' '}and{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+            </label>
+          </div>
+
+          <div className={styles.footerButtons}>
+            <button
+              className={styles.cancelButton}
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            
+            <button
+              className={styles.authorizeButton}
+              onClick={handleAccept}
+              disabled={!isAccepted || isLoading}
+            >
+              {isLoading ? 'Connecting...' : 'Accept & Continue'}
+            </button>
+          </div>
         </div>
       </div>
 

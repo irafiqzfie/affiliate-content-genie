@@ -132,36 +132,41 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
     <div className={styles.consentModalOverlay} onClick={onClose}>
       <div className={styles.consentModal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.consentModalHeader}>
-          <h2 className={styles.consentModalTitle}>🔐 Connect with Facebook</h2>
-          <button className={styles.closeButton} onClick={onClose} aria-label="Close">
-            ×
-          </button>
+          <div className={styles.brandingHeader}>
+            <div className={styles.brandingLeft}>
+              <span className={styles.inabizLogo}>INABIZ</span>
+              <span className={styles.brandingDivider}></span>
+              <div className={styles.platformBrand}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#1877F2" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                <span>Facebook</span>
+              </div>
+            </div>
+            <button className={styles.closeButton} onClick={onClose} aria-label="Close">
+              ×
+            </button>
+          </div>
+          <h2 className={styles.consentModalTitle}>Connect with Facebook</h2>
+          <p className={styles.valueProposition}>
+            Share your affiliate content seamlessly and reach your audience on Facebook with one click.
+          </p>
         </div>
 
         <div className={styles.consentModalContent}>
           <div className={styles.modalDescription}>
             <p>
-              <strong>Inabiz Online</strong> would like to access your Facebook account to provide you with a seamless experience.
+              We&apos;ll use a secure OAuth connection to access your Facebook profile. Your credentials are never stored.
             </p>
           </div>
 
           <div className={styles.modalSection}>
-            <h3>📋 What We Will Access</h3>
-            <div className={styles.permissionList}>
-              <div className={styles.permissionItem}>
-                <div className={styles.permissionName}>✓</div>
-                <div className={styles.permissionDesc}>
-                  <strong>Public Profile</strong>
-                  <p>Your name and profile picture</p>
-                </div>
-              </div>
-              <div className={styles.permissionItem}>
-                <div className={styles.permissionName}>✓</div>
-                <div className={styles.permissionDesc}>
-                  <strong>Email Address</strong>
-                  <p>Your email registered with Facebook</p>
-                </div>
-              </div>
+            <h3 className={styles.sectionTitle}>✅ What We Will Access</h3>
+            <div className={styles.compactPermissionBox}>
+              <ul>
+                <li><strong>Public Profile:</strong> Your name and profile picture</li>
+                <li><strong>Email Address:</strong> Your email registered with Facebook</li>
+              </ul>
             </div>
           </div>
 
@@ -228,43 +233,44 @@ export default function FacebookConsentModal({ isOpen, onClose }: FacebookConsen
               </div>
             </div>
           </AccordionSection>
-
-          <div style={{marginTop:"1rem"}}>
-            <label>
-              <input
-                type="checkbox"
-                checked={isAccepted}
-                onChange={(e) => setIsAccepted(e.target.checked)}
-              />
-              <span>
-                I have read and agree to the{' '}
-                <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-                {' '}and{' '}
-                <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
-              </span>
-            </label>
-          </div>
         </div>
 
         <div className={styles.consentModalFooter}>
-          <button
-            className={styles.cancelButton}
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          
-          <button
-            className={styles.authorizeButton}
-            onClick={handleAccept}
-            disabled={!isAccepted || isLoading}
-          >
-            {isLoading ? 'Connecting...' : 'Accept & Continue'}
-          </button>
+          <div className={styles.inlineCheckbox}>
+            <input
+              id="facebook-consent"
+              type="checkbox"
+              checked={isAccepted}
+              onChange={(e) => setIsAccepted(e.target.checked)}
+            />
+            <label htmlFor="facebook-consent">
+              I have read and agree to the{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+              {' '}and{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+            </label>
+          </div>
+
+          <div className={styles.footerButtons}>
+            <button
+              className={styles.cancelButton}
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            
+            <button
+              className={styles.authorizeButton}
+              onClick={handleAccept}
+              disabled={!isAccepted || isLoading}
+            >
+              {isLoading ? 'Connecting...' : 'Accept & Continue'}
+            </button>
+          </div>
 
           {isAccepted && (
-            <div className="fb-login-button-container">
+            <div className="fb-login-button-container" style={{ marginTop: '1rem', textAlign: 'center' }}>
               <div 
                 className="fb-login-button" 
                 data-width="300"

@@ -42,21 +42,62 @@
 }
 
 .consentModalHeader {
-  padding: 2rem 2rem 1rem !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  padding: 1.5rem 2rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   flex-shrink: 0 !important;
 }
 
-.consentModalTitle {
-  font-size: 1.75rem !important;
-  font-weight: 700 !important;
-  background: linear-gradient(135deg, var(--primary-color), #d946ef) !important;
+.brandingHeader {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 1rem !important;
+}
+
+.brandingLeft {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+.inabizLogo {
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, #f97316 0%, #3b82f6 100%) !important;
   -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.brandingDivider {
+  width: 2px !important;
+  height: 24px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.platformBrand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+}
+
+.consentModalTitle {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: var(--primary-text-color) !important;
+  margin: 0 0 0.5rem 0 !important;
+}
+
+.valueProposition {
+  font-size: 0.95rem !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  line-height: 1.4 !important;
   margin: 0 !important;
 }
 
@@ -266,58 +307,119 @@
   margin: 0 !important;
 }
 
+.compactPermissionBox {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  padding: 1rem 1.25rem !important;
+  border-radius: 10px !important;
+  margin-bottom: 1rem !important;
+}
+
+.compactPermissionBox ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0.5rem 0 0 0 !important;
+}
+
+.compactPermissionBox li {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.9rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 0.5rem !important;
+  padding-left: 1.5rem !important;
+  position: relative !important;
+}
+
+.compactPermissionBox li::before {
+  content: "✓" !important;
+  position: absolute !important;
+  left: 0 !important;
+  color: #10b981 !important;
+  font-weight: bold !important;
+  font-size: 1.1rem !important;
+}
+
+.compactPermissionBox li:last-child {
+  margin-bottom: 0 !important;
+}
+
 .consentModalFooter {
-  padding: 2rem 3rem 3rem !important;
+  padding: 1.5rem 2rem !important;
   display: flex !important;
-  gap: 1.5rem !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
   border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   flex-shrink: 0 !important;
 }
 
+.inlineCheckbox {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.75rem !important;
+  padding: 0.5rem 0 !important;
+}
+
+.inlineCheckbox input[type="checkbox"] {
+  margin-top: 0.25rem !important;
+  cursor: pointer !important;
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0 !important;
+}
+
+.inlineCheckbox label {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.9rem !important;
+  line-height: 1.5 !important;
+  cursor: pointer !important;
+}
+
+.footerButtons {
+  display: flex !important;
+  gap: 1rem !important;
+}
+
 .footerButton {
   flex: 1 !important;
-  padding: 3rem 5rem !important;
+  padding: 0.875rem 1.5rem !important;
   border: none !important;
-  border-radius: 16px !important;
-  font-size: 1.65rem !important;
-  font-weight: 700 !important;
+  border-radius: 10px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.2s ease !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 0.5rem !important;
-  min-height: 110px !important;
 }
 
 .cancelButton {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05)) !important;
-  border: 2px solid rgba(255, 255, 255, 0.15) !important;
-  color: var(--primary-text-color) !important;
+  background: transparent !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 .cancelButton:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08)) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: var(--primary-text-color) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .authorizeButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+  background: linear-gradient(135deg, #f97316 0%, #3b82f6 100%) !important;
   color: white !important;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3) !important;
   border: none !important;
 }
 
 .authorizeButton:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5) !important;
-  background: linear-gradient(135deg, #7a8efc 0%, #8857b2 50%, #f5a3ff 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4) !important;
 }
 
 .authorizeButton:active {
-  transform: translateY(-1px) !important;
+  transform: translateY(0) !important;
 }
 
 .authorizeButton:disabled {
@@ -327,5 +429,5 @@
 
 .authorizeButton:disabled:hover {
   transform: none !important;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3) !important;
 }
