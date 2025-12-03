@@ -8,7 +8,6 @@ import AuthButton from './components/AuthButton';
 import { SavedItemsList } from '@/app/components/SavedContent';
 import { ScheduledPostsList, PostHistory } from '@/app/components/Scheduler';
 import PostConfirmationModal, { PostOptions } from './components/PostConfirmationModal';
-import ConnectionStatus from './components/ConnectionStatus';
 // import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
@@ -3244,7 +3243,6 @@ export default function Home() {
         </nav>
         
         <div className="header-auth">
-          {session && <ConnectionStatus />}
           <a href="/about" className="about-link">
             About Us
           </a>

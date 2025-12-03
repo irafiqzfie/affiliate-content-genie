@@ -673,6 +673,25 @@ body {
   box-shadow: 0 2px 4px rgba(24, 119, 242, 0.15);
 }
 
+/* Facebook Connected State - Green glow with pulse */
+.auth-button-signin.facebook-signin.connected {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 4px 16px rgba(16, 185, 129, 0.4);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.auth-button-signin.facebook-signin.connected:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+.auth-button-signin.facebook-signin.connected:active {
+  transform: translateY(0);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
 /* Threads button - Professional black */
 .auth-button-signin.threads-signin {
   background: #000000;
@@ -689,6 +708,35 @@ body {
 .auth-button-signin.threads-signin:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Threads Connected State - Green glow with pulse */
+.auth-button-signin.threads-signin.connected {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 4px 16px rgba(16, 185, 129, 0.4);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.auth-button-signin.threads-signin.connected:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+.auth-button-signin.threads-signin.connected:active {
+  transform: translateY(0);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Pulse glow animation for connected state */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 4px 16px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 6px 24px rgba(16, 185, 129, 0.6);
+  }
 }
 
 /* Sign out button - Charcoal outline */
