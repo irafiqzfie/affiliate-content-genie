@@ -168,9 +168,9 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
 
       {/* Threads Modal */}
       {showModal === 'threads' && (
-        <div className="modal-overlay" onClick={() => setShowModal(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowModal(null)}>×</button>
+        <div className="connection-modal-overlay" onClick={() => setShowModal(null)}>
+          <div className="connection-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="connection-modal-close" onClick={() => setShowModal(null)}>×</button>
             
             <div className="modal-header">
               <span className="modal-icon">
@@ -219,9 +219,9 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
 
       {/* Facebook Modal */}
       {showModal === 'facebook' && (
-        <div className="modal-overlay" onClick={() => setShowModal(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowModal(null)}>×</button>
+        <div className="connection-modal-overlay" onClick={() => setShowModal(null)}>
+          <div className="connection-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="connection-modal-close" onClick={() => setShowModal(null)}>×</button>
             
             <div className="modal-header">
               <span className="modal-icon">📘</span>
@@ -336,21 +336,21 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
           text-align: center;
         }
 
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+        .connection-modal-overlay {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
           background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
           z-index: 1000;
           padding: 1rem;
         }
 
-        .modal-content {
+        .connection-modal-content {
           background: white;
           border-radius: 16px;
           max-width: 500px;
@@ -361,7 +361,7 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
           position: relative;
         }
 
-        .modal-close {
+        .connection-modal-close {
           position: absolute;
           top: 12px;
           right: 12px;
@@ -379,7 +379,7 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
           transition: all 0.2s;
         }
 
-        .modal-close:hover {
+        .connection-modal-close:hover {
           background: #f5f5f5;
           color: #333;
         }
@@ -535,7 +535,7 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
         }
 
         @media (max-width: 768px) {
-          .modal-content {
+          .connection-modal-content {
             margin: 1rem;
           }
         }
