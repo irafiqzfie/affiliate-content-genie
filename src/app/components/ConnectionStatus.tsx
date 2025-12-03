@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { createPortal } from 'react-dom';
 import { ThreadsIcon } from './ThreadsIcon';
 
 interface Connection {
@@ -30,6 +31,11 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
   const [connections, setConnections] = useState<Connections | null>(null);
   const [showModal, setShowModal] = useState<'threads' | 'facebook' | null>(null);
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (session?.user) {
@@ -167,7 +173,7 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
       </div>
 
       {/* Threads Modal */}
-      {showModal === 'threads' && (
+      {mounted && showModal === 'threads' && createPortal(
         <div className="connection-modal-overlay" onClick={() => setShowModal(null)}>
           <div className="connection-modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="connection-modal-close" onClick={() => setShowModal(null)}>×</button>
@@ -214,11 +220,12 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Facebook Modal */}
-      {showModal === 'facebook' && (
+      {mounted && showModal === 'facebook' && createPortal(
         <div className="connection-modal-overlay" onClick={() => setShowModal(null)}>
           <div className="connection-modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="connection-modal-close" onClick={() => setShowModal(null)}>×</button>
@@ -270,7 +277,8 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style jsx>{`
