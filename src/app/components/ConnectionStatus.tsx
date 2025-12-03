@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { ThreadsIcon } from './ThreadsIcon';
 
 interface Connection {
   id: string;
@@ -138,17 +139,25 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
           onClick={() => setShowModal('threads')}
           title={threadsConnected ? 'Threads: Connected' : 'Threads: Not Connected'}
         >
-          <span className="status-icon">🧵</span>
-          {connections?.threads?.expires_at && isExpiringSoon(connections.threads.expires_at) && (
-            <span className="warning-dot">⚠️</span>
-          )}
+          <span className="status-icon">
+            <ThreadsIcon size={18} />
+          </span>
+          {connections?.threads?.expires_at &&
+            connections.threads &&
+            isExpiringSoon(connections.threads.expires_at) && (
+              <span className="warning-dot">⚠️</span>
+            )}
         </button>
 
         {/* Facebook Pages */}
         <button
           className={`status-indicator ${facebookConnected ? 'connected' : 'disconnected'}`}
           onClick={() => setShowModal('facebook')}
-          title={facebookConnected ? `Facebook: ${connections?.facebook.length} page(s)` : 'Facebook: Not Connected'}
+          title={
+            facebookConnected
+              ? `Facebook: ${connections?.facebook.length} page(s)`
+              : 'Facebook: Not Connected'
+          }
         >
           <span className="status-icon">📘</span>
           {facebookConnected && connections?.facebook && (
@@ -164,7 +173,9 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
             <button className="modal-close" onClick={() => setShowModal(null)}>×</button>
             
             <div className="modal-header">
-              <span className="modal-icon">🧵</span>
+              <span className="modal-icon">
+                <ThreadsIcon size={20} />
+              </span>
               <h3>Threads Connection</h3>
             </div>
 

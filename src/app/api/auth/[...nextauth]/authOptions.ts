@@ -85,24 +85,33 @@ export const authOptions: NextAuthOptions = {
             throw new Error(tokens.error?.message || tokens.error_message || 'Failed to get access token');
           }
 
-          console.log('✅ Token exchange successful');
+          console.log('✅ Token exchange successful:', { 
+            hasToken: !!tokens.access_token,
+            userId: tokens.user_id 
+          });
           return { tokens };
         },
       },
       userinfo: {
         url: 'https://graph.threads.net/v1.0/me',
         async request(context) {
+          console.log('🔍 Fetching Threads user profile...');
           const response = await fetch(
             `https://graph.threads.net/v1.0/me?fields=id,username,name,threads_profile_picture_url&access_token=${context.tokens.access_token}`
           );
           
-          return await response.json();
+          const profile = await response.json();
+          console.log('✅ Threads profile received:', { 
+            id: profile.id, 
+            username: profile.username 
+          });
+          return profile;
         },
       },
       clientId: process.env.THREADS_APP_ID || '',
       clientSecret: process.env.THREADS_APP_SECRET || '',
       profile(profile) {
-        console.log('📱 Threads profile:', profile);
+        console.log('📱 Processing Threads profile:', profile);
         return {
           id: profile.id,
           name: profile.name || profile.username,
@@ -114,7 +123,7 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: PrismaAdapter && prisma ? 'database' : 'jwt',
+    strategy: 'jwt', // Use JWT since we don't have Session model
     maxAge: 60 * 24 * 60 * 60, // 60 days
   },
   pages: {
@@ -198,35 +207,129 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user, account, profile }) {
       console.log('✅ Sign in callback:', { 
-        user: user?.id, 
+        userId: user?.id,
+        userEmail: user?.email,
         provider: account?.provider,
-        profile: profile 
+        providerAccountId: account?.providerAccountId,
+        hasProfile: !!profile 
       });
       
-      // If signing in with Threads, ensure threadsUserId is stored
-      if (account?.provider === 'threads' && profile && user?.id) {
-        try {
+      if (!account || !user) {
+        console.error('❌ Missing account or user in signIn callback');
+        return false;
+      }
+
+      try {
+        // Ensure user exists in database
+        let dbUser = await prisma.user.findUnique({
+          where: { email: user.email || `${user.id}@placeholder.com` }
+        });
+
+        if (!dbUser) {
+          console.log('📝 Creating new user in database...');
+          dbUser = await prisma.user.create({
+            data: {
+              id: user.id || undefined,
+              email: user.email || `${user.id}@placeholder.com`,
+              name: user.name,
+              image: user.image,
+            }
+          });
+          console.log('✅ User created:', dbUser.id);
+        } else {
+          console.log('✅ User found:', dbUser.id);
+        }
+
+        // For Threads provider, ensure account is stored with threadsUserId
+        if (account.provider === 'threads' && profile) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const threadsProfile = profile as any;
-          const threadsUserId = threadsProfile.id || threadsProfile.username;
+          const threadsUserId = threadsProfile.id || account.providerAccountId;
           
-          // Update the account record to include threadsUserId
-          await prisma.account.updateMany({
+          // Check if account already exists
+          const existingAccount = await prisma.account.findUnique({
             where: {
-              userId: user.id,
-              provider: 'threads',
-            },
-            data: {
-              threadsUserId: threadsUserId,
-            },
+              provider_providerAccountId: {
+                provider: 'threads',
+                providerAccountId: account.providerAccountId
+              }
+            }
           });
-          console.log('✅ Updated Threads account with threadsUserId:', threadsUserId);
-        } catch (error) {
-          console.error('❌ Failed to update threadsUserId:', error);
+
+          if (existingAccount) {
+            console.log('🔄 Updating existing Threads account...');
+            await prisma.account.update({
+              where: { id: existingAccount.id },
+              data: {
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                threadsUserId: threadsUserId,
+                updatedAt: new Date(),
+              }
+            });
+            console.log('✅ Threads account updated');
+          } else {
+            console.log('📝 Creating new Threads account...');
+            await prisma.account.create({
+              data: {
+                userId: dbUser.id,
+                provider: 'threads',
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type || 'Bearer',
+                scope: account.scope || 'threads_basic,threads_content_publish',
+                threadsUserId: threadsUserId,
+              }
+            });
+            console.log('✅ Threads account created with threadsUserId:', threadsUserId);
+          }
         }
+
+        // For Facebook provider
+        if (account.provider === 'facebook') {
+          const existingAccount = await prisma.account.findUnique({
+            where: {
+              provider_providerAccountId: {
+                provider: 'facebook',
+                providerAccountId: account.providerAccountId
+              }
+            }
+          });
+
+          if (existingAccount) {
+            await prisma.account.update({
+              where: { id: existingAccount.id },
+              data: {
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                updatedAt: new Date(),
+              }
+            });
+            console.log('✅ Facebook account updated');
+          } else {
+            await prisma.account.create({
+              data: {
+                userId: dbUser.id,
+                provider: 'facebook',
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type || 'Bearer',
+                scope: account.scope,
+              }
+            });
+            console.log('✅ Facebook account created');
+          }
+        }
+
+        return true;
+      } catch (error) {
+        console.error('❌ Error in signIn callback:', error);
+        return false;
       }
-      
-      return true;
     },
     async redirect({ url, baseUrl }) {
       // Always redirect to home after sign in
