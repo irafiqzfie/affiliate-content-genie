@@ -272,7 +272,9 @@ export const authOptions: NextAuthOptions = {
             console.log('📝 Creating new Threads account...');
             await prisma.account.create({
               data: {
-                userId: dbUser.id,
+                user: {
+                  connect: { id: dbUser.id }
+                },
                 provider: 'threads',
                 providerAccountId: account.providerAccountId,
                 access_token: account.access_token,
@@ -311,7 +313,9 @@ export const authOptions: NextAuthOptions = {
           } else {
             await prisma.account.create({
               data: {
-                userId: dbUser.id,
+                user: {
+                  connect: { id: dbUser.id }
+                },
                 provider: 'facebook',
                 providerAccountId: account.providerAccountId,
                 access_token: account.access_token,
