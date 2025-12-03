@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSession } from 'next-auth/react';
-import { ThreadsIcon } from './ThreadsIcon';
 
 interface Connection {
   id: string;
@@ -30,6 +30,11 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
   const [connections, setConnections] = useState<Connections | null>(null);
   const [showModal, setShowModal] = useState<'threads' | 'facebook' | null>(null);
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (session?.user) {
@@ -139,9 +144,7 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
           onClick={() => setShowModal('threads')}
           title={threadsConnected ? 'Threads: Connected' : 'Threads: Not Connected'}
         >
-          <span className="status-icon">
-            <ThreadsIcon size={18} />
-          </span>
+          <span className="status-icon">🧵</span>
           {connections?.threads?.expires_at &&
             connections.threads &&
             isExpiringSoon(connections.threads.expires_at) && (
@@ -167,15 +170,13 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
       </div>
 
       {/* Threads Modal */}
-      {showModal === 'threads' && (
+      {mounted && showModal === 'threads' && createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowModal(null)}>×</button>
             
             <div className="modal-header">
-              <span className="modal-icon">
-                <ThreadsIcon size={20} />
-              </span>
+              <span className="modal-icon">🧵</span>
               <h3>Threads Connection</h3>
             </div>
 
@@ -214,11 +215,12 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Facebook Modal */}
-      {showModal === 'facebook' && (
+      {mounted && showModal === 'facebook' && createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowModal(null)}>×</button>
@@ -270,7 +272,8 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style jsx>{`
