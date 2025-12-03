@@ -2926,13 +2926,6 @@ export default function Home() {
               <div className="post-header-title">
                 <h2 className="section-title">
                   📤 Ready To Post
-                  <span className="status-chip-enhanced">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: '4px' }}>
-                      <circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.2"/>
-                      <circle cx="6" cy="6" r="3" fill="currentColor"/>
-                    </svg>
-                    READY
-                  </span>
                 </h2>
                 <p className="post-count-subtext">{readyToPostItems.length} {readyToPostItems.length === 1 ? 'post' : 'posts'} queued</p>
               </div>
@@ -2999,7 +2992,16 @@ export default function Home() {
                 <div className="scheduled-preview-content">
                   {/* Platform Badge & Timestamp */}
                   <div className="scheduled-preview-meta">
-                    <span className="scheduled-platform-badge-pill">Threads</span>
+                    <div className="card-badges">
+                      <span className="scheduled-platform-badge-pill">Threads</span>
+                      <span className="card-status-ready">
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style={{ marginRight: '3px' }}>
+                          <circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.2"/>
+                          <circle cx="6" cy="6" r="3" fill="currentColor"/>
+                        </svg>
+                        READY
+                      </span>
+                    </div>
                     <span className="scheduled-preview-time">
                       {new Date(item.timestamp).toLocaleString('en-US', { 
                         month: 'short', 
