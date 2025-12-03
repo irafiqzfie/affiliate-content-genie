@@ -7046,40 +7046,6 @@ body {
 .post-filters {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.filter-pills {
-  display: flex;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 0.25rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.filter-pill {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filter-pill:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.filter-pill.active {
-  background: rgba(88, 101, 242, 0.2);
-  color: rgb(88, 101, 242);
-  box-shadow: 0 0 0 1px rgba(88, 101, 242, 0.3) inset;
 }
 
 .sort-dropdown {
@@ -7622,16 +7588,6 @@ body {
   .post-filters {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .filter-pills {
-    width: 100%;
-    justify-content: stretch;
-  }
-
-  .filter-pill {
-    flex: 1;
-    text-align: center;
   }
 
   .sort-dropdown {

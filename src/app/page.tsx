@@ -243,7 +243,6 @@ export default function Home() {
   const [hasGeneratedAttempt, setHasGeneratedAttempt] = useState(false);
   const [showReadyToPost, setShowReadyToPost] = useState(false); // Separate flag for "Ready To Post" preview
   const [selectedDetailItem, setSelectedDetailItem] = useState<typeof readyToPostItems[0] | null>(null);
-  const [postFilter, setPostFilter] = useState<'all' | 'scheduled' | 'posted' | 'failed'>('all');
   const [postSort, setPostSort] = useState<'newest' | 'oldest'>('newest');
   const [readyToPostItems, setReadyToPostItems] = useState<Array<{
     id: string;
@@ -2930,28 +2929,8 @@ export default function Home() {
                 <p className="post-count-subtext">{readyToPostItems.length} {readyToPostItems.length === 1 ? 'post' : 'posts'} queued</p>
               </div>
               
-              {/* Filters and Sort */}
+              {/* Sort Dropdown */}
               <div className="post-filters">
-                <div className="filter-pills">
-                  <button 
-                    className={`filter-pill ${postFilter === 'all' ? 'active' : ''}`}
-                    onClick={() => setPostFilter('all')}
-                  >
-                    All
-                  </button>
-                  <button 
-                    className={`filter-pill ${postFilter === 'scheduled' ? 'active' : ''}`}
-                    onClick={() => setPostFilter('scheduled')}
-                  >
-                    Scheduled
-                  </button>
-                  <button 
-                    className={`filter-pill ${postFilter === 'posted' ? 'active' : ''}`}
-                    onClick={() => setPostFilter('posted')}
-                  >
-                    Posted
-                  </button>
-                </div>
                 <select 
                   className="sort-dropdown"
                   value={postSort}
