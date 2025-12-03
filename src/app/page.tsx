@@ -253,8 +253,26 @@ export default function Home() {
   }>>([]);
   const [isShopeeImportOpen, setIsShopeeImportOpen] = useState(false);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<'Threads' | 'Facebook'>>(new Set(['Threads']));
+  const [connections, setConnections] = useState<{ threads: boolean; facebook: boolean }>({ threads: false, facebook: false });
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
+
+  // Fetch connection status
+  useEffect(() => {
+    if (session?.user) {
+      fetch('/api/auth/connections')
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data) {
+            setConnections({
+              threads: !!data.threads,
+              facebook: !!(data.facebook && data.facebook.length > 0)
+            });
+          }
+        })
+        .catch(err => console.error('Failed to fetch connections:', err));
+    }
+  }, [session]);
 
     // Helper to safely extract a message from an unknown error without using `any`.
     const extractErrorMessage = (err: unknown): string | null => {
@@ -1477,6 +1495,18 @@ export default function Home() {
     
     if (!platforms || platforms.length === 0) {
       alert('Please select at least one platform');
+      return;
+    }
+    
+    // Validate connections for selected platforms
+    const disconnectedPlatforms = platforms.filter(p => {
+      if (p === 'Threads') return !connections.threads;
+      if (p === 'Facebook') return !connections.facebook;
+      return false;
+    });
+    
+    if (disconnectedPlatforms.length > 0) {
+      alert(`Please connect ${disconnectedPlatforms.join(' and ')} before posting. Click the platform icon in the header to connect.`);
       return;
     }
     
@@ -3267,6 +3297,7 @@ export default function Home() {
         hasImage={!!Object.keys(generatedImages).find(key => key.startsWith('post-') && generatedImages[key])}
         hasLongForm={!!(editableContent.post?.['body-long'] && editableContent.post['body-long'].length > 0)}
         hasHook={!!(editableContent.post?.['body-hook'] && editableContent.post['body-hook'].length > 0)}
+        connectedPlatforms={{ threads: connections.threads, facebook: connections.facebook }}
       />
     </div>
   );

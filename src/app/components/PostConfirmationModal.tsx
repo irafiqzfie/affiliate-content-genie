@@ -11,6 +11,7 @@ interface PostConfirmationModalProps {
   hasImage: boolean;
   hasLongForm: boolean;
   hasHook: boolean;
+  connectedPlatforms: { threads: boolean; facebook: boolean };
 }
 
 export interface PostOptions {
@@ -26,7 +27,8 @@ export default function PostConfirmationModal({
   onConfirm,
   hasImage,
   hasLongForm,
-  hasHook
+  hasHook,
+  connectedPlatforms
 }: PostConfirmationModalProps) {
   const [postType, setPostType] = useState<'short-hook-picture' | 'short-hook-text' | 'long-form-text'>(
     hasImage && hasHook ? 'short-hook-picture' : (hasHook ? 'short-hook-text' : 'long-form-text')
@@ -85,25 +87,28 @@ export default function PostConfirmationModal({
             <div className="option-section">
               <h3>Post to Platforms</h3>
               <div className="platforms-container">
-                <label className="checkbox-option">
+                <label className={`checkbox-option ${!connectedPlatforms.threads ? 'disabled' : ''}`}>
                   <input
                     type="checkbox"
                     checked={selectedPlatforms.has('Threads')}
                     onChange={() => togglePlatform('Threads')}
+                    disabled={!connectedPlatforms.threads}
                   />
                   <span className="checkbox-label">
                     <span className="option-icon">
                       <ThreadsIcon size={20} />
                     </span>
                     <strong>Threads</strong>
+                    {!connectedPlatforms.threads && <span style={{ color: '#f59e0b', fontSize: '0.75rem', marginLeft: '0.5rem' }}>⚠️ Not connected</span>}
                   </span>
                 </label>
 
-                <label className="checkbox-option">
+                <label className={`checkbox-option ${!connectedPlatforms.facebook ? 'disabled' : ''}`}>
                   <input
                     type="checkbox"
                     checked={selectedPlatforms.has('Facebook')}
                     onChange={() => togglePlatform('Facebook')}
+                    disabled={!connectedPlatforms.facebook}
                   />
                   <span className="checkbox-label">
                     <span className="option-icon">
@@ -112,6 +117,7 @@ export default function PostConfirmationModal({
                       </svg>
                     </span>
                     <strong>Facebook</strong>
+                    {!connectedPlatforms.facebook && <span style={{ color: '#f59e0b', fontSize: '0.75rem', marginLeft: '0.5rem' }}>⚠️ Not connected</span>}
                   </span>
                 </label>
               </div>
