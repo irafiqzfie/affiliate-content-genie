@@ -179,7 +179,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           <div className="auth-footer">
             {mode === 'signin' ? (
               <p>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button
                   className="link-btn"
                   onClick={() => {
