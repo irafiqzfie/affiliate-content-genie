@@ -5,6 +5,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
+import ConnectionStatus from './components/ConnectionStatus';
 import { SavedItemsList } from '@/app/components/SavedContent';
 import { ScheduledPostsList, PostHistory } from '@/app/components/Scheduler';
 import PostConfirmationModal, { PostOptions } from './components/PostConfirmationModal';
@@ -3249,6 +3250,7 @@ export default function Home() {
           <a href="/contact" className="about-link">
             Contact Us
           </a>
+          {session && <ConnectionStatus />}
           <AuthButton />
         </div>
       </header>
