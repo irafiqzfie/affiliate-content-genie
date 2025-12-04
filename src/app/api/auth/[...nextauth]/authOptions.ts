@@ -28,8 +28,7 @@ if (!process.env.THREADS_APP_SECRET) {
 }
 
 export const authOptions: NextAuthOptions = {
-  // Enable PrismaAdapter to store accounts and sessions in database
-  ...(PrismaAdapter && prisma ? { adapter: PrismaAdapter(prisma) } : {}),
+  // Don't use PrismaAdapter with Credentials provider - incompatible
   debug: true,
   providers: [
     CredentialsProvider({
@@ -79,7 +78,7 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
     maxAge: 60 * 24 * 60 * 60, // 60 days
   },
   pages: {
