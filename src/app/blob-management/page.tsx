@@ -2,10 +2,17 @@
 
 import { useState } from 'react';
 
+interface BlobInfo {
+  url: string;
+  pathname: string;
+  size: number;
+  uploadedAt: string;
+}
+
 export default function BlobManagementPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [blobList, setBlobList] = useState<any[]>([]);
+  const [blobList, setBlobList] = useState<BlobInfo[]>([]);
   const [showList, setShowList] = useState(false);
 
   const listBlobs = async () => {
