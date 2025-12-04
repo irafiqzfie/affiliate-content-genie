@@ -42,7 +42,7 @@ export default function BlobManagementPage() {
     }
 
     setLoading(true);
-    setMessage('Deleting all blobs...');
+    setMessage('⏳ Deleting blobs in batches (this may take a while)...');
     try {
       const response = await fetch('/api/blob/delete-all', {
         method: 'DELETE'
@@ -50,11 +50,22 @@ export default function BlobManagementPage() {
       const data = await response.json();
       
       if (response.ok) {
-        setMessage(`✅ ${data.message}`);
+        let msg = `✅ ${data.message}`;
+        if (data.errors && data.errors.length > 0) {
+          msg += `\n\n⚠️ Some errors occurred:\n${data.errors.join('\n')}`;
+        }
+        setMessage(msg);
         setShowList(false);
         setBlobList([]);
       } else {
-        setMessage(`❌ Error: ${data.error}`);
+        let errorMsg = `❌ Error: ${data.error}`;
+        if (data.details) {
+          errorMsg += `\n\nDetails: ${data.details}`;
+          if (data.details.includes('Too many requests')) {
+            errorMsg += '\n\nPlease wait a moment and try again.';
+          }
+        }
+        setMessage(errorMsg);
       }
     } catch (error) {
       setMessage(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -109,10 +120,13 @@ export default function BlobManagementPage() {
       {message && (
         <div style={{
           padding: '16px',
-          backgroundColor: message.includes('Error') ? '#fee' : '#efe',
-          border: `1px solid ${message.includes('Error') ? '#fcc' : '#cfc'}`,
+          backgroundColor: message.includes('Error') || message.includes('❌') ? '#fee' : '#efe',
+          border: `1px solid ${message.includes('Error') || message.includes('❌') ? '#fcc' : '#cfc'}`,
           borderRadius: '8px',
-          marginBottom: '24px'
+          marginBottom: '24px',
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'monospace',
+          fontSize: '14px'
         }}>
           {message}
         </div>

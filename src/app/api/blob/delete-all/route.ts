@@ -31,21 +31,65 @@ export async function DELETE() {
       });
     }
 
-    // Delete all blobs
-    const deletePromises = blobs.map(blob => {
-      console.log(`🗑️ Deleting: ${blob.url}`);
-      return del(blob.url);
-    });
+    // Delete blobs in batches to avoid rate limits
+    const BATCH_SIZE = 5;
+    const DELAY_MS = 2000; // 2 seconds between batches
+    
+    let deletedCount = 0;
+    const deletedUrls: string[] = [];
+    const errors: string[] = [];
 
-    await Promise.all(deletePromises);
+    for (let i = 0; i < blobs.length; i += BATCH_SIZE) {
+      const batch = blobs.slice(i, i + BATCH_SIZE);
+      
+      console.log(`🗑️ Deleting batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length} blobs)...`);
+      
+      // Delete current batch
+      const batchResults = await Promise.allSettled(
+        batch.map(async (blob) => {
+          try {
+            await del(blob.url);
+            return { success: true, url: blob.url };
+          } catch (error) {
+            return { 
+              success: false, 
+              url: blob.url, 
+              error: error instanceof Error ? error.message : 'Unknown error' 
+            };
+          }
+        })
+      );
 
-    console.log(`✅ Successfully deleted ${blobs.length} blobs`);
+      // Process results
+      batchResults.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          if (result.value.success) {
+            deletedCount++;
+            deletedUrls.push(result.value.url);
+            console.log(`✅ Deleted: ${result.value.url}`);
+          } else {
+            errors.push(`Failed to delete ${result.value.url}: ${result.value.error}`);
+            console.error(`❌ Failed: ${result.value.url}`);
+          }
+        }
+      });
+
+      // Wait before next batch (except for the last batch)
+      if (i + BATCH_SIZE < blobs.length) {
+        console.log(`⏳ Waiting ${DELAY_MS}ms before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+      }
+    }
+
+    console.log(`✅ Deletion complete: ${deletedCount}/${blobs.length} blobs deleted`);
 
     return NextResponse.json({
       success: true,
-      message: `Successfully deleted ${blobs.length} blobs`,
-      deletedCount: blobs.length,
-      deletedUrls: blobs.map(b => b.url)
+      message: `Successfully deleted ${deletedCount} out of ${blobs.length} blobs`,
+      deletedCount,
+      totalBlobs: blobs.length,
+      deletedUrls,
+      errors: errors.length > 0 ? errors : undefined
     });
 
   } catch (error) {
