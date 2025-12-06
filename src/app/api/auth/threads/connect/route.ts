@@ -12,12 +12,13 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
 import { storeOAuthTokens } from '@/lib/oauth-helpers';
 
 export async function GET(request: NextRequest) {
-  console.log('🔍 GET /api/auth/threads/connect - OAuth callback');
+  console.log('🚨🚨🚨 GET /api/auth/threads/connect - OAuth callback - DEPLOYMENT VERSION 2');
   
   const session = await getServerSession(authOptions);
   
-  console.log('🔍 Session exists:', !!session);
-  console.log('🔍 User ID:', session?.user?.id);
+  console.log('🚨 Session exists:', !!session);
+  console.log('🚨 User ID:', session?.user?.id);
+  console.log('🚨 User email:', session?.user?.email);
 
   if (!session?.user?.id) {
     console.error('❌ No session during OAuth callback!');
@@ -93,9 +94,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Store tokens in database
-    console.log('💾 Storing Threads connection for user:', session.user.id);
-    console.log('💾 Threads user ID:', userInfo.id);
-    console.log('💾 Threads username:', userInfo.username);
+    console.log('🚨🚨🚨 ABOUT TO STORE - Threads connection for user:', session.user.id);
+    console.log('🚨 Threads user ID:', userInfo.id);
+    console.log('🚨 Threads username:', userInfo.username);
+    console.log('🚨 Access token length:', tokenData.access_token?.length);
     
     try {
       const storedAccount = await storeOAuthTokens(
@@ -108,14 +110,16 @@ export async function GET(request: NextRequest) {
           threadsUserId: userInfo.id,
         }
       );
-      console.log('✅ Storage completed, account ID:', storedAccount?.id);
+      console.log('🚨🚨🚨 STORAGE SUCCESS - account ID:', storedAccount?.id);
     } catch (storageError) {
-      console.error('❌ CRITICAL: Failed to store Threads connection:', storageError);
-      console.error('❌ Error details:', JSON.stringify(storageError, null, 2));
+      console.error('🚨🚨🚨 CRITICAL STORAGE ERROR:', storageError);
+      console.error('🚨 Error name:', (storageError as Error)?.name);
+      console.error('🚨 Error message:', (storageError as Error)?.message);
+      console.error('🚨 Error stack:', (storageError as Error)?.stack);
       // Don't fail the whole flow, but log it
     }
 
-    console.log('✅ Threads account connected:', userInfo.username);
+    console.log('🚨 Threads account connected:', userInfo.username);
 
     // Redirect back to dashboard with success message
     return NextResponse.redirect(
