@@ -42,6 +42,7 @@ export async function storeOAuthTokens(
       },
     },
     update: {
+      userId, // Update userId in case it changed or was wrong
       access_token: accessToken,
       refresh_token: refreshToken || null,
       expires_at: expiresAt || null,
