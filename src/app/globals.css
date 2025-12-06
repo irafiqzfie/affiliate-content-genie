@@ -303,9 +303,11 @@ body {
   margin: 0;
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
+  background: var(--app-bg);
   background-image:
-    radial-gradient(at 5% 10%, hsla(28, 100%, 50%, 0.2) 0px, transparent 50%),
-    radial-gradient(at 90% 95%, hsla(202, 100%, 50%, 0.25) 0px, transparent 50%);
+    radial-gradient(at 5% 10%, hsla(28, 100%, 50%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 90% 95%, hsla(202, 100%, 50%, 0.18) 0px, transparent 50%);
+  min-height: 100vh;
 }
 
 /* ================================================================
@@ -368,7 +370,7 @@ body {
 .app-wrapper {
   min-height: 100vh;
   padding: 0.5rem;
-  /* Full-width background continues to cover entire viewport */
+  background: transparent;
 }
 
 .app-container-wrapper {
@@ -397,6 +399,7 @@ body {
   flex-direction: column;
   gap: var(--spacing-sm);
   min-height: calc(100vh - 3rem);
+  background: transparent;
 }
 
 .header {
@@ -877,6 +880,7 @@ body {
     flex-direction: column;
     gap: var(--spacing-xs);  /* Reduced from --spacing-sm to 8px */
     animation: fadeInUp 0.6s ease-out;
+    background: transparent;
 }
 
 @keyframes fadeInUp {
