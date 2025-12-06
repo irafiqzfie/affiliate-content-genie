@@ -115,22 +115,52 @@ export async function GET(request: NextRequest) {
  * Initiates the Threads OAuth flow
  */
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  try {
+    const session = await getServerSession(authOptions);
+    
+    console.log('🔍 Threads connect POST - Session:', session ? 'Found' : 'Not found');
+    console.log('🔍 User ID:', session?.user?.id);
 
-  if (!session?.user?.id) {
+    if (!session?.user?.id) {
+      console.error('❌ No session or user ID found');
+      return NextResponse.json(
+        { error: 'Unauthorized. Please sign in first.' },
+        { status: 401 }
+      );
+    }
+
+    if (!process.env.THREADS_APP_ID) {
+      console.error('❌ THREADS_APP_ID not set');
+      return NextResponse.json(
+        { error: 'Server configuration error: THREADS_APP_ID not set' },
+        { status: 500 }
+      );
+    }
+
+    if (!process.env.NEXTAUTH_URL) {
+      console.error('❌ NEXTAUTH_URL not set');
+      return NextResponse.json(
+        { error: 'Server configuration error: NEXTAUTH_URL not set' },
+        { status: 500 }
+      );
+    }
+
+    const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/threads/connect`;
+    
+    const authUrl = new URL('https://threads.net/oauth/authorize');
+    authUrl.searchParams.set('client_id', process.env.THREADS_APP_ID);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('scope', 'threads_basic,threads_content_publish');
+    authUrl.searchParams.set('response_type', 'code');
+
+    console.log('✅ Threads auth URL generated:', authUrl.toString());
+    
+    return NextResponse.json({ authUrl: authUrl.toString() });
+  } catch (error) {
+    console.error('❌ Error in Threads connect POST:', error);
     return NextResponse.json(
-      { error: 'Unauthorized. Please sign in first.' },
-      { status: 401 }
+      { error: 'Internal server error' },
+      { status: 500 }
     );
   }
-
-  const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/threads/connect`;
-  
-  const authUrl = new URL('https://threads.net/oauth/authorize');
-  authUrl.searchParams.set('client_id', process.env.THREADS_APP_ID || '');
-  authUrl.searchParams.set('redirect_uri', redirectUri);
-  authUrl.searchParams.set('scope', 'threads_basic,threads_content_publish');
-  authUrl.searchParams.set('response_type', 'code');
-
-  return NextResponse.json({ authUrl: authUrl.toString() });
 }

@@ -63,16 +63,20 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
         method: 'POST',
       });
 
-      if (response.ok) {
-        const { authUrl } = await response.json();
-        window.location.href = authUrl;
+      const data = await response.json();
+
+      if (response.ok && data.authUrl) {
+        console.log('✅ Redirecting to Threads auth:', data.authUrl);
+        window.location.href = data.authUrl;
       } else {
-        alert('Failed to initiate Threads connection');
+        const errorMsg = data.error || 'Failed to initiate Threads connection';
+        console.error('❌ Threads connection failed:', data);
+        alert(errorMsg);
         setConnecting(null);
       }
     } catch (error) {
-      console.error('Error connecting Threads:', error);
-      alert('Error connecting Threads');
+      console.error('❌ Error connecting Threads:', error);
+      alert('Error connecting Threads: ' + (error instanceof Error ? error.message : 'Unknown error'));
       setConnecting(null);
     }
   };
