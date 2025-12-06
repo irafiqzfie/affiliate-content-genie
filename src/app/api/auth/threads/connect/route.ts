@@ -99,8 +99,11 @@ export async function GET(request: NextRequest) {
     console.log('🚨 Threads username:', userInfo.username);
     console.log('🚨 Access token length:', tokenData.access_token?.length);
     
+    let storedAccount = null;
+    let storageError = null;
+    
     try {
-      const storedAccount = await storeOAuthTokens(
+      storedAccount = await storeOAuthTokens(
         session.user.id,
         'threads',
         userInfo.id,
@@ -111,19 +114,22 @@ export async function GET(request: NextRequest) {
         }
       );
       console.log('🚨🚨🚨 STORAGE SUCCESS - account ID:', storedAccount?.id);
-    } catch (storageError) {
-      console.error('🚨🚨🚨 CRITICAL STORAGE ERROR:', storageError);
-      console.error('🚨 Error name:', (storageError as Error)?.name);
-      console.error('🚨 Error message:', (storageError as Error)?.message);
-      console.error('🚨 Error stack:', (storageError as Error)?.stack);
-      // Don't fail the whole flow, but log it
+    } catch (error) {
+      storageError = error;
+      console.error('🚨🚨🚨 CRITICAL STORAGE ERROR:', error);
+      console.error('🚨 Error name:', (error as Error)?.name);
+      console.error('🚨 Error message:', (error as Error)?.message);
+      console.error('🚨 Error stack:', (error as Error)?.stack);
     }
 
     console.log('🚨 Threads account connected:', userInfo.username);
 
+    // DEBUG: Add query param to see if storage happened
+    const debugInfo = storedAccount ? `stored_id=${storedAccount.id}` : `storage_failed&error=${encodeURIComponent((storageError as Error)?.message || 'unknown')}`;
+
     // Redirect back to dashboard with success message
     return NextResponse.redirect(
-      new URL('/?success=threads_connected', request.url)
+      new URL(`/?success=threads_connected&${debugInfo}`, request.url)
     );
 
   } catch (error) {
