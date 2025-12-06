@@ -86,10 +86,17 @@ export const authOptions: NextAuthOptions = {
     error: '/',
   },
   callbacks: {
-    async session({ session, user }) {
-      // Add user ID to session
+    async jwt({ token, user }) {
+      // Add user ID to token on sign in
       if (user) {
-        session.user.id = user.id;
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Add user ID to session from token
+      if (token && session.user) {
+        session.user.id = token.id as string;
       }
       return session;
     },
