@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { createPortal } from 'react-dom';
+import Image from 'next/image';
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -86,12 +87,20 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
       <div className="modal-content signin-modal" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>×</button>
         
+        {/* Logo Header */}
+        <div className="modal-brand">
+          <div className="brand-logo-wrapper">
+            <Image src="/logo.svg" alt="Logo" width={48} height={48} className="brand-logo" />
+          </div>
+          <h1 className="brand-title">Affiliate Content Genie</h1>
+        </div>
+
         <div className="modal-header">
-          <h2>{mode === 'signin' ? 'Sign In' : 'Create Account'}</h2>
+          <h2>{mode === 'signin' ? 'Welcome Back' : 'Create Account'}</h2>
           <p className="modal-subtitle">
             {mode === 'signin' 
-              ? 'Welcome back! Sign in to access your account' 
-              : 'Get started with your free account'}
+              ? 'Sign in to access your saved content and scheduled posts' 
+              : 'Start creating amazing content with AI'}
           </p>
         </div>
 
@@ -215,14 +224,14 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.65);
+          background: rgba(0, 0, 0, 0.75);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 9999;
           padding: 1rem;
-          backdrop-filter: blur(8px);
-          animation: fadeIn 0.2s ease-out;
+          backdrop-filter: blur(12px);
+          animation: fadeIn 0.25s ease-out;
         }
 
         @keyframes fadeIn {
@@ -237,125 +246,157 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         @keyframes slideUp {
           from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px) scale(0.96);
           }
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
           }
         }
 
         .signin-modal {
-          max-width: 480px;
+          max-width: 460px;
         }
 
         .modal-content {
-          background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-          border-radius: 20px;
+          background: linear-gradient(145deg, rgba(26, 28, 48, 0.95) 0%, rgba(17, 19, 38, 0.98) 100%);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 24px;
           width: 100%;
           max-height: 90vh;
           overflow-y: auto;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+          box-shadow: 
+            0 30px 80px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
           position: relative;
           z-index: 10000;
-          animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .modal-close {
           position: absolute;
-          top: 16px;
-          right: 16px;
-          background: rgba(0, 0, 0, 0.05);
-          border: none;
+          top: 20px;
+          right: 20px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           font-size: 24px;
-          color: #666;
+          color: rgba(255, 255, 255, 0.7);
           cursor: pointer;
-          width: 36px;
-          height: 36px;
+          width: 40px;
+          height: 40px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 50%;
-          transition: all 0.2s;
+          border-radius: 12px;
+          transition: all 0.2s ease;
           z-index: 10;
+          font-weight: 300;
         }
 
         .modal-close:hover {
-          background: rgba(0, 0, 0, 0.1);
-          color: #333;
-          transform: rotate(90deg);
+          background: rgba(255, 255, 255, 0.12);
+          border-color: rgba(255, 255, 255, 0.2);
+          color: white;
+          transform: scale(1.05);
+        }
+
+        .modal-brand {
+          padding: 40px 40px 24px;
+          text-align: center;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .brand-logo-wrapper {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 72px;
+          height: 72px;
+          background: linear-gradient(135deg, rgba(255, 123, 0, 0.15) 0%, rgba(255, 149, 0, 0.1) 100%);
+          border: 2px solid rgba(255, 123, 0, 0.3);
+          border-radius: 20px;
+          margin-bottom: 16px;
+          box-shadow: 
+            0 8px 24px rgba(255, 123, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .brand-logo {
+          filter: drop-shadow(0 2px 8px rgba(255, 123, 0, 0.4));
+        }
+
+        .brand-title {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 700;
+          background: linear-gradient(135deg, #ff7b00 0%, #ff9500 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          letter-spacing: -0.02em;
         }
 
         .modal-header {
-          padding: 40px 36px 24px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 20px 20px 0 0;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .modal-header::before {
-          content: '';
-          position: absolute;
-          top: -50%;
-          right: -20%;
-          width: 300px;
-          height: 300px;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-          border-radius: 50%;
+          padding: 32px 40px 24px;
+          text-align: center;
         }
 
         .modal-header h2 {
           margin: 0 0 8px 0;
           font-size: 28px;
-          color: white;
+          color: #f0f2f5;
           font-weight: 700;
-          position: relative;
+          letter-spacing: -0.02em;
         }
 
         .modal-subtitle {
           margin: 0;
-          color: rgba(255, 255, 255, 0.9);
+          color: rgba(240, 242, 245, 0.7);
           font-size: 15px;
-          position: relative;
+          line-height: 1.5;
         }
 
         .modal-body {
-          padding: 32px 36px 36px;
+          padding: 0 40px 40px;
         }
 
         .auth-mode-toggle {
           display: flex;
-          gap: 6px;
-          margin-bottom: 28px;
-          background: #f0f1f3;
-          padding: 5px;
-          border-radius: 12px;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+          gap: 8px;
+          margin-bottom: 32px;
+          background: rgba(0, 0, 0, 0.3);
+          padding: 6px;
+          border-radius: 14px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .mode-btn {
           flex: 1;
-          padding: 12px;
+          padding: 12px 16px;
           border: none;
           background: transparent;
-          border-radius: 9px;
+          border-radius: 10px;
           font-weight: 600;
           font-size: 14px;
-          color: #6b7280;
+          color: rgba(240, 242, 245, 0.6);
           cursor: pointer;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .mode-btn:hover {
-          color: #4b5563;
+          color: rgba(240, 242, 245, 0.8);
+          background: rgba(255, 255, 255, 0.05);
         }
 
         .mode-btn.active {
-          background: white;
-          color: #667eea;
-          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15), 0 1px 2px rgba(0, 0, 0, 0.06);
-          transform: translateY(-1px);
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+          color: white;
+          box-shadow: 
+            0 4px 12px rgba(37, 99, 235, 0.3),
+            0 0 0 1px rgba(37, 99, 235, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .auth-form {
@@ -367,13 +408,13 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         .form-group {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
         }
 
         .form-group label {
           font-size: 14px;
           font-weight: 600;
-          color: #374151;
+          color: rgba(240, 242, 245, 0.9);
           display: flex;
           align-items: center;
           gap: 6px;
@@ -381,113 +422,201 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
 
         .form-group input {
           padding: 14px 16px;
-          border: 2px solid #e5e7eb;
-          border-radius: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 12px;
           font-size: 15px;
           transition: all 0.2s ease;
-          background: white;
+          background: rgba(0, 0, 0, 0.2);
+          color: #f0f2f5;
+          backdrop-filter: blur(10px);
         }
 
         .form-group input:focus {
           outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          border-color: #2563eb;
+          background: rgba(0, 0, 0, 0.3);
+          box-shadow: 
+            0 0 0 3px rgba(37, 99, 235, 0.15),
+            0 4px 12px rgba(37, 99, 235, 0.1);
         }
 
         .form-group input::placeholder {
-          color: #9ca3af;
+          color: rgba(240, 242, 245, 0.4);
+        }
+
+        .form-group input:-webkit-autofill,
+        .form-group input:-webkit-autofill:hover,
+        .form-group input:-webkit-autofill:focus {
+          -webkit-text-fill-color: #f0f2f5;
+          -webkit-box-shadow: 0 0 0 30px rgba(0, 0, 0, 0.3) inset;
+          transition: background-color 5000s ease-in-out 0s;
         }
 
         .error-message {
           padding: 14px 16px;
-          background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-          color: #dc2626;
-          border-radius: 10px;
+          background: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%);
+          border: 1px solid rgba(220, 38, 38, 0.3);
+          border-left: 4px solid #dc2626;
+          color: #fca5a5;
+          border-radius: 12px;
           font-size: 14px;
-          border-left: 4px solid #ef4444;
           display: flex;
           align-items: center;
-          gap: 8px;
-          animation: shake 0.4s ease;
+          gap: 10px;
+          animation: shake 0.4s ease, fadeIn 0.3s ease;
+          backdrop-filter: blur(10px);
         }
 
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
+          25% { transform: translateX(-8px); }
+          75% { transform: translateX(8px); }
         }
 
         .btn-primary {
-          padding: 15px 24px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding: 16px 24px;
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
           color: white;
           border: none;
-          border-radius: 10px;
+          border-radius: 12px;
           font-weight: 600;
           font-size: 16px;
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+          box-shadow: 
+            0 4px 16px rgba(37, 99, 235, 0.4),
+            0 0 0 1px rgba(37, 99, 235, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
           margin-top: 8px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .btn-primary::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover:not(:disabled)::before {
+          left: 100%;
         }
 
         .btn-primary:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+          box-shadow: 
+            0 6px 24px rgba(37, 99, 235, 0.5),
+            0 0 0 1px rgba(37, 99, 235, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
         .btn-primary:active:not(:disabled) {
           transform: translateY(0);
+          box-shadow: 
+            0 2px 8px rgba(37, 99, 235, 0.4),
+            0 0 0 1px rgba(37, 99, 235, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .btn-primary:disabled {
-          opacity: 0.6;
+          opacity: 0.5;
           cursor: not-allowed;
           transform: none;
+          box-shadow: 
+            0 2px 8px rgba(37, 99, 235, 0.2),
+            0 0 0 1px rgba(37, 99, 235, 0.3);
         }
 
         .auth-footer {
-          margin-top: 24px;
-          padding-top: 24px;
-          border-top: 1px solid #e5e7eb;
+          margin-top: 28px;
+          padding-top: 28px;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
           text-align: center;
           font-size: 14px;
-          color: #6b7280;
+          color: rgba(240, 242, 245, 0.6);
         }
 
         .link-btn {
           background: none;
           border: none;
-          color: #667eea;
+          color: #3b82f6;
           font-weight: 600;
           cursor: pointer;
           padding: 0;
           text-decoration: none;
-          transition: color 0.2s;
+          transition: all 0.2s ease;
         }
 
         .link-btn:hover {
-          color: #764ba2;
-          text-decoration: underline;
+          color: #60a5fa;
+          text-decoration: none;
+          text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Custom Scrollbar */
+        .modal-content::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 0 24px 24px 0;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
         }
 
         @media (max-width: 768px) {
           .modal-content {
             margin: 1rem;
-            border-radius: 16px;
+            border-radius: 20px;
+          }
+
+          .modal-brand {
+            padding: 32px 24px 20px;
+          }
+
+          .brand-logo-wrapper {
+            width: 64px;
+            height: 64px;
+          }
+
+          .brand-title {
+            font-size: 16px;
           }
 
           .modal-header {
-            padding: 32px 24px 20px;
-            border-radius: 16px 16px 0 0;
+            padding: 24px 24px 20px;
           }
 
           .modal-header h2 {
             font-size: 24px;
           }
 
+          .modal-subtitle {
+            font-size: 14px;
+          }
+
           .modal-body {
-            padding: 24px;
+            padding: 0 24px 32px;
+          }
+
+          .modal-close {
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
           }
         }
       `}</style>

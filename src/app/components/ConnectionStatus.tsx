@@ -44,44 +44,15 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
     }
   }, [session]);
 
-  // Check URL for OAuth success/error and refetch connections
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const success = params.get('success');
-      const error = params.get('error');
-
-      if (success === 'threads_connected' || success === 'facebook_connected') {
-        console.log('✅ OAuth connection successful, refetching connections...');
-        // Refetch connections after successful OAuth
-        if (session?.user) {
-          fetchConnections();
-        }
-        // Clean up URL
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-
-      if (error) {
-        console.error('❌ OAuth error:', error);
-        // Clean up URL
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-    }
-  }, [session]);
-
   const fetchConnections = async () => {
     try {
-      console.log('🔍 Fetching connections...');
       const response = await fetch('/api/auth/connections');
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Connections data:', data);
         setConnections(data);
-      } else {
-        console.error('❌ Failed to fetch connections:', response.status);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch connections:', error);
+      console.error('Failed to fetch connections:', error);
     }
   };
 
@@ -92,20 +63,16 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
         method: 'POST',
       });
 
-      const data = await response.json();
-
-      if (response.ok && data.authUrl) {
-        console.log('✅ Redirecting to Threads auth:', data.authUrl);
-        window.location.href = data.authUrl;
+      if (response.ok) {
+        const { authUrl } = await response.json();
+        window.location.href = authUrl;
       } else {
-        const errorMsg = data.error || 'Failed to initiate Threads connection';
-        console.error('❌ Threads connection failed:', data);
-        alert(errorMsg);
+        alert('Failed to initiate Threads connection');
         setConnecting(null);
       }
     } catch (error) {
-      console.error('❌ Error connecting Threads:', error);
-      alert('Error connecting Threads: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error('Error connecting Threads:', error);
+      alert('Error connecting Threads');
       setConnecting(null);
     }
   };
