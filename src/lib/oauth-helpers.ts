@@ -96,6 +96,17 @@ export async function getOAuthTokens(userId: string, provider: 'threads' | 'face
 export async function getUserConnections(userId: string) {
   console.log('🔍 getUserConnections called with userId:', userId);
   
+  // First, let's see ALL accounts in the database for debugging
+  const allAccounts = await prisma.account.findMany({
+    select: {
+      id: true,
+      userId: true,
+      provider: true,
+      providerAccountId: true,
+    },
+  });
+  console.log('🔍 ALL accounts in database:', JSON.stringify(allAccounts, null, 2));
+  
   const accounts = await prisma.account.findMany({
     where: { userId },
     select: {
@@ -111,7 +122,7 @@ export async function getUserConnections(userId: string) {
     },
   });
 
-  console.log('🔍 Found accounts:', accounts.length);
+  console.log('🔍 Found accounts for this user:', accounts.length);
   console.log('🔍 Account details:', JSON.stringify(accounts, null, 2));
 
   return {
