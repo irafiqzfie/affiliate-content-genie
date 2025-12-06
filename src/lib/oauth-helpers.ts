@@ -29,7 +29,12 @@ export async function storeOAuthTokens(
 ) {
   const { accessToken, refreshToken, expiresAt, pageId, pageName, pageAccessToken, threadsUserId, instagramId } = tokenData;
 
-  await prisma.account.upsert({
+  console.log('💾 storeOAuthTokens called:');
+  console.log('💾 userId:', userId);
+  console.log('💾 provider:', provider);
+  console.log('💾 providerAccountId:', providerAccountId);
+
+  const result = await prisma.account.upsert({
     where: {
       provider_providerAccountId: {
         provider,
@@ -63,6 +68,9 @@ export async function storeOAuthTokens(
       instagramId: instagramId || null,
     },
   });
+
+  console.log('✅ Account stored/updated:', result.id);
+  return result;
 }
 
 /**
@@ -86,6 +94,8 @@ export async function getOAuthTokens(userId: string, provider: 'threads' | 'face
  * Get all connected accounts for a user
  */
 export async function getUserConnections(userId: string) {
+  console.log('🔍 getUserConnections called with userId:', userId);
+  
   const accounts = await prisma.account.findMany({
     where: { userId },
     select: {
@@ -100,6 +110,9 @@ export async function getUserConnections(userId: string) {
       updatedAt: true,
     },
   });
+
+  console.log('🔍 Found accounts:', accounts.length);
+  console.log('🔍 Account details:', JSON.stringify(accounts, null, 2));
 
   return {
     threads: accounts.find((a: { provider: string }) => a.provider === 'threads') || null,
