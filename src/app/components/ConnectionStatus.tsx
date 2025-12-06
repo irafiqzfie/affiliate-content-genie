@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { createPortal } from 'react-dom';
 import { ThreadsIcon } from './ThreadsIcon';
+import { FacebookIcon } from './FacebookIcon';
 
 interface Connection {
   id: string;
@@ -165,7 +166,9 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
               : 'Facebook: Not Connected'
           }
         >
-          <span className="status-icon">📘</span>
+          <span className="status-icon">
+            <FacebookIcon size={18} />
+          </span>
           {facebookConnected && connections?.facebook && (
             <span className="count-badge">{connections.facebook.length}</span>
           )}
@@ -231,7 +234,9 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
             <button className="connection-modal-close" onClick={() => setShowModal(null)}>×</button>
             
             <div className="modal-header">
-              <span className="modal-icon">📘</span>
+              <span className="modal-icon">
+                <FacebookIcon size={20} />
+              </span>
               <h3>Facebook Pages</h3>
             </div>
 
