@@ -12,9 +12,15 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
 import { storeOAuthTokens } from '@/lib/oauth-helpers';
 
 export async function GET(request: NextRequest) {
+  console.log('🔍 GET /api/auth/threads/connect - OAuth callback');
+  
   const session = await getServerSession(authOptions);
+  
+  console.log('🔍 Session exists:', !!session);
+  console.log('🔍 User ID:', session?.user?.id);
 
   if (!session?.user?.id) {
+    console.error('❌ No session during OAuth callback!');
     return NextResponse.json(
       { error: 'Unauthorized. Please sign in first.' },
       { status: 401 }
@@ -24,6 +30,9 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const error = searchParams.get('error');
+
+  console.log('🔍 OAuth code received:', !!code);
+  console.log('🔍 OAuth error:', error);
 
   // Handle OAuth error
   if (error) {
@@ -35,6 +44,7 @@ export async function GET(request: NextRequest) {
 
   // Missing code
   if (!code) {
+    console.error('❌ No OAuth code received');
     return NextResponse.json(
       { error: 'Missing authorization code' },
       { status: 400 }
