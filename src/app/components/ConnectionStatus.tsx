@@ -71,13 +71,17 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
 
   const fetchConnections = async () => {
     try {
+      console.log('🔍 Fetching connections...');
       const response = await fetch('/api/auth/connections');
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Connections data:', data);
         setConnections(data);
+      } else {
+        console.error('❌ Failed to fetch connections:', response.status);
       }
     } catch (error) {
-      console.error('Failed to fetch connections:', error);
+      console.error('❌ Failed to fetch connections:', error);
     }
   };
 

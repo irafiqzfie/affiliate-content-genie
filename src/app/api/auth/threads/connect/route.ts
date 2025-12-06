@@ -83,6 +83,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Store tokens in database
+    console.log('💾 Storing Threads connection for user:', session.user.id);
+    console.log('💾 Threads user ID:', userInfo.id);
+    console.log('💾 Threads username:', userInfo.username);
+    
     await storeOAuthTokens(
       session.user.id,
       'threads',
