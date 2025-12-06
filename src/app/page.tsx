@@ -3211,15 +3211,15 @@ export default function Home() {
         </div>
         
         <nav className="unified-tab-bar">
-          <button 
-            className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
-            onClick={() => setCurrentPage('generator')}
-          >
-            <span className="tab-icon">✨</span>
-            <span className="tab-label">Generator</span>
-          </button>
           {session && (
             <>
+              <button 
+                className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
+                onClick={() => setCurrentPage('generator')}
+              >
+                <span className="tab-icon">✨</span>
+                <span className="tab-label">Generator</span>
+              </button>
               <button 
                 className={`unified-tab ${currentPage === 'saved' ? 'active' : ''}`} 
                 onClick={() => setCurrentPage('saved')}
@@ -3256,21 +3256,15 @@ export default function Home() {
       </header>
 
       <main className="main-content">
-        {currentPage === 'generator' && renderGeneratorPage()}
-        {currentPage === 'saved' && session && renderSavedPage()}
-        {currentPage === 'scheduler' && session && renderSchedulerPage()}
-        {currentPage === 'saved' && !session && (
+        {!session && (
           <div className="empty-saved-page">
             <h2>🔒 Login Required</h2>
-            <p>Please sign in to access your saved content.</p>
+            <p>Please sign in to access the AI content generator and all features.</p>
           </div>
         )}
-        {currentPage === 'scheduler' && !session && (
-          <div className="empty-saved-page">
-            <h2>🔒 Login Required</h2>
-            <p>Please sign in to access scheduled posts.</p>
-          </div>
-        )}
+        {session && currentPage === 'generator' && renderGeneratorPage()}
+        {session && currentPage === 'saved' && renderSavedPage()}
+        {session && currentPage === 'scheduler' && renderSchedulerPage()}
       </main>
 
       <footer className="app-footer">
