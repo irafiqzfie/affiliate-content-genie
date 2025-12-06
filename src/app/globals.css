@@ -426,10 +426,8 @@ body::before {
 
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: 12px var(--spacing-md);
+  flex-direction: column;
+  gap: 0;
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -437,13 +435,67 @@ body::before {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
-.header-auth {
+/* Header Row 1: Brand + Navigation Links */
+.header-row-1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px var(--spacing-md);
+  gap: var(--spacing-md);
+}
+
+/* Header Row 2: Generator Tabs + Social + User Actions */
+.header-row-2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px var(--spacing-md);
+  gap: var(--spacing-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.header-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-user-actions {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-/* TERTIARY BUTTONS - About & Contact (Text-only, minimal) */
+/* Navigation Links - Row 1 */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  height: 36px;
+  padding: 0 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--secondary-text-color);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: var(--line-height-tight);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.nav-link:active {
+  transform: scale(0.98);
+}
+
+/* Legacy support for old class name */
 .about-link {
   display: inline-flex !important;
   align-items: center !important;
@@ -4630,13 +4682,30 @@ body::before {
   
   /* Header responsive */
   .header {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-content);
-    padding: var(--spacing-content);
+    flex-direction: column;
+    gap: 0;
   }
-  
-  .header-auth {
-    justify-self: center;
+
+  .header-row-1 {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    text-align: center;
+  }
+
+  .header-row-2 {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+  }
+
+  .header-nav-links {
+    justify-content: center;
+  }
+
+  .header-user-actions {
+    justify-content: center;
+    width: 100%;
   }
   
   .branding {
@@ -4645,6 +4714,7 @@ body::before {
   
   .unified-tab-bar {
     justify-content: center;
+    width: 100%;
   }
 }
 

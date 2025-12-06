@@ -3202,56 +3202,65 @@ export default function Home() {
   return (
     <div className="app-container">
       <header className="header">
-        <div className="branding">
-          <div className="logo-container">
-            <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={52} height={52} />
-            <h1>Inabiz Online</h1>
+        {/* Row 1: Brand + Navigation Links */}
+        <div className="header-row-1">
+          <div className="branding">
+            <div className="logo-container">
+              <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={52} height={52} />
+              <h1>Inabiz Online</h1>
+            </div>
+            <p>a MASTER SERVE innovation</p>
           </div>
-          <p>a MASTER SERVE innovation</p>
+          
+          <div className="header-nav-links">
+            <a href="/about" className="nav-link">
+              About Us
+            </a>
+            <a href="/contact" className="nav-link">
+              Contact Us
+            </a>
+          </div>
         </div>
-        
-        <nav className="unified-tab-bar">
-          {session && (
-            <>
-              <button 
-                className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
-                onClick={() => setCurrentPage('generator')}
-              >
-                <span className="tab-icon">✨</span>
-                <span className="tab-label">Generator</span>
-              </button>
-              <button 
-                className={`unified-tab ${currentPage === 'saved' ? 'active' : ''}`} 
-                onClick={() => setCurrentPage('saved')}
-              >
-                <span className="tab-icon">💾</span>
-                <span className="tab-label">Saved</span>
-                {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
-              </button>
-              <button 
-                className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
-                onClick={() => setCurrentPage('scheduler')}
-              >
-                <span className="tab-icon">📮</span>
-                <span className="tab-label">Posts</span>
-                {(() => {
-                  const readyToPostCount = readyToPostItems.length + scheduledPosts.filter(p => p.status === 'Scheduled').length;
-                  return readyToPostCount > 0 ? <span className="count-badge">{readyToPostCount}</span> : null;
-                })()}
-              </button>
-            </>
-          )}
-        </nav>
-        
-        <div className="header-auth">
-          <a href="/about" className="about-link">
-            About Us
-          </a>
-          <a href="/contact" className="about-link">
-            Contact Us
-          </a>
-          {session && <ConnectionStatus />}
-          <AuthButton />
+
+        {/* Row 2: Generator Tabs + Social + User Actions */}
+        <div className="header-row-2">
+          <nav className="unified-tab-bar">
+            {session && (
+              <>
+                <button 
+                  className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
+                  onClick={() => setCurrentPage('generator')}
+                >
+                  <span className="tab-icon">✨</span>
+                  <span className="tab-label">Generator</span>
+                </button>
+                <button 
+                  className={`unified-tab ${currentPage === 'saved' ? 'active' : ''}`} 
+                  onClick={() => setCurrentPage('saved')}
+                >
+                  <span className="tab-icon">💾</span>
+                  <span className="tab-label">Saved</span>
+                  {savedList.length > 0 && <span className="count-badge">{savedList.length}</span>}
+                </button>
+                <button 
+                  className={`unified-tab ${currentPage === 'scheduler' ? 'active' : ''}`} 
+                  onClick={() => setCurrentPage('scheduler')}
+                >
+                  <span className="tab-icon">📮</span>
+                  <span className="tab-label">Posts</span>
+                  {(() => {
+                    const readyToPostCount = readyToPostItems.length + scheduledPosts.filter(p => p.status === 'Scheduled').length;
+                    return readyToPostCount > 0 ? <span className="count-badge">{readyToPostCount}</span> : null;
+                  })()}
+                </button>
+              </>
+            )}
+          </nav>
+          
+          <div className="header-user-actions">
+            {session && <ConnectionStatus />}
+            <AuthButton />
+          </div>
         </div>
       </header>
 
