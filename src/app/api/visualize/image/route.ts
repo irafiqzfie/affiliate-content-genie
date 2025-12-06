@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { uploadToR2 } from '@/lib/r2';
 
 // Configure route timeout for image generation (60 seconds)
 export const maxDuration = 60;
@@ -196,7 +197,7 @@ Requirements: Professional lighting, clean background, high-quality, NO watermar
   } catch (error) {
     console.error('❌ Image generation error:', error);
     
-    // Create a simple error placeholder and upload directly to Vercel Blob
+    // Create a simple error placeholder and upload to R2 (or Vercel Blob as fallback)
     const svgError = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <rect width="512" height="512" fill="#ef4444"/>
       <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="20" font-family="Arial">
@@ -205,17 +206,30 @@ Requirements: Professional lighting, clean background, high-quality, NO watermar
     </svg>`;
 
     try {
-      const blob = await put(
-        `error-${Date.now()}.svg`,
-        svgError,
-        {
-          access: 'public',
+      let errorUrl: string;
+      
+      if (process.env.R2_ACCOUNT_ID) {
+        const { publicUrl } = await uploadToR2({
+          buffer: Buffer.from(svgError),
           contentType: 'image/svg+xml',
-        }
-      );
+          folder: 'placeholders',
+          fileName: `error-${Date.now()}.svg`,
+        });
+        errorUrl = publicUrl;
+      } else {
+        const blob = await put(
+          `error-${Date.now()}.svg`,
+          svgError,
+          {
+            access: 'public',
+            contentType: 'image/svg+xml',
+          }
+        );
+        errorUrl = blob.url;
+      }
 
       return NextResponse.json({ 
-        imageUrl: blob.url,
+        imageUrl: errorUrl,
         message: 'Using placeholder image due to generation error.',
         error: error instanceof Error ? error.message : 'Unknown error',
         isPlaceholder: true

@@ -1,27 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { uploadToR2 } from '@/lib/r2';
 
 /**
  * POST /api/upload-image
  * 
- * Uploads a base64 image to Vercel Blob Storage and returns a public URL
+ * Uploads a base64 image to Cloudflare R2 (or Vercel Blob as fallback)
  * This is needed for Threads API which requires publicly accessible image URLs
  */
 export async function POST(request: NextRequest) {
   try {
-    // Check if Vercel Blob is configured
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error('❌ BLOB_READ_WRITE_TOKEN not configured');
-      return NextResponse.json(
-        { 
-          error: 'Vercel Blob Storage not configured',
-          details: 'BLOB_READ_WRITE_TOKEN environment variable is missing. Please connect your blob store in Vercel project settings.'
-        },
-        { status: 503 }
-      );
-    }
-
-    const { imageData } = await request.json();
+    const { imageData, useR2 = true } = await request.json();
 
     if (!imageData) {
       return NextResponse.json(
@@ -52,26 +41,63 @@ export async function POST(request: NextRequest) {
     
     // Convert base64 to buffer
     const buffer = Buffer.from(base64Data, 'base64');
-    
-    // Generate unique filename
-    const filename = `threads-image-${Date.now()}.${extension}`;
-    
-    console.log(`📤 Uploading image to Vercel Blob: ${filename} (${(buffer.length / 1024).toFixed(2)} KB)`);
+    const contentType = `image/${extension}`;
 
-    // Upload to Vercel Blob
+    // NEW: Use Cloudflare R2 by default
+    if (useR2 && process.env.R2_ACCOUNT_ID) {
+      console.log(`📤 Uploading image to Cloudflare R2 (${(buffer.length / 1024).toFixed(2)} KB)`);
+      
+      try {
+        const { publicUrl, fileKey } = await uploadToR2({
+          buffer,
+          contentType,
+          folder: 'generated',
+        });
+
+        console.log(`✅ Image uploaded to R2: ${publicUrl}`);
+
+        return NextResponse.json({
+          success: true,
+          url: publicUrl,
+          fileKey,
+          storage: 'r2',
+          size: buffer.length,
+        });
+      } catch (r2Error) {
+        console.error('⚠️ R2 upload failed, falling back to Vercel Blob:', r2Error);
+        // Fall through to Vercel Blob
+      }
+    }
+
+    // FALLBACK: Vercel Blob (for backward compatibility or if R2 not configured)
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('❌ No storage configured (R2 failed and Blob token missing)');
+      return NextResponse.json(
+        { 
+          error: 'Storage not configured',
+          details: 'Neither R2 nor Vercel Blob is properly configured.'
+        },
+        { status: 503 }
+      );
+    }
+
+    console.log(`📤 Uploading image to Vercel Blob (fallback) (${(buffer.length / 1024).toFixed(2)} KB)`);
+    
+    const filename = `threads-image-${Date.now()}.${extension}`;
     const blob = await put(filename, buffer, {
       access: 'public',
-      contentType: `image/${extension}`,
+      contentType,
       addRandomSuffix: true,
     });
 
-    console.log(`✅ Image uploaded successfully: ${blob.url}`);
+    console.log(`✅ Image uploaded to Vercel Blob: ${blob.url}`);
 
     return NextResponse.json({
       success: true,
       url: blob.url,
       downloadUrl: blob.downloadUrl,
-      size: buffer.length
+      storage: 'vercel-blob',
+      size: buffer.length,
     });
 
   } catch (error) {
