@@ -97,16 +97,23 @@ export async function GET(request: NextRequest) {
     console.log('💾 Threads user ID:', userInfo.id);
     console.log('💾 Threads username:', userInfo.username);
     
-    await storeOAuthTokens(
-      session.user.id,
-      'threads',
-      userInfo.id,
-      {
-        accessToken: tokenData.access_token,
-        expiresAt: Math.floor(Date.now() / 1000) + (60 * 24 * 60 * 60), // 60 days
-        threadsUserId: userInfo.id,
-      }
-    );
+    try {
+      const storedAccount = await storeOAuthTokens(
+        session.user.id,
+        'threads',
+        userInfo.id,
+        {
+          accessToken: tokenData.access_token,
+          expiresAt: Math.floor(Date.now() / 1000) + (60 * 24 * 60 * 60), // 60 days
+          threadsUserId: userInfo.id,
+        }
+      );
+      console.log('✅ Storage completed, account ID:', storedAccount?.id);
+    } catch (storageError) {
+      console.error('❌ CRITICAL: Failed to store Threads connection:', storageError);
+      console.error('❌ Error details:', JSON.stringify(storageError, null, 2));
+      // Don't fail the whole flow, but log it
+    }
 
     console.log('✅ Threads account connected:', userInfo.username);
 
