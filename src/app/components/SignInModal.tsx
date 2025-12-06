@@ -90,7 +90,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         {/* Logo Header */}
         <div className="modal-brand">
           <div className="brand-logo-wrapper">
-            <Image src="/logo.svg" alt="Logo" width={48} height={48} className="brand-logo" />
+            <Image src="/logo.svg" alt="Logo" width={40} height={40} className="brand-logo" />
           </div>
           <h1 className="brand-title">Affiliate Content Genie</h1>
         </div>
@@ -303,7 +303,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         }
 
         .modal-brand {
-          padding: 40px 40px 24px;
+          padding: 28px 32px 16px;
           text-align: center;
           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -312,12 +312,12 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 72px;
-          height: 72px;
+          width: 56px;
+          height: 56px;
           background: linear-gradient(135deg, rgba(255, 123, 0, 0.15) 0%, rgba(255, 149, 0, 0.1) 100%);
           border: 2px solid rgba(255, 123, 0, 0.3);
-          border-radius: 20px;
-          margin-bottom: 16px;
+          border-radius: 16px;
+          margin-bottom: 12px;
           box-shadow: 
             0 8px 24px rgba(255, 123, 0, 0.15),
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -329,7 +329,7 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
 
         .brand-title {
           margin: 0;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 700;
           background: linear-gradient(135deg, #ff7b00 0%, #ff9500 100%);
           -webkit-background-clip: text;
@@ -339,13 +339,13 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         }
 
         .modal-header {
-          padding: 32px 40px 24px;
+          padding: 24px 32px 20px;
           text-align: center;
         }
 
         .modal-header h2 {
-          margin: 0 0 8px 0;
-          font-size: 28px;
+          margin: 0 0 6px 0;
+          font-size: 24px;
           color: #f0f2f5;
           font-weight: 700;
           letter-spacing: -0.02em;
@@ -354,27 +354,27 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         .modal-subtitle {
           margin: 0;
           color: rgba(240, 242, 245, 0.7);
-          font-size: 15px;
-          line-height: 1.5;
+          font-size: 14px;
+          line-height: 1.4;
         }
 
         .modal-body {
-          padding: 0 40px 40px;
+          padding: 0 32px 32px;
         }
 
         .auth-mode-toggle {
           display: flex;
           gap: 8px;
-          margin-bottom: 32px;
+          margin-bottom: 24px;
           background: rgba(0, 0, 0, 0.3);
-          padding: 6px;
+          padding: 5px;
           border-radius: 14px;
           border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .mode-btn {
           flex: 1;
-          padding: 12px 16px;
+          padding: 10px 14px;
           border: none;
           background: transparent;
           border-radius: 10px;
@@ -402,13 +402,13 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         .auth-form {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 16px;
         }
 
         .form-group {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 8px;
         }
 
         .form-group label {
@@ -421,10 +421,10 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         }
 
         .form-group input {
-          padding: 14px 16px;
+          padding: 12px 14px;
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 12px;
-          font-size: 15px;
+          font-size: 14px;
           transition: all 0.2s ease;
           background: rgba(0, 0, 0, 0.2);
           color: #f0f2f5;
@@ -474,13 +474,13 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         }
 
         .btn-primary {
-          padding: 16px 24px;
+          padding: 14px 24px;
           background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
           color: white;
           border: none;
           border-radius: 12px;
           font-weight: 600;
-          font-size: 16px;
+          font-size: 15px;
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           box-shadow: 
@@ -533,11 +533,11 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         }
 
         .auth-footer {
-          margin-top: 28px;
-          padding-top: 28px;
+          margin-top: 20px;
+          padding-top: 20px;
           border-top: 1px solid rgba(255, 255, 255, 0.08);
           text-align: center;
-          font-size: 14px;
+          font-size: 13px;
           color: rgba(240, 242, 245, 0.6);
         }
 
