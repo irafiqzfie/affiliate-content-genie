@@ -1054,8 +1054,8 @@ body::before {
 }
 
 .form-group.featured .select-field:focus {
-  border-color: var(--focus-ring-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--gradient-orange);
+  box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.15);
 }
 
 /* New form layout styles */
@@ -1087,7 +1087,7 @@ body::before {
 
 .analysis-inline-section {
   background: rgba(255, 123, 0, 0.03);
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 123, 0, 0.15);
   border-radius: var(--border-radius);
   padding: var(--spacing-sm);
   backdrop-filter: blur(8px);
@@ -1104,7 +1104,7 @@ body::before {
   gap: var(--spacing-xs);
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid rgba(255, 123, 0, 0.15);
   margin-top: 0; /* Reset */
 }
 
@@ -1419,7 +1419,7 @@ body::before {
   gap: var(--spacing-md);
   padding: var(--spacing-sm);
   background: rgba(255, 123, 0, 0.03);
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 123, 0, 0.15);
   border-radius: var(--border-radius);
   margin: 0;
   box-sizing: border-box;
@@ -1518,7 +1518,7 @@ body::before {
 
 .url-input-inline:focus {
   outline: none;
-  border-color: var(--focus-ring-color);
+  border-color: var(--gradient-orange);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -1680,7 +1680,7 @@ body::before {
 }
 
 .image-preview-item-small:hover {
-  border-color: var(--focus-ring-color);
+  border-color: var(--gradient-orange);
   box-shadow: 0 2px 8px rgba(255, 123, 0, 0.2);
 }
 
@@ -1703,7 +1703,7 @@ body::before {
 }
 
 .image-preview-item-small.placeholder:hover {
-  border-color: var(--focus-ring-color);
+  border-color: var(--gradient-orange);
   background: rgba(255, 123, 0, 0.05);
 }
 
@@ -1750,7 +1750,7 @@ body::before {
 }
 
 .image-preview-item:hover {
-  border-color: var(--focus-ring-color);
+  border-color: var(--gradient-orange);
   box-shadow: 0 4px 12px rgba(255, 123, 0, 0.2);
 }
 
@@ -1801,7 +1801,7 @@ body::before {
 }
 
 .upload-placeholder:hover {
-  border-color: var(--focus-ring-color);
+  border-color: var(--gradient-orange);
   background: rgba(255, 123, 0, 0.05);
   transform: scale(1.01);
   box-shadow: 0 4px 12px rgba(255, 123, 0, 0.1);
@@ -2361,7 +2361,7 @@ body::before {
 
 .spinner {
   border: 4px solid var(--glass-bg-hover);
-  border-top: 1px solid var(--glass-border);
+  border-top: 4px solid var(--gradient-orange);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -3177,7 +3177,7 @@ body::before {
 }
 
 .refresh-button:hover:not(:disabled) {
-    border-color: var(--focus-ring-color);
+    border-color: var(--gradient-orange);
     color: var(--gradient-orange);
     transform: rotate(180deg) scale(1.1);
     background-color: rgba(255, 123, 0, 0.1);
@@ -3507,7 +3507,7 @@ body::before {
 
 .editable-div:focus {
     outline: none;
-    border-color: var(--focus-ring-color);
+    border-color: var(--gradient-orange);
     box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.3);
     background: rgba(13, 15, 27, 0.9);
 }
@@ -3815,7 +3815,7 @@ body::before {
 .search-input:focus, .sort-select:focus {
     outline: none;
     background: rgba(0,0,0,0.4);
-    border-color: var(--focus-ring-color);
+    border-color: var(--gradient-orange);
     box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.1);
 }
 
@@ -5837,7 +5837,7 @@ body::before {
 .form-group textarea:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.08);
-  border-color: var(--focus-ring-color);
+  border-color: var(--gradient-orange);
   box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.1);
 }
 
