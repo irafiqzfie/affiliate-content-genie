@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import AuthButton from '../components/AuthButton';
 
 export const metadata: Metadata = {
@@ -11,29 +12,32 @@ export default function AboutPage() {
   return (
     <div className="app-container">
       <header className="header">
-        <div className="branding">
-          <div className="logo-container">
-            <img src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" />
-            <h1>Inabiz Online</h1>
+        <div className="header-row-1">
+          <div className="branding">
+            <div className="logo-container">
+              <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={52} height={52} />
+              <h1>Inabiz Online</h1>
+            </div>
+            <p>a MASTER SERVE innovation</p>
           </div>
-          <p>a MASTER SERVE innovation</p>
+          
+          <nav className="header-nav-links">
+            <a href="/about" className="nav-link">ℹ️ About</a>
+            <a href="/contact" className="nav-link">📧 Contact</a>
+          </nav>
         </div>
         
-        <nav className="unified-tab-bar">
-          <Link href="/" className="unified-tab">
-            <span className="tab-icon">✨</span>
-            <span className="tab-label">Generator</span>
-          </Link>
-        </nav>
-        
-        <div className="header-auth">
-          <Link href="/about" className="about-link">
-            ℹ️ About Us
-          </Link>
-          <Link href="/contact" className="about-link">
-            📧 Contact Us
-          </Link>
-          <AuthButton />
+        <div className="header-row-2">
+          <nav className="unified-tab-bar">
+            <Link href="/" className="unified-tab">
+              <span className="tab-icon">✨</span>
+              <span className="tab-label">Generator</span>
+            </Link>
+          </nav>
+          
+          <div className="header-user-actions">
+            <AuthButton />
+          </div>
         </div>
       </header>
 
