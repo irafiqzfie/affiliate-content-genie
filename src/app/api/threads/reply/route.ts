@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/authOptions';
-import type { Session, NextAuthOptions } from 'next-auth';
+import { getOAuthTokens } from '@/lib/oauth-helpers';
 
 /**
  * POST /api/threads/reply
@@ -11,11 +11,21 @@ import type { Session, NextAuthOptions } from 'next-auth';
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null;
+    const session = await getServerSession(authOptions);
 
-    if (!session?.accessToken) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Not authenticated with Threads' },
+        { error: 'Not authenticated' },
+        { status: 401 }
+      );
+    }
+
+    // Fetch Threads connection from database
+    const threadsAccount = await getOAuthTokens(session.user.id, 'threads');
+
+    if (!threadsAccount?.access_token) {
+      return NextResponse.json(
+        { error: 'Please connect your Threads account first.' },
         { status: 401 }
       );
     }
@@ -29,14 +39,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const accessToken = session.accessToken;
-    const userId = session.user?.id;
+    const accessToken = threadsAccount.access_token;
+    const threadsUserId = threadsAccount.threadsUserId || threadsAccount.providerAccountId;
 
     console.log('💬 Creating reply to post:', postId);
 
     // Step 1: Create a reply container
     const containerResponse = await fetch(
-      `https://graph.threads.net/v1.0/${userId}/threads`,
+      `https://graph.threads.net/v1.0/${threadsUserId}/threads`,
       {
         method: 'POST',
         headers: {
@@ -116,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     // Step 2: Publish the reply container
     const publishResponse = await fetch(
-      `https://graph.threads.net/v1.0/${userId}/threads_publish`,
+      `https://graph.threads.net/v1.0/${threadsUserId}/threads_publish`,
       {
         method: 'POST',
         headers: {
