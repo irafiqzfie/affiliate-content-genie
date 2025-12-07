@@ -625,7 +625,7 @@ body::before {
   position: relative;
   text-decoration: none;
   box-sizing: border-box;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
 }
 
 .unified-tab:first-child {
@@ -2488,7 +2488,7 @@ body::before {
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   background: transparent;
   color: var(--secondary-text-color);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   font-family: 'Inter', sans-serif;
   font-size: var(--font-size-sm);
   font-weight: 500;
@@ -6558,7 +6558,7 @@ body::before {
 .option-section {
   background: transparent;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   padding: 0;
 }
 
@@ -7475,7 +7475,7 @@ body::before {
   background: transparent;
   border-left: none;
   border-bottom: none;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   letter-spacing: 0.01em;
 }
 
