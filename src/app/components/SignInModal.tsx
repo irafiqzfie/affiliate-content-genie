@@ -255,21 +255,20 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
         }
 
         .signin-modal {
-          max-width: 460px;
+          max-width: 700px;
+          width: 90%;
         }
 
         .modal-content {
-          background: linear-gradient(145deg, rgba(26, 28, 48, 0.95) 0%, rgba(17, 19, 38, 0.98) 100%);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 24px;
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          border-radius: var(--radius-sm);
           width: 100%;
           max-height: 90vh;
           overflow-y: auto;
-          box-shadow: 
-            0 30px 80px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(255, 255, 255, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          box-shadow:
+            0 8px 32px 0 rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(37, 99, 235, 0.15);
           position: relative;
           z-index: 10000;
           animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -314,24 +313,22 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
           justify-content: center;
           width: 56px;
           height: 56px;
-          background: linear-gradient(135deg, rgba(255, 123, 0, 0.15) 0%, rgba(255, 149, 0, 0.1) 100%);
-          border: 2px solid rgba(255, 123, 0, 0.3);
-          border-radius: 16px;
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          border-radius: var(--radius-sm);
           margin-bottom: 12px;
-          box-shadow: 
-            0 8px 24px rgba(255, 123, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
 
         .brand-logo {
-          filter: drop-shadow(0 2px 8px rgba(255, 123, 0, 0.4));
+          filter: drop-shadow(0 2px 8px rgba(37, 99, 235, 0.4));
         }
 
         .brand-title {
           margin: 0;
           font-size: 16px;
           font-weight: 700;
-          background: linear-gradient(135deg, #ff7b00 0%, #ff9500 100%);
+          background: var(--primary-gradient);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
