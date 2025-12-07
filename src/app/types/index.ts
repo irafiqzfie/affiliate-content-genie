@@ -14,7 +14,6 @@ export interface ParsedContent {
 export interface SavedItem {
   id: number;
   title: string;
-  productLink: string | null;
   video: string;
   post: string;
   info: string;

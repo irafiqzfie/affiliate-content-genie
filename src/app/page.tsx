@@ -31,7 +31,6 @@ interface ParsedContent {
 interface SavedItem {
   id: number;
   title: string;
-  productLink: string | null;
   video: string;
   post: string;
   info: string;
@@ -200,7 +199,6 @@ const sectionsConfigPost = [
 export default function Home() {
   const { data: session } = useSession();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [productLink, setProductLink] = useState('');
   // New fields for manual product input
   const [productTitle, setProductTitle] = useState('');
   const [productImages, setProductImages] = useState<File[]>([]);
@@ -208,8 +206,7 @@ export default function Home() {
   const [customDescription, setCustomDescription] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');
-  // Future optimization: Apply debouncing to productLink for better performance
-  // const debouncedProductLink = useDebounce(productLink, 500);
+
   const [advancedInputs, setAdvancedInputs] = useState(initialAdvancedInputs);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -441,7 +438,7 @@ export default function Home() {
       // Ctrl+Enter to generate
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        if (productLink && !isLoading && !isAnalyzing) {
+        if (productTitle && !isLoading && !isAnalyzing) {
           const fakeEvent = {
             preventDefault: () => {},
             stopPropagation: () => {},
@@ -454,7 +451,7 @@ export default function Home() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productLink, isLoading, isAnalyzing]);
+  }, [productTitle, isLoading, isAnalyzing]);
 
   // Auto-collapse form when output is generated
   useEffect(() => {
@@ -462,16 +459,6 @@ export default function Home() {
       setIsFormCollapsed(true);
     }
   }, [generatedContent]);
-
-  const handleProductLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProductLink(e.target.value);
-    if (trendscore !== null || productSummary || affiliatePotential || productFeatures) {
-        setTrendscore(null);
-        setProductSummary(null);
-        setProductFeatures(null);
-        setAffiliatePotential(null);
-    }
-  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -662,8 +649,8 @@ export default function Home() {
   };
 
   const handleAnalyze = async () => {
-    // Require at least one input: productLink, productTitle, or customDescription
-    if ((!productLink && !productTitle && !customDescription) || isAnalyzing || isLoading) return;
+    // Require at least one input: productTitle or customDescription
+    if ((!productTitle && !customDescription) || isAnalyzing || isLoading) return;
 
     setIsAnalyzing(true);
     setError(null);
@@ -677,7 +664,6 @@ export default function Home() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-              productLink,
               productTitle: productTitle || undefined,
               customDescription: customDescription || undefined
             }),
@@ -710,12 +696,11 @@ export default function Home() {
   const handleGenerate = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation: Either productLink OR (productTitle + productImages) must be provided
+    // Validation: Require productTitle and productImages
     const hasManualInput = productTitle.trim() && productImagePreviews.length > 0;
-    const hasProductLink = productLink.trim();
     
-    if (!hasProductLink && !hasManualInput) {
-      setError('Please provide either a Shopee product link, or both product title and images');
+    if (!hasManualInput) {
+      setError('Please provide both product title and at least one image');
       return;
     }
     
@@ -727,12 +712,10 @@ export default function Home() {
     setIsLoading(true);
     
     // Auto-analyze before generating content
-    const analyzePayload: { productLink?: string; productTitle?: string; productImages?: string[] } = {};
+    const analyzePayload: { productTitle?: string; productImages?: string[] } = {};
     
-    if (productLink) {
-      analyzePayload.productLink = productLink;
-    } else if (productTitle || productImagePreviews.length > 0) {
-      // Use title and/or images if no product link
+    if (productTitle || productImagePreviews.length > 0) {
+      // Use title and/or images
       if (productTitle) analyzePayload.productTitle = productTitle;
       if (productImagePreviews.length > 0) analyzePayload.productImages = productImagePreviews;
     }
@@ -776,7 +759,6 @@ export default function Home() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-              productLink: productLink || productTitle, // Use title as fallback
               productTitle: productTitle || undefined,
               advancedInputs,
               productImages: productImagePreviews // Send base64 encoded images
@@ -845,7 +827,7 @@ export default function Home() {
         } finally {
       setIsLoading(false);
     }
-  }, [productLink, productTitle, productImagePreviews, isLoading, advancedInputs, initializeOptionIndexes, parseContent]);
+  }, [productTitle, productImagePreviews, isLoading, advancedInputs, initializeOptionIndexes, parseContent]);
   
   const handleGenerateImage = useCallback(async (key: string, promptText: string) => {
     console.log('🎨 Generating image for key:', key, 'with prompt:', promptText.substring(0, 100) + '...');
@@ -1029,8 +1011,8 @@ export default function Home() {
       return;
     }
     
-    if (!productLink && !productTitle) {
-      setError('Product link or title is required to refresh content');
+    if (!productTitle) {
+      setError('Product title is required to refresh content');
       return;
     }
     
@@ -1043,7 +1025,7 @@ export default function Home() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          productLink: productLink || productTitle, // Use title as fallback
+          productTitle: productTitle,
           advancedInputs,
           productImages: productImagePreviews
         }),
@@ -1117,7 +1099,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [productLink, productTitle, advancedInputs, productImagePreviews, isLoading, activeOutputTab, parseContent]);
+  }, [productTitle, advancedInputs, productImagePreviews, isLoading, activeOutputTab, parseContent]);
 
   const stripHtml = (html: string): string => {
     if (typeof document === 'undefined') return html; // Guard for server-side
@@ -1193,7 +1175,6 @@ export default function Home() {
     setGeneratedContent({ video: null, post: null, info: null });
     setEditableContent({ video: null, post: null, info: null });
     setEditingKey(null);
-    setProductLink('');
     setAdvancedInputs(initialAdvancedInputs);
     setError(null);
     setGeneratedImages({});
@@ -1294,7 +1275,6 @@ export default function Home() {
 
         const newItemPayload = {
           title,
-          productLink: productLink || '',
           content: {
               video: videoContent,
               post: postContent,
@@ -1377,7 +1357,6 @@ export default function Home() {
   };
 
   const handleLoadSavedItem = (item: SavedItem) => {
-    setProductLink(item.productLink || '');
     setGeneratedContent({
       video: item.video,
       post: item.post,
@@ -2479,20 +2458,6 @@ export default function Home() {
                               rows={3}
                             />
                           </div>
-
-                          <div className="form-group">
-                            <label htmlFor="productLink" className="input-label">Shopee Product Link <span className="optional-label">(Optional)</span></label>
-                            <input
-                              id="productLink"
-                              name="productLink"
-                              type="url"
-                              className="input-field"
-                              value={productLink}
-                              onChange={handleProductLinkChange}
-                              placeholder="https://shopee.com/..."
-                              aria-label="Shopee Product Link"
-                            />
-                          </div>
                         </div>
 
                         <div className="form-group">
@@ -2693,7 +2658,7 @@ export default function Home() {
                       </fieldset>
                     </div>
 
-                    <button type="submit" className="generate-button" disabled={isLoading || (!productLink && !productTitle)}>
+                    <button type="submit" className="generate-button" disabled={isLoading || !productTitle}>
                       {isLoading ? 'Generating...' : '✨ Generate Content'}
                     </button>
                 </form>
@@ -2726,7 +2691,7 @@ export default function Home() {
               className="retry-button" 
               onClick={() => {
                 setError(null);
-                if (productLink) {
+                if (productTitle) {
                   const fakeEvent = {
                     preventDefault: () => {},
                     stopPropagation: () => {},
@@ -2734,7 +2699,7 @@ export default function Home() {
                   handleGenerate(fakeEvent);
                 }
               }}
-              disabled={isLoading || !productLink}
+              disabled={isLoading || !productTitle}
             >
               🔄 Try Again
             </button>

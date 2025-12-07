@@ -22,8 +22,7 @@ export function SavedItemsList({ savedList, onLoadItem, onDeleteItem }: SavedIte
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         item =>
-          item.title.toLowerCase().includes(term) ||
-          (item.productLink && item.productLink.toLowerCase().includes(term))
+          item.title.toLowerCase().includes(term)
       );
     }
 
@@ -92,9 +91,6 @@ export function SavedItemsList({ savedList, onLoadItem, onDeleteItem }: SavedIte
                 <div className="saved-item-info">
                   <span className="saved-item-type">🎬 Video + ✍️ Post</span>
                   <span className="saved-item-title">{item.title}</span>
-                  {item.productLink && (
-                    <span className="saved-item-link">{item.productLink}</span>
-                  )}
                   {item.createdAt && (
                     <span className="saved-item-date">
                       {new Date(item.createdAt).toLocaleString('en-US', {

@@ -49,24 +49,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid JSON in request body' }, { status: 400 });
     }
 
-    console.log('📦 Request body:', { title: body.title, productLink: body.productLink, hasContent: !!body.content, hasImageUrl: !!body.imageUrl });
+    console.log('📦 Request body:', { title: body.title, hasContent: !!body.content, hasImageUrl: !!body.imageUrl });
     console.log('📦 Full request body:', JSON.stringify(body, null, 2));
     
-    const { title, productLink, content, imageUrl } = body;
+    const { title, content, imageUrl } = body;
 
     if (!title || !content) {
-      console.log('❌ Missing required fields:', { title: !!title, productLink: !!productLink, content: !!content });
+      console.log('❌ Missing required fields:', { title: !!title, content: !!content });
       return NextResponse.json({ message: 'Missing required fields: title and content are required' }, { status: 400 });
     }
 
     if (typeof title !== 'string') {
       console.log('❌ Invalid field types');
       return NextResponse.json({ message: 'Invalid field types: title must be a string' }, { status: 400 });
-    }
-
-    if (productLink && typeof productLink !== 'string') {
-      console.log('❌ Invalid productLink type');
-      return NextResponse.json({ message: 'Invalid field types: productLink must be a string or null' }, { status: 400 });
     }
 
     if (typeof content !== 'object' || !('video' in content) || !('post' in content) || !('info' in content)) {
@@ -87,7 +82,6 @@ export async function POST(request: Request) {
     // Build data object conditionally
     const dataToCreate: {
       title: string;
-      productLink: string | null;
       video: string;
       post: string;
       info: string;
@@ -95,7 +89,6 @@ export async function POST(request: Request) {
       userId?: string | null;
     } = {
       title,
-      productLink: productLink && productLink.trim() !== '' ? productLink : null,
       video: content.video || '',
       post: content.post || '',
       info: content.info || ''
