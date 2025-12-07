@@ -4232,7 +4232,7 @@ body::before {
     display: flex;
     flex-direction: column;
     animation: slideIn 0.3s ease-out;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(37, 99, 235, 0.15);
 }
 
 @keyframes slideIn {
