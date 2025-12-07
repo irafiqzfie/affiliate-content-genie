@@ -98,12 +98,6 @@ export default function ContactPage() {
                   </p>
                 </div>
                 <div className="info-item">
-                  <h3>📞 Phone</h3>
-                  <p>
-                    <a href="tel:0145143981">0145143981</a>
-                  </p>
-                </div>
-                <div className="info-item">
                   <h3>✉️ Email</h3>
                   <p>
                     <a href="mailto:admin@inabiz.online">admin@inabiz.online</a>
