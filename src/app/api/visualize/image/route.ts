@@ -174,20 +174,38 @@ Requirements: Professional lighting, clean background, high-quality, NO watermar
       </text>
     </svg>`;
     
-    // Upload directly to Vercel Blob
-    const blob = await put(
-      `placeholder-${Date.now()}.svg`,
-      svgPlaceholder,
-      {
-        access: 'public',
-        contentType: 'image/svg+xml',
+    // Upload to R2 (or Vercel Blob as fallback)
+    let placeholderUrl: string;
+    try {
+      if (process.env.R2_ACCOUNT_ID) {
+        console.log('📤 Uploading placeholder to R2...');
+        const { publicUrl } = await uploadToR2({
+          buffer: Buffer.from(svgPlaceholder),
+          contentType: 'image/svg+xml',
+          folder: 'placeholders',
+          fileName: `placeholder-${Date.now()}.svg`,
+        });
+        placeholderUrl = publicUrl;
+        console.log('✅ Placeholder uploaded to R2:', placeholderUrl);
+      } else {
+        throw new Error('R2 not configured');
       }
-    );
-
-    console.log('✅ Placeholder uploaded to Vercel Blob:', blob.url);
+    } catch (r2Error) {
+      console.log('⚠️ R2 upload failed, using Vercel Blob:', r2Error);
+      const blob = await put(
+        `placeholder-${Date.now()}.svg`,
+        svgPlaceholder,
+        {
+          access: 'public',
+          contentType: 'image/svg+xml',
+        }
+      );
+      placeholderUrl = blob.url;
+      console.log('✅ Placeholder uploaded to Vercel Blob:', placeholderUrl);
+    }
 
     return NextResponse.json({ 
-      imageUrl: blob.url,
+      imageUrl: placeholderUrl,
       prompt: outputText.substring(0, 100) + '...',
       keywords: cleanKeywords,
       isConditioned: false,
