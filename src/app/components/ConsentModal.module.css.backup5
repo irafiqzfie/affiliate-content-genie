@@ -17,15 +17,15 @@
 }
 
 .consentModal {
-  background: var(--glass-bg) !important;
-  border: 1px solid var(--glass-border) !important;
-  border-radius: var(--radius-sm) !important;
+  background: linear-gradient(135deg, rgba(13, 15, 27, 0.98), rgba(20, 25, 40, 0.98)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px !important;
   max-width: 600px !important;
   width: 100% !important;
   max-height: 90vh !important;
   display: flex !important;
   flex-direction: column !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
   animation: slideUp 0.3s ease-out !important;
   overflow: hidden !important;
 }
@@ -131,8 +131,8 @@
 
 .accordionSection {
   margin-bottom: 1rem !important;
-  border: 1px solid var(--glass-border) !important;
-  border-radius: var(--radius-sm) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
   overflow: hidden !important;
   background: rgba(255, 255, 255, 0.02) !important;
   transition: all 0.3s ease !important;
