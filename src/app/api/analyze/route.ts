@@ -8,41 +8,27 @@ if (!API_KEY) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { productLink, productTitle, customDescription, productImages } = body;
+    const { productTitle, customDescription, productImages } = body;
 
     // Validate that at least one input is provided
-    if (!productLink && !productTitle && !customDescription && (!productImages || productImages.length === 0)) {
+    if (!productTitle && !customDescription && (!productImages || productImages.length === 0)) {
       return NextResponse.json({ 
-        message: 'Please provide at least one of: Product Link, Product Title, Custom Description, or Product Images.' 
+        message: 'Please provide at least one of: Product Title, Custom Description, or Product Images.' 
       }, { status: 400 });
     }
 
     console.log('🔍 Analyzing product with:', { 
-      hasLink: !!productLink, 
       hasTitle: !!productTitle, 
       hasDescription: !!customDescription,
       hasImages: !!productImages && productImages.length > 0
     });
 
-    // Extract product name from URL or use title
-    let productName = productTitle || '';
-    
-    if (productLink && !productName) {
-      const urlParts = productLink.split('/');
-      const productSlug = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || '';
-      productName = decodeURIComponent(productSlug)
-        .replace(/-/g, ' ')
-        .replace(/\?.*/, '')
-        .replace(/i\.\d+\.\d+/, '')
-        .trim();
-    }
+    // Use product title as product name
+    const productName = productTitle || '';
 
     // Build analysis prompt based on available information
     let analysisPrompt = `Analyze this product and provide affiliate content recommendations:\n\n`;
     
-    if (productLink) {
-      analysisPrompt += `Product URL: ${productLink}\n`;
-    }
     if (productName) {
       analysisPrompt += `Product Name/Title: ${productName}\n`;
     }

@@ -123,10 +123,10 @@ async function retryWithBackoff<T>(
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { productLink, advancedInputs, productImages } = body;
+    const { productTitle, advancedInputs, productImages } = body;
 
-    if (!productLink || !advancedInputs) {
-      return NextResponse.json({ message: 'Missing product link or advanced inputs' }, { status: 400 });
+    if (!productTitle || !advancedInputs) {
+      return NextResponse.json({ message: 'Missing product title or advanced inputs' }, { status: 400 });
     }
 
     // Log if product images are included
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
       console.log(`📸 ${productImages.length} product image(s) included for context`);
     }
 
-    const prompt = `Here is the product link: ${productLink}\n\nAnd here are the parameters for the content I want you to create:\n${JSON.stringify(advancedInputs, null, 2)}`;
+    const prompt = `Here is the product title: ${productTitle}\n\nAnd here are the parameters for the content I want you to create:\n${JSON.stringify(advancedInputs, null, 2)}`;
     
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
     
