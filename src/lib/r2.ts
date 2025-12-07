@@ -46,6 +46,7 @@ export async function generatePresignedUploadUrl(config: UploadConfig) {
     Bucket: BUCKET_NAME,
     Key: fileKey,
     ContentType: contentType,
+    CacheControl: 'public, max-age=31536000, immutable', // Cache for 1 year
   });
 
   const presignedUrl = await getSignedUrl(r2Client, command, { expiresIn });
@@ -88,6 +89,7 @@ export async function uploadToR2(config: {
     Key: fileKey,
     Body: buffer,
     ContentType: contentType,
+    CacheControl: 'public, max-age=31536000, immutable', // Cache for 1 year
   });
 
   await r2Client.send(command);

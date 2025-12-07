@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { uploadToR2 } from '@/lib/r2';
+import { getPlaceholderDataUrl, getErrorPlaceholderDataUrl } from '@/lib/placeholder-cache';
 
 // Configure route timeout for image generation (60 seconds)
 export const maxDuration = 60;
@@ -166,46 +167,12 @@ Requirements: Professional lighting, clean background, high-quality, NO watermar
     
     console.log('🔍 Keywords extracted:', cleanKeywords);
 
-    // Create a simple colored SVG placeholder
-    const svgPlaceholder = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-      <rect width="512" height="512" fill="#6366f1"/>
-      <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="24" font-family="Arial">
-        ${cleanKeywords.substring(0, 30)}
-      </text>
-    </svg>`;
-    
-    // Upload to R2 (or Vercel Blob as fallback)
-    let placeholderUrl: string;
-    try {
-      if (process.env.R2_ACCOUNT_ID) {
-        console.log('📤 Uploading placeholder to R2...');
-        const { publicUrl } = await uploadToR2({
-          buffer: Buffer.from(svgPlaceholder),
-          contentType: 'image/svg+xml',
-          folder: 'placeholders',
-          fileName: `placeholder-${Date.now()}.svg`,
-        });
-        placeholderUrl = publicUrl;
-        console.log('✅ Placeholder uploaded to R2:', placeholderUrl);
-      } else {
-        throw new Error('R2 not configured');
-      }
-    } catch (r2Error) {
-      console.log('⚠️ R2 upload failed, using Vercel Blob:', r2Error);
-      const blob = await put(
-        `placeholder-${Date.now()}.svg`,
-        svgPlaceholder,
-        {
-          access: 'public',
-          contentType: 'image/svg+xml',
-        }
-      );
-      placeholderUrl = blob.url;
-      console.log('✅ Placeholder uploaded to Vercel Blob:', placeholderUrl);
-    }
+    // Use data URL for placeholder (no upload needed - saves R2 Class A operations!)
+    const placeholderDataUrl = getPlaceholderDataUrl(cleanKeywords);
+    console.log('✅ Using placeholder data URL (no upload needed)');
 
     return NextResponse.json({ 
-      imageUrl: placeholderUrl,
+      imageUrl: placeholderDataUrl,
       prompt: outputText.substring(0, 100) + '...',
       keywords: cleanKeywords,
       isConditioned: false,
@@ -215,51 +182,15 @@ Requirements: Professional lighting, clean background, high-quality, NO watermar
   } catch (error) {
     console.error('❌ Image generation error:', error);
     
-    // Create a simple error placeholder and upload to R2 (or Vercel Blob as fallback)
-    const svgError = `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-      <rect width="512" height="512" fill="#ef4444"/>
-      <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="20" font-family="Arial">
-        Image Generation Failed
-      </text>
-    </svg>`;
+    // Use data URL for error placeholder (no upload needed - saves R2 Class A operations!)
+    const errorDataUrl = getErrorPlaceholderDataUrl();
+    console.log('✅ Using error placeholder data URL (no upload needed)');
 
-    try {
-      let errorUrl: string;
-      
-      if (process.env.R2_ACCOUNT_ID) {
-        const { publicUrl } = await uploadToR2({
-          buffer: Buffer.from(svgError),
-          contentType: 'image/svg+xml',
-          folder: 'placeholders',
-          fileName: `error-${Date.now()}.svg`,
-        });
-        errorUrl = publicUrl;
-      } else {
-        const blob = await put(
-          `error-${Date.now()}.svg`,
-          svgError,
-          {
-            access: 'public',
-            contentType: 'image/svg+xml',
-          }
-        );
-        errorUrl = blob.url;
-      }
-
-      return NextResponse.json({ 
-        imageUrl: errorUrl,
-        message: 'Using placeholder image due to generation error.',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        isPlaceholder: true
-      });
-    } catch (uploadError) {
-      console.error('Failed to upload error placeholder:', uploadError);
-      
-      return NextResponse.json({ 
-        imageUrl: null,
-        message: 'Image generation failed and placeholder upload failed.',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }, { status: 500 });
-    }
+    return NextResponse.json({ 
+      imageUrl: errorDataUrl,
+      message: 'Using placeholder image due to generation error.',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      isPlaceholder: true
+    });
   }
 }
