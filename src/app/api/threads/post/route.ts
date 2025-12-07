@@ -52,10 +52,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Filter out data URLs (placeholders) - Threads API doesn't support them
+    let validMediaUrl = mediaUrl;
+    if (mediaUrl && mediaUrl.startsWith('data:')) {
+      console.log('⚠️ Data URL detected (placeholder), posting without image');
+      validMediaUrl = null; // Post as text-only
+    }
+
     // Validate mediaUrl if provided
-    if (mediaUrl) {
+    if (validMediaUrl) {
       try {
-        const url = new URL(mediaUrl);
+        const url = new URL(validMediaUrl);
         if (!url.protocol.startsWith('http')) {
           return NextResponse.json(
             { error: 'Image URL must be a valid HTTP or HTTPS URL. Data URLs and relative paths are not supported by Threads API.' },
@@ -64,14 +71,14 @@ export async function POST(request: NextRequest) {
         }
         
         // Verify the image is actually accessible before posting
-        console.log('📸 Verifying image accessibility:', mediaUrl);
+        console.log('📸 Verifying image accessibility:', validMediaUrl);
         console.log('🔍 URL Details:', {
-          isR2: mediaUrl.includes('r2.dev'),
-          isVercelBlob: mediaUrl.includes('vercel-storage.com'),
-          fullUrl: mediaUrl
+          isR2: validMediaUrl.includes('r2.dev'),
+          isVercelBlob: validMediaUrl.includes('vercel-storage.com'),
+          fullUrl: validMediaUrl
         });
         
-        const imageCheckResponse = await fetch(mediaUrl, { method: 'HEAD' });
+        const imageCheckResponse = await fetch(validMediaUrl, { method: 'HEAD' });
         console.log('📡 HEAD Response:', {
           status: imageCheckResponse.status,
           statusText: imageCheckResponse.statusText,
@@ -83,7 +90,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json(
             { 
               error: 'Image URL is not publicly accessible',
-              details: `Threads API requires images to be publicly accessible. The URL returned status ${imageCheckResponse.status}. Please ensure your image storage (R2 or Vercel Blob) is configured with public access. URL: ${mediaUrl}`
+              details: `Threads API requires images to be publicly accessible. The URL returned status ${imageCheckResponse.status}. Please ensure your image storage (R2 or Vercel Blob) is configured with public access. URL: ${validMediaUrl}`
             },
             { status: 400 }
           );
@@ -99,30 +106,30 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      console.log('📸 Media URL validated:', mediaUrl);
+      console.log('📸 Media URL validated:', validMediaUrl);
     }
 
     // Use access token and user ID from Threads account
     const accessToken = threadsAccount.access_token;
     const threadsUserId = threadsAccount.threadsUserId || threadsAccount.providerAccountId;
 
-    console.log('📤 Posting to Threads:', { threadsUserId, hasToken: !!accessToken, hasMedia: !!mediaUrl });
+    console.log('📤 Posting to Threads:', { threadsUserId, hasToken: !!accessToken, hasMedia: !!validMediaUrl });
 
     // Step 1: Create a container (media post preparation)
     const containerUrl = `https://graph.threads.net/v1.0/${threadsUserId}/threads`;
     
     const containerParams: Record<string, string> = {
-      media_type: mediaUrl ? mediaType : 'TEXT',
+      media_type: validMediaUrl ? mediaType : 'TEXT',
       text: text,
       access_token: accessToken
     };
 
     // Only add image/video URL if provided
-    if (mediaUrl) {
+    if (validMediaUrl) {
       if (mediaType === 'IMAGE') {
-        containerParams.image_url = mediaUrl;
+        containerParams.image_url = validMediaUrl;
       } else if (mediaType === 'VIDEO') {
-        containerParams.video_url = mediaUrl;
+        containerParams.video_url = validMediaUrl;
       }
     }
 
@@ -167,7 +174,7 @@ export async function POST(request: NextRequest) {
     console.log('⏳ Waiting for container to be ready...');
     
     let statusAttempts = 0;
-    const maxAttempts = mediaUrl ? (mediaType === 'VIDEO' ? 30 : 15) : 5; // 15s for images (increased from 10), 30s for video, 5s for text
+    const maxAttempts = validMediaUrl ? (mediaType === 'VIDEO' ? 30 : 15) : 5; // 15s for images (increased from 10), 30s for video, 5s for text
     let isReady = false;
     let lastError: string | null = null;
     
@@ -190,7 +197,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json(
             { 
               error: 'Threads media processing failed',
-              details: `${lastError}. ${mediaUrl ? 'Ensure the image URL is publicly accessible and the image format is supported (JPEG, PNG).' : ''}`
+              details: `${lastError}. ${validMediaUrl ? 'Ensure the image URL is publicly accessible and the image format is supported (JPEG, PNG).' : ''}`
             },
             { status: 400 }
           );
@@ -210,7 +217,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'Threads processing timeout',
-          details: `Container took longer than ${maxAttempts} seconds to process. ${mediaUrl ? 'This may indicate the image URL is not accessible or the image format is incompatible. Threads requires JPEG or PNG images.' : 'Please try again.'}`
+          details: `Container took longer than ${maxAttempts} seconds to process. ${validMediaUrl ? 'This may indicate the image URL is not accessible or the image format is incompatible. Threads requires JPEG or PNG images.' : 'Please try again.'}`
         },
         { status: 408 }
       );
