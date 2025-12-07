@@ -25,7 +25,7 @@
   max-height: 90vh !important;
   display: flex !important;
   flex-direction: column !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(37, 99, 235, 0.15) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
   animation: slideUp 0.3s ease-out !important;
   overflow: hidden !important;
 }
