@@ -65,13 +65,25 @@ export async function POST(request: NextRequest) {
         
         // Verify the image is actually accessible before posting
         console.log('📸 Verifying image accessibility:', mediaUrl);
+        console.log('🔍 URL Details:', {
+          isR2: mediaUrl.includes('r2.dev'),
+          isVercelBlob: mediaUrl.includes('vercel-storage.com'),
+          fullUrl: mediaUrl
+        });
+        
         const imageCheckResponse = await fetch(mediaUrl, { method: 'HEAD' });
+        console.log('📡 HEAD Response:', {
+          status: imageCheckResponse.status,
+          statusText: imageCheckResponse.statusText,
+          headers: Object.fromEntries(imageCheckResponse.headers.entries())
+        });
+        
         if (!imageCheckResponse.ok) {
           console.error('❌ Image not accessible:', imageCheckResponse.status, imageCheckResponse.statusText);
           return NextResponse.json(
             { 
               error: 'Image URL is not publicly accessible',
-              details: `Threads API requires images to be publicly accessible. The URL returned status ${imageCheckResponse.status}. Please ensure your image storage (Vercel Blob) is configured with public access.`
+              details: `Threads API requires images to be publicly accessible. The URL returned status ${imageCheckResponse.status}. Please ensure your image storage (R2 or Vercel Blob) is configured with public access. URL: ${mediaUrl}`
             },
             { status: 400 }
           );
