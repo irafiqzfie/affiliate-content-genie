@@ -467,7 +467,7 @@ export default function Home() {
     // Validate file types and sizes
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     const maxSize = 5 * 1024 * 1024; // 5MB
-    const maxFiles = 5; // Maximum 5 images
+    const maxFiles = 4; // Maximum 4 images
     
     // Check if adding these files would exceed the limit
     if (productImages.length + files.length > maxFiles) {
@@ -531,7 +531,7 @@ export default function Home() {
     e.stopPropagation();
     setIsDragging(false);
 
-    const maxFiles = 5;
+    const maxFiles = 4;
     if (productImages.length >= maxFiles) {
       setError(`You can only upload up to ${maxFiles} images`);
       return;
@@ -580,7 +580,7 @@ export default function Home() {
   const handleAddImageFromUrl = async () => {
     if (!imageUrlInput.trim()) return;
 
-    const maxFiles = 5;
+    const maxFiles = 4;
     if (productImages.length >= maxFiles) {
       setError(`You can only upload up to ${maxFiles} images`);
       setImageUrlInput('');
@@ -2462,10 +2462,10 @@ export default function Home() {
 
                         <div className="form-group">
                           <label htmlFor="productImage" className="input-label">
-                            Product Images <span className="input-label-caption">(up to 5)</span>
+                            Product Images <span className="input-label-caption">(up to 4)</span>
                           </label>
                         <div className="image-upload-container compact">
-                          <div className="image-preview-grid compact-gallery">
+                          <div className="image-preview-grid compact-gallery grid-2col">
                             {productImagePreviews.map((preview, index) => (
                               <div key={index} className="image-preview-item gallery-tile">
                                 <Image 
@@ -2492,7 +2492,7 @@ export default function Home() {
                               </div>
                             ))}
 
-                            {Array.from({ length: Math.max(0, 5 - productImagePreviews.length) }).map((_, idx) => (
+                            {Array.from({ length: Math.max(0, 4 - productImagePreviews.length) }).map((_, idx) => (
                               <button
                                 key={`placeholder-${idx}`}
                                 type="button"
@@ -2505,7 +2505,7 @@ export default function Home() {
                             ))}
                           </div>
 
-                          {productImages.length < 5 && (
+                          {productImages.length < 4 && (
                             <div
                               className={`image-drop-zone subtle ${isDragging ? 'dragging' : ''}`}
                               onDragOver={handleDragOver}

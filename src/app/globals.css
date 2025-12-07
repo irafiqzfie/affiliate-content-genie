@@ -1660,6 +1660,13 @@ body::before {
   gap: 0.75rem;
 }
 
+/* 2-column grid layout for 4 images */
+.image-preview-grid.grid-2col {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 100%;
+}
+
 .image-preview-item {
   position: relative;
   aspect-ratio: 1;
@@ -4803,6 +4810,12 @@ body::before {
     gap: var(--spacing-element);
   }
   
+  /* Maintain 2-column grid on tablets */
+  .image-preview-grid.grid-2col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+  }
+  
   .upload-placeholder {
     padding: 1.5rem;
     min-height: 120px;
@@ -7926,6 +7939,12 @@ body::before {
   .image-preview-grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: var(--spacing-sm);
+  }
+  
+  /* Maintain 2-column grid on mobile for consistency */
+  .image-preview-grid.grid-2col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
   
   /* Mobile saved items */
