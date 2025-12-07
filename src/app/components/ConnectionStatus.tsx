@@ -295,58 +295,67 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
 
         .status-indicator {
           position: relative;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
           border: 2px solid;
-          background: white;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s ease;
           padding: 0;
         }
 
         .status-indicator.connected {
-          border-color: #1976d2;
-          background: #e3f2fd;
+          background: linear-gradient(135deg, rgba(255, 123, 0, 0.15) 0%, rgba(0, 170, 255, 0.15) 100%);
+          border-color: rgba(255, 123, 0, 0.5);
+          box-shadow: 0 4px 12px rgba(255, 123, 0, 0.2);
         }
 
         .status-indicator.disconnected {
-          border-color: #ccc;
-          background: #f5f5f5;
-          opacity: 0.7;
+          background: rgba(13, 15, 27, 0.5);
+          border: 2px dashed rgba(255, 255, 255, 0.18);
+          opacity: 0.6;
         }
 
         .status-indicator:hover {
-          transform: scale(1.1);
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(255, 123, 0, 0.3);
+        }
+
+        .status-indicator.disconnected:hover {
+          opacity: 1;
+          border-color: rgba(255, 123, 0, 0.3);
+          box-shadow: 0 4px 12px rgba(255, 123, 0, 0.15);
         }
 
         .status-icon {
           font-size: 20px;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .warning-dot {
           position: absolute;
           top: -4px;
           right: -4px;
-          font-size: 12px;
+          font-size: 14px;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
         }
 
         .count-badge {
           position: absolute;
           top: -6px;
           right: -6px;
-          background: #1976d2;
+          background: linear-gradient(135deg, #ff7b00, #00aaff);
           color: white;
-          font-size: 10px;
-          font-weight: 600;
-          padding: 2px 6px;
-          border-radius: 10px;
-          min-width: 18px;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 3px 7px;
+          border-radius: 12px;
+          min-width: 20px;
           text-align: center;
+          box-shadow: 0 2px 8px rgba(255, 123, 0, 0.4);
         }
 
         .connection-modal-overlay {
@@ -355,196 +364,277 @@ export default function ConnectionStatus({ onConnectionChange }: ConnectionStatu
           left: 0 !important;
           right: 0 !important;
           bottom: 0 !important;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(13, 15, 27, 0.85);
+          backdrop-filter: blur(8px);
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
           z-index: 1000;
           padding: 1rem;
+          animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideUp {
+          from {
+            transform: translateY(20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
 
         .connection-modal-content {
-          background: white;
+          background: rgba(26, 28, 48, 0.95);
+          border: 2px solid rgba(255, 123, 0, 0.3);
           border-radius: 16px;
-          max-width: 500px;
+          max-width: 520px;
           width: 100%;
           max-height: 90vh;
           overflow-y: auto;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+          box-shadow: 0 20px 60px rgba(255, 123, 0, 0.3), 
+                      0 8px 24px rgba(0, 0, 0, 0.5);
           position: relative;
+          animation: slideUp 0.3s ease-out;
         }
 
         .connection-modal-close {
           position: absolute;
-          top: 12px;
-          right: 12px;
-          background: none;
-          border: none;
-          font-size: 28px;
-          color: #999;
+          top: 16px;
+          right: 16px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          font-size: 24px;
+          color: rgba(240, 242, 245, 0.7);
           cursor: pointer;
-          width: 32px;
-          height: 32px;
+          width: 36px;
+          height: 36px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 50%;
-          transition: all 0.2s;
+          border-radius: 8px;
+          transition: all 0.2s ease;
         }
 
         .connection-modal-close:hover {
-          background: #f5f5f5;
-          color: #333;
+          background: rgba(255, 123, 0, 0.2);
+          border-color: rgba(255, 123, 0, 0.5);
+          color: #f0f2f5;
+          transform: rotate(90deg);
         }
 
         .modal-header {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 24px 24px 16px;
-          border-bottom: 1px solid #f0f0f0;
+          gap: 14px;
+          padding: 28px 28px 20px;
+          border-bottom: 2px solid rgba(255, 123, 0, 0.2);
+          background: linear-gradient(135deg, rgba(255, 123, 0, 0.05) 0%, rgba(0, 170, 255, 0.05) 100%);
         }
 
         .modal-icon {
-          font-size: 32px;
+          font-size: 36px;
+          filter: drop-shadow(0 2px 8px rgba(255, 123, 0, 0.4));
         }
 
         .modal-header h3 {
-          font-size: 20px;
+          font-size: 22px;
           margin: 0;
+          color: #f0f2f5;
+          font-weight: 700;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .modal-body {
-          padding: 24px;
+          padding: 28px;
         }
 
         .modal-description {
-          color: #666;
-          margin: 0 0 20px 0;
-          line-height: 1.5;
+          color: #d0dae8;
+          margin: 0 0 24px 0;
+          line-height: 1.6;
+          font-size: 15px;
         }
 
         .connection-info {
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
 
         .status-badge {
-          display: inline-block;
-          padding: 6px 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 16px;
           border-radius: 20px;
           font-size: 14px;
-          font-weight: 600;
-          margin-bottom: 12px;
+          font-weight: 700;
+          margin-bottom: 16px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .status-badge.connected {
-          background: #e8f5e9;
-          color: #2e7d32;
+          background: linear-gradient(135deg, rgba(78, 222, 128, 0.2) 0%, rgba(22, 163, 74, 0.2) 100%);
+          border: 2px solid rgba(78, 222, 128, 0.5);
+          color: #4ade80;
         }
 
         .account-id {
           font-size: 14px;
-          color: #666;
-          margin: 8px 0;
+          color: #8b97ad;
+          margin: 10px 0;
+          padding: 12px;
+          background: rgba(13, 15, 27, 0.6);
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          font-family: 'Courier New', monospace;
         }
 
         .expiry-info {
           font-size: 14px;
-          margin: 8px 0 0 0;
+          margin: 12px 0 0 0;
+          padding: 10px 12px;
+          border-radius: 8px;
+          background: rgba(13, 15, 27, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .expiry-info.warning {
-          color: #f57c00;
+          background: rgba(251, 191, 36, 0.15);
+          border-color: rgba(251, 191, 36, 0.4);
+          color: #fbbf24;
           font-weight: 600;
         }
 
         .pages-list-modal {
-          margin: 16px 0;
+          margin: 20px 0;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
         }
 
         .page-item-modal {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 12px;
-          background: #f8f9fa;
-          border-radius: 8px;
+          padding: 14px 16px;
+          background: rgba(13, 15, 27, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+          transition: all 0.2s ease;
+        }
+
+        .page-item-modal:hover {
+          background: rgba(40, 43, 73, 0.6);
+          border-color: rgba(255, 123, 0, 0.3);
+          transform: translateX(4px);
         }
 
         .page-info-modal {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 6px;
+        }
+
+        .page-info-modal strong {
+          color: #f0f2f5;
+          font-size: 15px;
         }
 
         .warning-badge {
           font-size: 12px;
-          color: #f57c00;
+          color: #fbbf24;
+          font-weight: 600;
         }
 
         .modal-actions {
           display: flex;
-          gap: 8px;
-          margin-top: 20px;
+          gap: 10px;
+          margin-top: 24px;
         }
 
         .btn-primary, .btn-secondary, .btn-danger, .btn-danger-small {
-          padding: 10px 20px;
+          padding: 12px 24px;
           border: none;
-          border-radius: 8px;
-          font-weight: 600;
+          border-radius: 10px;
+          font-weight: 700;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
           font-size: 14px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .btn-primary {
-          background: #1976d2;
+          background: linear-gradient(135deg, #ff7b00 0%, #00aaff 100%);
           color: white;
           width: 100%;
+          box-shadow: 0 4px 16px rgba(255, 123, 0, 0.3);
+          border: 2px solid transparent;
         }
 
         .btn-primary:hover:not(:disabled) {
-          background: #1565c0;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(255, 123, 0, 0.4);
+          background: linear-gradient(135deg, #ff9d40 0%, #55cdff 100%);
+        }
+
+        .btn-primary:active:not(:disabled) {
+          transform: translateY(0);
         }
 
         .btn-secondary {
-          background: #f5f5f5;
-          color: #333;
+          background: rgba(255, 255, 255, 0.1);
+          color: #f0f2f5;
           flex: 1;
+          border: 2px solid rgba(255, 255, 255, 0.18);
         }
 
         .btn-secondary:hover {
-          background: #e0e0e0;
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 123, 0, 0.4);
+          transform: translateY(-2px);
         }
 
         .btn-danger {
-          background: #f5f5f5;
-          color: #d32f2f;
+          background: rgba(220, 38, 38, 0.15);
+          color: #f87171;
           flex: 1;
+          border: 2px solid rgba(220, 38, 38, 0.3);
         }
 
         .btn-danger:hover {
-          background: #ffebee;
+          background: rgba(220, 38, 38, 0.25);
+          border-color: rgba(220, 38, 38, 0.5);
+          transform: translateY(-2px);
         }
 
         .btn-danger-small {
-          padding: 6px 12px;
-          background: #f5f5f5;
-          color: #d32f2f;
+          padding: 8px 16px;
+          background: rgba(220, 38, 38, 0.15);
+          color: #f87171;
           font-size: 13px;
+          border: 2px solid rgba(220, 38, 38, 0.3);
         }
 
         .btn-danger-small:hover {
-          background: #ffebee;
+          background: rgba(220, 38, 38, 0.25);
+          border-color: rgba(220, 38, 38, 0.5);
         }
 
         button:disabled {
-          opacity: 0.6;
+          opacity: 0.5;
           cursor: not-allowed;
+          transform: none !important;
         }
 
         @media (max-width: 768px) {
