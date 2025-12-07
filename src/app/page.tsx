@@ -2464,110 +2464,112 @@ export default function Home() {
                           <label htmlFor="productImage" className="input-label">
                             Product Images <span className="input-label-caption">(up to 4)</span>
                           </label>
-                        <div className="image-upload-container compact">
-                          <div className="image-preview-grid compact-gallery grid-2col">
-                            {productImagePreviews.map((preview, index) => (
-                              <div key={index} className="image-preview-item gallery-tile">
-                                <Image 
-                                  src={preview} 
-                                  alt={`Product preview ${index + 1}`} 
-                                  className="image-preview"
-                                  width={200}
-                                  height={200}
-                                  unoptimized
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveImage(index)}
-                                  className="remove-image-button"
-                                  aria-label={`Remove image ${index + 1}`}
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                                  </svg>
-                                </button>
-                                {index === 0 && (
-                                  <div className="primary-badge compact">Primary</div>
-                                )}
-                              </div>
-                            ))}
-
-                            {Array.from({ length: Math.max(0, 4 - productImagePreviews.length) }).map((_, idx) => (
-                              <button
-                                key={`placeholder-${idx}`}
-                                type="button"
-                                className="image-preview-item gallery-tile placeholder"
-                                onClick={() => document.getElementById('productImage')?.click()}
-                              >
-                                <span className="placeholder-plus">+</span>
-                                <span className="placeholder-label">Add</span>
-                              </button>
-                            ))}
-                          </div>
-
-                          {productImages.length < 4 && (
-                            <div
-                              className={`image-drop-zone subtle ${isDragging ? 'dragging' : ''}`}
-                              onDragOver={handleDragOver}
-                              onDragLeave={handleDragLeave}
-                              onDrop={handleDrop}
-                            >
-                              <label htmlFor="productImage" className="image-upload-label">
-                                <div className="upload-placeholder">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 0 1-.708-.708l3-3z"/>
-                                  </svg>
-                                  <span className="upload-text">
-                                    Drag & drop images here or click any tile
-                                  </span>
-                                  <span className="upload-hint">
-                                    JPG, PNG, or WEBP · max 5MB each
-                                  </span>
-                                </div>
-                                <input
-                                  id="productImage"
-                                  name="productImage"
-                                  type="file"
-                                  accept=".jpg,.jpeg,.png,.webp"
-                                  onChange={handleImageUpload}
-                                  style={{ display: 'none' }}
-                                  aria-label="Product Image Upload"
-                                  multiple
-                                />
-                              </label>
-
-                              <div className="image-url-input-container">
-                                <div className="divider">
-                                  <span>or</span>
-                                </div>
-                                <div className="url-input-group">
-                                  <input
-                                    type="url"
-                                    className="url-input-field"
-                                    placeholder="Paste image URL here..."
-                                    value={imageUrlInput}
-                                    onChange={(e) => setImageUrlInput(e.target.value)}
-                                    onKeyPress={(e) => {
-                                      if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        handleAddImageFromUrl();
-                                      }
-                                    }}
+                          <div className="image-upload-layout">
+                            {/* Left side - Small image grid */}
+                            <div className="image-preview-sidebar">
+                              {productImagePreviews.map((preview, index) => (
+                                <div key={index} className="image-preview-item-small">
+                                  <Image 
+                                    src={preview} 
+                                    alt={`Product preview ${index + 1}`} 
+                                    className="image-preview"
+                                    width={80}
+                                    height={80}
+                                    unoptimized
                                   />
                                   <button
                                     type="button"
-                                    className="url-add-button"
-                                    onClick={handleAddImageFromUrl}
-                                    disabled={!imageUrlInput.trim()}
+                                    onClick={() => handleRemoveImage(index)}
+                                    className="remove-image-button"
+                                    aria-label={`Remove image ${index + 1}`}
                                   >
-                                    Add
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                                      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                                    </svg>
                                   </button>
+                                  {index === 0 && (
+                                    <div className="primary-badge compact">Primary</div>
+                                  )}
+                                </div>
+                              ))}
+
+                              {Array.from({ length: Math.max(0, 4 - productImagePreviews.length) }).map((_, idx) => (
+                                <button
+                                  key={`placeholder-${idx}`}
+                                  type="button"
+                                  className="image-preview-item-small placeholder"
+                                  onClick={() => document.getElementById('productImage')?.click()}
+                                >
+                                  <span className="placeholder-plus">+</span>
+                                  <span className="placeholder-label">Add</span>
+                                </button>
+                              ))}
+                            </div>
+
+                            {/* Right side - Drag & drop zone */}
+                            <div className="image-upload-main">
+                              <div
+                                className={`image-drop-zone compact ${isDragging ? 'dragging' : ''}`}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                              >
+                                <label htmlFor="productImage" className="image-upload-label">
+                                  <div className="upload-placeholder">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                                      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                      <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 0 1-.708-.708l3-3z"/>
+                                    </svg>
+                                    <span className="upload-text">
+                                      Drag & drop images here or click any tile
+                                    </span>
+                                    <span className="upload-hint">
+                                      JPG, PNG, or WEBP · max 5MB each
+                                    </span>
+                                  </div>
+                                  <input
+                                    id="productImage"
+                                    name="productImage"
+                                    type="file"
+                                    accept=".jpg,.jpeg,.png,.webp"
+                                    onChange={handleImageUpload}
+                                    style={{ display: 'none' }}
+                                    aria-label="Product Image Upload"
+                                    multiple
+                                  />
+                                </label>
+
+                                <div className="image-url-input-container">
+                                  <div className="divider">
+                                    <span>or</span>
+                                  </div>
+                                  <div className="url-input-group">
+                                    <input
+                                      type="url"
+                                      className="url-input-field"
+                                      placeholder="Paste image URL here..."
+                                      value={imageUrlInput}
+                                      onChange={(e) => setImageUrlInput(e.target.value)}
+                                      onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                          e.preventDefault();
+                                          handleAddImageFromUrl();
+                                        }
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      className="url-add-button"
+                                      onClick={handleAddImageFromUrl}
+                                      disabled={!imageUrlInput.trim()}
+                                    >
+                                      Add
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          )}
-                        </div>
+                          </div>
                         </div>
                       </div>
                     </div>
