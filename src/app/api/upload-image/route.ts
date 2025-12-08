@@ -44,6 +44,16 @@ export async function POST(request: NextRequest) {
     const contentType = `image/${extension}`;
 
     // NEW: Use Cloudflare R2 by default
+    console.log('🔍 Storage configuration:', {
+      useR2,
+      hasR2AccountId: !!process.env.R2_ACCOUNT_ID,
+      hasR2AccessKey: !!process.env.R2_ACCESS_KEY_ID,
+      hasR2SecretKey: !!process.env.R2_SECRET_ACCESS_KEY,
+      hasR2Bucket: !!process.env.R2_BUCKET_NAME,
+      hasR2PublicUrl: !!process.env.R2_PUBLIC_URL,
+      hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN
+    });
+
     if (useR2 && process.env.R2_ACCOUNT_ID) {
       console.log(`📤 Uploading image to Cloudflare R2 (${(buffer.length / 1024).toFixed(2)} KB)`);
       
