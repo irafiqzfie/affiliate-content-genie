@@ -193,14 +193,17 @@ export async function POST(request: NextRequest) {
   
   console.log('🔗 Facebook OAuth URL:', redirectUri);
   
+  // Use basic permissions that work with Facebook Login use case
+  // For Pages access, we'll need to request pages_manage_metadata instead
   const authUrl = new URL('https://www.facebook.com/v18.0/dialog/oauth');
   authUrl.searchParams.set('client_id', process.env.FACEBOOK_CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', redirectUri);
-  authUrl.searchParams.set('scope', 'pages_show_list,pages_read_engagement,pages_manage_posts,business_management');
+  authUrl.searchParams.set('scope', 'public_profile,email,pages_manage_metadata,pages_read_engagement,pages_show_list');
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('state', crypto.randomUUID()); // CSRF protection
+  authUrl.searchParams.set('config_id', ''); // Optional: if you have a configuration ID
 
-  console.log('✅ Facebook auth URL generated');
+  console.log('✅ Facebook auth URL generated with scope:', 'public_profile,email,pages_manage_metadata,pages_read_engagement,pages_show_list');
 
   return NextResponse.json({ authUrl: authUrl.toString() });
 }
