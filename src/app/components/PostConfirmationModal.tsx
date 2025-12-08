@@ -12,12 +12,14 @@ interface PostConfirmationModalProps {
   hasLongForm: boolean;
   hasHook: boolean;
   connectedPlatforms: { threads: boolean; facebook: boolean };
+  facebookPages?: Array<{ id: string; name: string }>;
 }
 
 export interface PostOptions {
   postType: 'short-hook-picture' | 'short-hook-text' | 'long-form-text';
   selectedPlatforms: Array<'Facebook' | 'Threads'>;
   affiliateLink?: string;
+  facebookPageIds?: string[];
 }
 
 export default function PostConfirmationModal({
@@ -28,12 +30,14 @@ export default function PostConfirmationModal({
   hasImage,
   hasLongForm,
   hasHook,
-  connectedPlatforms
+  connectedPlatforms,
+  facebookPages = []
 }: PostConfirmationModalProps) {
   const [postType, setPostType] = useState<'short-hook-picture' | 'short-hook-text' | 'long-form-text'>(
     hasImage && hasHook ? 'short-hook-picture' : (hasHook ? 'short-hook-text' : 'long-form-text')
   );
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<'Facebook' | 'Threads'>>(new Set(['Threads']));
+  const [selectedPageIds, setSelectedPageIds] = useState<Set<string>>(new Set(facebookPages.map(p => p.id)));
   const [affiliateLink, setAffiliateLink] = useState('');
 
   if (!isOpen) return null;
@@ -48,10 +52,26 @@ export default function PostConfirmationModal({
     setSelectedPlatforms(newPlatforms);
   };
 
+  const togglePage = (pageId: string) => {
+    const newPages = new Set(selectedPageIds);
+    if (newPages.has(pageId)) {
+      newPages.delete(pageId);
+    } else {
+      newPages.add(pageId);
+    }
+    setSelectedPageIds(newPages);
+  };
+
   const handleSubmit = () => {
     // Validate platform selection
     if (selectedPlatforms.size === 0) {
       alert('Please select at least one platform');
+      return;
+    }
+
+    // Validate Facebook page selection if Facebook is selected
+    if (selectedPlatforms.has('Facebook') && selectedPageIds.size === 0) {
+      alert('Please select at least one Facebook Page');
       return;
     }
 
@@ -66,7 +86,8 @@ export default function PostConfirmationModal({
     onConfirm({
       postType,
       selectedPlatforms: Array.from(selectedPlatforms),
-      affiliateLink: affiliateLink.trim() || undefined
+      affiliateLink: affiliateLink.trim() || undefined,
+      facebookPageIds: selectedPlatforms.has('Facebook') ? Array.from(selectedPageIds) : undefined
     });
   };
 
@@ -121,6 +142,29 @@ export default function PostConfirmationModal({
                   </span>
                 </label>
               </div>
+
+              {/* Facebook Page Selector */}
+              {selectedPlatforms.has('Facebook') && facebookPages.length > 0 && (
+                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)', marginBottom: '0.5rem' }}>
+                    Select Facebook Pages:
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {facebookPages.map(page => (
+                      <label key={page.id} className="checkbox-option" style={{ fontSize: '0.875rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedPageIds.has(page.id)}
+                          onChange={() => togglePage(page.id)}
+                        />
+                        <span className="checkbox-label">
+                          {page.name}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="option-section">

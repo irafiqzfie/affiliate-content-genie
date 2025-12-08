@@ -250,7 +250,11 @@ export default function Home() {
   }>>([]);
   const [isShopeeImportOpen, setIsShopeeImportOpen] = useState(false);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<'Threads' | 'Facebook'>>(new Set(['Threads']));
-  const [connections, setConnections] = useState<{ threads: boolean; facebook: boolean }>({ threads: false, facebook: false });
+  const [connections, setConnections] = useState<{ 
+    threads: boolean; 
+    facebook: boolean;
+    facebookPages?: Array<{ id: string; name: string; }>;
+  }>({ threads: false, facebook: false });
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
 
@@ -263,7 +267,8 @@ export default function Home() {
           if (data) {
             setConnections({
               threads: !!data.threads,
-              facebook: !!(data.facebook && data.facebook.length > 0)
+              facebook: !!(data.facebook && data.facebook.length > 0),
+              facebookPages: data.facebook || []
             });
           }
         })
@@ -1604,7 +1609,10 @@ export default function Home() {
               content: {
                 text: caption,
                 ...(mediaUrl && { imageUrl: mediaUrl })
-              }
+              },
+              ...(platform === 'Facebook' && options.facebookPageIds && { 
+                facebookPageIds: options.facebookPageIds 
+              })
             })
           });
 
@@ -3274,6 +3282,7 @@ export default function Home() {
         hasLongForm={!!(editableContent.post?.['body-long'] && editableContent.post['body-long'].length > 0)}
         hasHook={!!(editableContent.post?.['body-hook'] && editableContent.post['body-hook'].length > 0)}
         connectedPlatforms={{ threads: connections.threads, facebook: connections.facebook }}
+        facebookPages={connections.facebookPages || []}
       />
     </div>
   );
