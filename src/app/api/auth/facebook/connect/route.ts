@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     });
 
     const longLivedResponse = await fetch(
-      `https://graph.facebook.com/v18.0/oauth/access_token?${longLivedParams.toString()}`
+      `https://graph.facebook.com/v20.0/oauth/access_token?${longLivedParams.toString()}`
     );
 
     const longLivedData = await longLivedResponse.json();
@@ -125,9 +125,9 @@ export async function GET(request: NextRequest) {
 
     console.log('🔄 Step 3: Fetching user Facebook Pages...');
     
-    // Step 3: Get user's Facebook Pages
+    // Step 3: Get user's Facebook Pages with specific fields
     const pagesResponse = await fetch(
-      `https://graph.facebook.com/v18.0/me/accounts?access_token=${finalUserToken}`
+      `https://graph.facebook.com/v20.0/me/accounts?fields=id,name,access_token,category,tasks&access_token=${finalUserToken}`
     );
 
     const pagesData = await pagesResponse.json();
