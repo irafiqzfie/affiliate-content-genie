@@ -115,6 +115,14 @@ export async function GET(request: NextRequest) {
 
     const finalUserToken = longLivedData.access_token || userAccessToken;
 
+    // Step 3.5: Check what permissions were actually granted
+    console.log('🔍 Checking granted permissions...');
+    const permissionsResponse = await fetch(
+      `https://graph.facebook.com/v20.0/me/permissions?access_token=${finalUserToken}`
+    );
+    const permissionsData = await permissionsResponse.json();
+    console.log('🔐 Granted permissions:', JSON.stringify(permissionsData, null, 2));
+
     console.log('🔄 Step 3: Fetching user Facebook Pages...');
     
     // Step 3: Get user's Facebook Pages
@@ -125,6 +133,7 @@ export async function GET(request: NextRequest) {
     const pagesData = await pagesResponse.json();
     
     console.log('📥 Pages response status:', pagesResponse.status);
+    console.log('📄 Full pages response:', JSON.stringify(pagesData, null, 2));
     console.log('📄 Pages found:', pagesData.data?.length || 0);
 
     if (!pagesResponse.ok || pagesData.error) {
@@ -136,8 +145,12 @@ export async function GET(request: NextRequest) {
 
     if (!pagesData.data || pagesData.data.length === 0) {
       console.error('❌ No Facebook Pages found');
+      console.error('ℹ️ This could mean:');
+      console.error('  1. You need to create a Facebook Page first');
+      console.error('  2. The pages_show_list permission was not granted');
+      console.error('  3. You need pages_manage_posts permission to see pages');
       return NextResponse.redirect(
-        new URL(`/?error=no_facebook_pages&message=${encodeURIComponent('No Facebook Pages found. Please create a Facebook Page first.')}`, request.url)
+        new URL(`/?error=no_facebook_pages&message=${encodeURIComponent('No Facebook Pages found. Please ensure you have a Facebook Page and granted the pages_show_list permission.')}`, request.url)
       );
     }
 
