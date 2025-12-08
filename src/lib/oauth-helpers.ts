@@ -126,9 +126,17 @@ export async function getUserConnections(userId: string) {
   console.log('🔍 Found accounts for this user:', accounts.length);
   console.log('🔍 Account details:', JSON.stringify(accounts, null, 2));
 
+  const facebookPages = accounts
+    .filter((a: { provider: string }) => a.provider === 'facebook-pages')
+    .map((page: any) => ({
+      id: page.pageId || page.providerAccountId, // Use Facebook Page ID, not database ID
+      name: page.pageName || `Page ${page.pageId || page.providerAccountId}`,
+      pageAccessToken: page.pageAccessToken,
+    }));
+
   return {
     threads: accounts.find((a: { provider: string }) => a.provider === 'threads') || null,
-    facebook: accounts.filter((a: { provider: string }) => a.provider === 'facebook-pages'),
+    facebook: facebookPages,
   };
 }
 
