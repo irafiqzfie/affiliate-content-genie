@@ -1585,37 +1585,43 @@ export default function Home() {
           
           const mediaUrl = (includeImage && finalImageUrl) ? finalImageUrl : null;
           
-          // First, post to Threads API
-          console.log('🚀 Posting to Threads with:', {
+          // Post to the correct API based on selected platform
+          console.log(`🚀 Posting to ${platform} with:`, {
             text: caption.substring(0, 50) + '...',
             textLength: caption.length,
             mediaUrl: mediaUrl || '(text-only)',
             mediaType: mediaUrl ? 'IMAGE' : 'TEXT'
           });
           
-          const threadsResponse = await fetch(`${API_URL}/threads/post`, {
+          // Use the unified /api/post endpoint
+          const postResponse = await fetch(`${API_URL}/post`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              text: caption,
-              ...(mediaUrl && { mediaUrl, mediaType: 'IMAGE' })
+              platforms: [platform.toLowerCase()],
+              content: {
+                text: caption,
+                ...(mediaUrl && { imageUrl: mediaUrl })
+              }
             })
           });
 
-          const threadsData = await threadsResponse.json();
+          const postData = await postResponse.json();
 
-          if (!threadsResponse.ok) {
-            console.error('❌ Threads API error:', threadsData);
-            throw new Error(threadsData.error || threadsData.details?.error?.message || `Failed to post to ${platform}`);
+          if (!postResponse.ok) {
+            console.error(`❌ ${platform} API error:`, postData);
+            throw new Error(postData.error || postData.results?.[0]?.error || `Failed to post to ${platform}`);
           }
 
-          console.log('✅ Successfully posted to Threads!', { postId: threadsData.postId });
+          console.log(`✅ Successfully posted to ${platform}!`, postData);
+          
+          const postId = postData.results?.[0]?.postId;
 
-          // If there's an affiliate link, post it as a reply/comment with CTA
+          // If there's an affiliate link and we got a post ID, post it as a comment
           const affiliateLinkToPost = options.affiliateLink || affiliateLink;
-          if (affiliateLinkToPost && threadsData.postId) {
+          if (affiliateLinkToPost && postId && platform === 'Threads') {
             console.log('💬 Posting affiliate link with CTA as comment...');
             
             // Get the CTA text from generated content
@@ -1635,7 +1641,7 @@ export default function Home() {
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  postId: threadsData.postId,
+                  postId: postId,
                   text: commentText
                 })
               });
