@@ -11,9 +11,15 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
 import { storeOAuthTokens } from '@/lib/oauth-helpers';
 
 export async function GET(request: NextRequest) {
+  console.log('🔍 Facebook OAuth callback received');
+  
   const session = await getServerSession(authOptions);
 
+  console.log('🔍 Session exists:', !!session);
+  console.log('🔍 User ID:', session?.user?.id);
+
   if (!session?.user?.id) {
+    console.error('❌ No session during Facebook OAuth callback');
     return NextResponse.json(
       { error: 'Unauthorized. Please sign in first.' },
       { status: 401 }
@@ -23,17 +29,26 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const error = searchParams.get('error');
+  const errorDescription = searchParams.get('error_description');
+
+  console.log('🔍 OAuth code received:', !!code);
+  console.log('🔍 OAuth error:', error);
+  
+  if (errorDescription) {
+    console.error('❌ OAuth error description:', errorDescription);
+  }
 
   // Handle OAuth error
   if (error) {
-    console.error('❌ Facebook OAuth error:', error);
+    console.error('❌ Facebook OAuth error:', error, errorDescription);
     return NextResponse.redirect(
-      new URL(`/?error=facebook_oauth_failed&message=${encodeURIComponent(error)}`, request.url)
+      new URL(`/?error=facebook_oauth_failed&message=${encodeURIComponent(errorDescription || error)}`, request.url)
     );
   }
 
   // Missing code
   if (!code) {
+    console.error('❌ No OAuth code received');
     return NextResponse.json(
       { error: 'Missing authorization code' },
       { status: 400 }
@@ -149,6 +164,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
+  console.log('🔍 Facebook connect POST - Session:', session?.user?.id ? 'Found' : 'Not found');
+
   if (!session?.user?.id) {
     return NextResponse.json(
       { error: 'Unauthorized. Please sign in first.' },
@@ -156,14 +173,34 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (!process.env.FACEBOOK_CLIENT_ID) {
+    console.error('❌ FACEBOOK_CLIENT_ID not set');
+    return NextResponse.json(
+      { error: 'Server configuration error: FACEBOOK_CLIENT_ID not set' },
+      { status: 500 }
+    );
+  }
+
+  if (!process.env.NEXTAUTH_URL) {
+    console.error('❌ NEXTAUTH_URL not set');
+    return NextResponse.json(
+      { error: 'Server configuration error: NEXTAUTH_URL not set' },
+      { status: 500 }
+    );
+  }
+
   const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/facebook/connect`;
   
+  console.log('🔗 Facebook OAuth URL:', redirectUri);
+  
   const authUrl = new URL('https://www.facebook.com/v18.0/dialog/oauth');
-  authUrl.searchParams.set('client_id', process.env.FACEBOOK_CLIENT_ID || '');
+  authUrl.searchParams.set('client_id', process.env.FACEBOOK_CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', redirectUri);
   authUrl.searchParams.set('scope', 'pages_show_list,pages_read_engagement,pages_manage_posts,business_management');
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('state', crypto.randomUUID()); // CSRF protection
+
+  console.log('✅ Facebook auth URL generated');
 
   return NextResponse.json({ authUrl: authUrl.toString() });
 }
