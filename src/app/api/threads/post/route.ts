@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/authOptions';
+import { getOAuthTokens } from '@/lib/oauth-helpers';
 
 /**
  * POST /api/threads/post
@@ -16,28 +17,31 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    console.log('🔍 Session check:', {
-      hasSession: !!session,
-      hasEmail: !!session?.user?.email,
-      hasAccessToken: !!session?.accessToken,
-      provider: session?.provider,
-      userId: session?.user?.id
-    });
-    
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Unauthorized. Please sign in with Threads.' },
+        { error: 'Unauthorized. Please sign in.' },
         { status: 401 }
       );
     }
 
-    if (!session?.accessToken) {
-      console.error('❌ No access token in session. User needs to sign out and sign back in.');
+    // Fetch Threads connection from database
+    const threadsAccount = await getOAuthTokens(session.user.id, 'threads');
+
+    if (!threadsAccount?.access_token) {
       return NextResponse.json(
-        { error: 'Session expired. Please sign out and sign back in with Threads to refresh your credentials.' },
+        { error: 'Please connect your Threads account first.' },
         { status: 401 }
       );
     }
+
+    const accessToken = threadsAccount.access_token;
+    const threadsUserId = threadsAccount.threadsUserId || threadsAccount.providerAccountId;
+
+    console.log('🔍 Threads account check:', {
+      hasToken: !!accessToken,
+      threadsUserId: threadsUserId,
+      userId: session.user.id
+    });
 
     const body = await request.json();
     const { text, mediaUrl, mediaType = 'IMAGE' } = body;
@@ -87,14 +91,10 @@ export async function POST(request: NextRequest) {
       console.log('📸 Media URL validated:', mediaUrl);
     }
 
-    // Get access token from session (JWT-only, no database)
-    const accessToken = session.accessToken;
-    const userId = session.user.id;
-
-    console.log('📤 Posting to Threads:', { userId, hasToken: !!accessToken, hasMedia: !!mediaUrl });
+    console.log('📤 Posting to Threads:', { threadsUserId, hasToken: !!accessToken, hasMedia: !!mediaUrl });
 
     // Step 1: Create a container (media post preparation)
-    const containerUrl = `https://graph.threads.net/v1.0/${userId}/threads`;
+    const containerUrl = `https://graph.threads.net/v1.0/${threadsUserId}/threads`;
     
     const containerParams: Record<string, string> = {
       media_type: mediaUrl ? mediaType : 'TEXT',
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ Container ready for publishing');
 
     // Step 2: Publish the container
-    const publishUrl = `https://graph.threads.net/v1.0/${userId}/threads_publish`;
+    const publishUrl = `https://graph.threads.net/v1.0/${threadsUserId}/threads_publish`;
     
     const publishResponse = await fetch(publishUrl, {
       method: 'POST',
