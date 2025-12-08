@@ -126,9 +126,17 @@ export async function getUserConnections(userId: string) {
   console.log('🔍 Found accounts for this user:', accounts.length);
   console.log('🔍 Account details:', JSON.stringify(accounts, null, 2));
 
-  const facebookPages = accounts
-    .filter((a: { provider: string }) => a.provider === 'facebook-pages')
-    .map((page: any) => ({
+  interface AccountRecord {
+    provider: string;
+    pageId: string | null;
+    providerAccountId: string;
+    pageName: string | null;
+    pageAccessToken?: string | null;
+  }
+
+  const facebookPages = (accounts as AccountRecord[])
+    .filter((a) => a.provider === 'facebook-pages')
+    .map((page) => ({
       id: page.pageId || page.providerAccountId, // Use Facebook Page ID, not database ID
       name: page.pageName || `Page ${page.pageId || page.providerAccountId}`,
       pageAccessToken: page.pageAccessToken,
