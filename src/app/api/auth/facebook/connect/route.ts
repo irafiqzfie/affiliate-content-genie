@@ -162,16 +162,40 @@ export async function GET(request: NextRequest) {
       console.log('🏢 Business accounts response:', JSON.stringify(businessData, null, 2));
       
       if (!businessData.data || businessData.data.length === 0) {
-        console.error('❌ Still no pages found. This is a known issue with Facebook Apps in Development Mode.');
-        console.error('ℹ️ Workaround: You need to switch your Facebook App to Live mode.');
-        return NextResponse.redirect(
-          new URL(`/?error=no_facebook_pages&message=${encodeURIComponent('No Facebook Pages found. Your Facebook App needs to be in Live mode (not Development mode) for the Pages API to work properly.')}`, request.url)
-        );
+        console.error('❌ Still no pages found. Using manual Page ID fallback...');
+        
+        // WORKAROUND: For unpublished Facebook Apps, manually fetch the known Page
+        // Page ID from the OAuth dialog: 110806291639348 (MS Home Essentials)
+        const manualPageId = '110806291639348';
+        console.log(`🔄 Fetching page directly with ID: ${manualPageId}`);
+        
+        try {
+          const pageResponse = await fetch(
+            `https://graph.facebook.com/v20.0/${manualPageId}?fields=id,name,access_token&access_token=${finalUserToken}`
+          );
+          const pageData = await pageResponse.json();
+          console.log('📄 Direct page fetch response:', JSON.stringify(pageData, null, 2));
+          
+          if (pageData.id && pageData.access_token) {
+            console.log('✅ Successfully fetched page via direct ID');
+            pagesData.data = [pageData];
+          } else if (pageData.error) {
+            console.error('❌ Failed to fetch page directly:', pageData.error);
+            return NextResponse.redirect(
+              new URL(`/?error=facebook_page_access_denied&message=${encodeURIComponent('Cannot access Facebook Page. Make sure you are an admin of the page.')}`, request.url)
+            );
+          }
+        } catch (fetchError) {
+          console.error('❌ Error fetching page directly:', fetchError);
+          return NextResponse.redirect(
+            new URL(`/?error=facebook_connection_failed&message=${encodeURIComponent('Failed to connect Facebook Page. Your app may need to be published first.')}`, request.url)
+          );
+        }
+      } else {
+        // Use the business accounts data instead
+        pagesData.data = businessData.data;
+        console.log('✅ Found pages via alternative method:', pagesData.data.length);
       }
-      
-      // Use the business accounts data instead
-      pagesData.data = businessData.data;
-      console.log('✅ Found pages via alternative method:', pagesData.data.length);
     }
 
     console.log('🔄 Step 4: Storing page tokens in database...');
