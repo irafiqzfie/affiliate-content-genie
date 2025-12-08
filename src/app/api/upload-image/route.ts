@@ -90,7 +90,20 @@ export async function POST(request: NextRequest) {
       addRandomSuffix: true,
     });
 
-    console.log(`✅ Image uploaded to Vercel Blob: ${blob.url}`);
+    console.log(`✅ Image uploaded to Vercel Blob:`);
+    console.log(`   URL: ${blob.url}`);
+    console.log(`   Download URL: ${blob.downloadUrl}`);
+    console.log(`   Pathname: ${blob.pathname}`);
+
+    // Verify the image is accessible before returning
+    console.log('🔍 Verifying Blob image accessibility...');
+    const verifyResponse = await fetch(blob.url, { method: 'HEAD' });
+    if (!verifyResponse.ok) {
+      console.error(`⚠️ Blob image not immediately accessible: ${verifyResponse.status}`);
+      console.log('⏳ Blob may need a few seconds to propagate. Returning URL anyway.');
+    } else {
+      console.log('✅ Blob image is accessible');
+    }
 
     return NextResponse.json({
       success: true,
