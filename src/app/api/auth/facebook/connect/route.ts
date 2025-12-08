@@ -191,18 +191,25 @@ export async function POST(request: NextRequest) {
 
   const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/facebook/connect`;
   
-  console.log('🔗 Facebook OAuth URL:', redirectUri);
+  console.log('🔗 Facebook OAuth redirect URI:', redirectUri);
   
-  // Use only basic, publicly available permissions
-  // For development/testing with Facebook Login use case
-  const authUrl = new URL('https://www.facebook.com/v18.0/dialog/oauth');
+  // Use Facebook Pages API OAuth (not Login Dialog)
+  // Permissions allowed for Page admins without App Review:
+  // - pages_show_list: List Pages user manages
+  // - pages_read_engagement: Read Page insights
+  // - pages_manage_metadata: Manage Page settings
+  // - pages_manage_posts: Create, edit, delete posts
+  // - public_profile: Basic profile info (always allowed)
+  const authUrl = new URL('https://www.facebook.com/v20.0/dialog/oauth');
   authUrl.searchParams.set('client_id', process.env.FACEBOOK_CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', redirectUri);
-  authUrl.searchParams.set('scope', 'public_profile,pages_show_list'); // Minimal scope that should work
+  authUrl.searchParams.set('scope', 'public_profile,pages_show_list,pages_read_engagement,pages_manage_metadata,pages_manage_posts');
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('state', crypto.randomUUID()); // CSRF protection
 
-  console.log('✅ Facebook auth URL generated with scope:', 'public_profile,pages_show_list');
+  console.log('✅ Facebook Pages OAuth URL generated');
+  console.log('📋 Permissions requested:', 'public_profile,pages_show_list,pages_read_engagement,pages_manage_metadata,pages_manage_posts');
+  console.log('ℹ️ These permissions are available to Page admins without App Review');
 
   return NextResponse.json({ authUrl: authUrl.toString() });
 }
