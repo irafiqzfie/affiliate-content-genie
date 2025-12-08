@@ -58,6 +58,8 @@ export async function GET(request: NextRequest) {
   try {
     const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/facebook/connect`;
     
+    console.log('🔄 Step 1: Exchanging code for user access token...');
+    
     // Step 1: Exchange code for user access token
     const tokenParams = new URLSearchParams({
       client_id: process.env.FACEBOOK_CLIENT_ID || '',
@@ -71,6 +73,9 @@ export async function GET(request: NextRequest) {
     );
 
     const tokenData = await tokenResponse.json();
+    
+    console.log('📥 Token response status:', tokenResponse.status);
+    console.log('📥 Token data:', tokenData.error ? `Error: ${JSON.stringify(tokenData.error)}` : 'Success');
 
     if (!tokenResponse.ok || tokenData.error) {
       console.error('❌ Token exchange failed:', tokenData);
@@ -80,7 +85,10 @@ export async function GET(request: NextRequest) {
     }
 
     const userAccessToken = tokenData.access_token;
+    console.log('✅ User access token obtained');
 
+    console.log('🔄 Step 2: Exchanging for long-lived token...');
+    
     // Step 2: Exchange for long-lived user token (60 days)
     const longLivedParams = new URLSearchParams({
       grant_type: 'fb_exchange_token',
@@ -94,20 +102,30 @@ export async function GET(request: NextRequest) {
     );
 
     const longLivedData = await longLivedResponse.json();
+    
+    console.log('📥 Long-lived token status:', longLivedResponse.status);
 
     if (!longLivedResponse.ok || longLivedData.error) {
-      console.error('❌ Long-lived token exchange failed:', longLivedData);
+      console.error('⚠️ Long-lived token exchange failed:', longLivedData);
+      console.log('⚠️ Continuing with short-lived token');
       // Continue with short-lived token if long-lived exchange fails
+    } else {
+      console.log('✅ Long-lived token obtained');
     }
 
     const finalUserToken = longLivedData.access_token || userAccessToken;
 
+    console.log('🔄 Step 3: Fetching user Facebook Pages...');
+    
     // Step 3: Get user's Facebook Pages
     const pagesResponse = await fetch(
       `https://graph.facebook.com/v18.0/me/accounts?access_token=${finalUserToken}`
     );
 
     const pagesData = await pagesResponse.json();
+    
+    console.log('📥 Pages response status:', pagesResponse.status);
+    console.log('📄 Pages found:', pagesData.data?.length || 0);
 
     if (!pagesResponse.ok || pagesData.error) {
       console.error('❌ Failed to get pages:', pagesData);
@@ -117,14 +135,18 @@ export async function GET(request: NextRequest) {
     }
 
     if (!pagesData.data || pagesData.data.length === 0) {
+      console.error('❌ No Facebook Pages found');
       return NextResponse.redirect(
         new URL(`/?error=no_facebook_pages&message=${encodeURIComponent('No Facebook Pages found. Please create a Facebook Page first.')}`, request.url)
       );
     }
 
+    console.log('🔄 Step 4: Storing page tokens in database...');
+    
     // Step 4: Store each page as a separate account
     // Each page gets its own long-lived page access token (60 days)
     for (const page of pagesData.data) {
+      console.log(`💾 Storing page: ${page.name} (ID: ${page.id})`);
       await storeOAuthTokens(
         session.user.id,
         'facebook-pages',
