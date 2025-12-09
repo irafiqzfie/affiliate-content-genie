@@ -240,6 +240,25 @@ export async function POST(request: NextRequest) {
     console.log('✅ Container ready for publishing');
     console.log('🔍 Publishing with container ID:', creationId);
     console.log('🔍 Threads user ID:', threadsUserId);
+    
+    // Final verification: Check if container still exists
+    console.log('🔍 Final container verification...');
+    const finalCheckUrl = `https://graph.threads.net/v1.0/${creationId}?fields=id,status&access_token=${accessToken}`;
+    const finalCheckResponse = await fetch(finalCheckUrl);
+    const finalCheckData = await finalCheckResponse.json();
+    
+    console.log('🔍 Final check response:', JSON.stringify(finalCheckData, null, 2));
+    
+    if (!finalCheckResponse.ok || finalCheckData.error) {
+      console.error('❌ Container no longer exists or is invalid');
+      return NextResponse.json(
+        { 
+          error: 'Threads container became invalid',
+          details: 'The container was created but is no longer accessible. This may be a Threads API issue. Please try again.'
+        },
+        { status: 400 }
+      );
+    }
 
     // Small delay to ensure Threads backend is fully ready
     await new Promise(resolve => setTimeout(resolve, 500));
