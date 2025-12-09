@@ -12,7 +12,7 @@ interface PostConfirmationModalProps {
   hasLongForm: boolean;
   hasHook: boolean;
   connectedPlatforms: { threads: boolean; facebook: boolean };
-  facebookPages?: Array<{ id: string; name: string }>;
+  facebookPages?: Array<{ id: string; pageId: string; name: string }>;
 }
 
 export interface PostOptions {
@@ -37,7 +37,7 @@ export default function PostConfirmationModal({
     hasImage && hasHook ? 'short-hook-picture' : (hasHook ? 'short-hook-text' : 'long-form-text')
   );
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<'Facebook' | 'Threads'>>(new Set(['Threads']));
-  const [selectedPageIds, setSelectedPageIds] = useState<Set<string>>(new Set(facebookPages.map(p => p.id)));
+  const [selectedPageIds, setSelectedPageIds] = useState<Set<string>>(new Set(facebookPages.map(p => p.pageId)));
   const [affiliateLink, setAffiliateLink] = useState('');
 
   if (!isOpen) return null;
@@ -154,8 +154,8 @@ export default function PostConfirmationModal({
                       <label key={page.id} className="checkbox-option" style={{ fontSize: '0.875rem' }}>
                         <input
                           type="checkbox"
-                          checked={selectedPageIds.has(page.id)}
-                          onChange={() => togglePage(page.id)}
+                          checked={selectedPageIds.has(page.pageId)}
+                          onChange={() => togglePage(page.pageId)}
                         />
                         <span className="checkbox-label">
                           {page.name}
