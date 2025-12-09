@@ -272,11 +272,12 @@ export async function POST(request: NextRequest) {
   
   console.log('🔗 Facebook OAuth redirect URI:', redirectUri);
   
-  // Use only the permissions that are actually available for Facebook Pages
-  // According to Facebook's current API, only these work without App Review for admins:
+  // Use only the permissions that work in Development Mode without App Review:
   // - public_profile: Basic profile (always available)
   // - pages_show_list: List pages user manages (available to page admins)
-  // - pages_manage_posts: Create/edit/delete posts (requires App Review OR business verification)
+  // - pages_manage_posts: Create/edit/delete posts (available to page admins in dev mode)
+  // - pages_read_engagement: Read page insights (available to page admins)
+  // - pages_manage_engagement: Manage comments/messages (available to page admins)
   const authUrl = new URL('https://www.facebook.com/v20.0/dialog/oauth');
   authUrl.searchParams.set('client_id', process.env.FACEBOOK_CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', redirectUri);
@@ -285,8 +286,8 @@ export async function POST(request: NextRequest) {
   authUrl.searchParams.set('state', crypto.randomUUID()); // CSRF protection
 
   console.log('✅ Facebook Pages OAuth URL generated');
-  console.log('📋 Permissions requested:', 'public_profile,pages_show_list,pages_manage_posts');
-  console.log('⚠️ Note: pages_manage_posts may require App Review or Business Verification');
+  console.log('📋 Permissions requested:', 'public_profile,pages_show_list,pages_manage_posts,pages_read_engagement,pages_manage_engagement');
+  console.log('⚠️ Note: Some permissions may require Business Verification');
 
   return NextResponse.json({ authUrl: authUrl.toString() });
 }
