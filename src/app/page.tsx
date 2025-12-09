@@ -1626,10 +1626,11 @@ export default function Home() {
           console.log(`✅ Successfully posted to ${platform}!`, postData);
           
           const postId = postData.results?.[0]?.postId;
+          const pageId = postData.results?.[0]?.pageId; // For Facebook
 
           // If there's an affiliate link and we got a post ID, post it as a comment
           const affiliateLinkToPost = options.affiliateLink || affiliateLink;
-          if (affiliateLinkToPost && postId && platform === 'Threads') {
+          if (affiliateLinkToPost && postId) {
             console.log('💬 Posting affiliate link with CTA as comment...');
             
             // Get the CTA text from generated content
@@ -1643,21 +1644,29 @@ export default function Home() {
               : `🔗 ${affiliateLinkToPost}`;
             
             try {
-              const replyResponse = await fetch(`${API_URL}/threads/reply`, {
+              const commentPayload: any = {
+                platform: platform.toLowerCase(),
+                postId: postId,
+                text: commentText
+              };
+
+              // Add pageId for Facebook
+              if (platform === 'Facebook' && pageId) {
+                commentPayload.pageId = pageId;
+              }
+
+              const replyResponse = await fetch(`${API_URL}/comment`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                  postId: postId,
-                  text: commentText
-                })
+                body: JSON.stringify(commentPayload)
               });
 
               const replyData = await replyResponse.json();
 
               if (replyResponse.ok) {
-                console.log('✅ Affiliate link with CTA posted as comment!');
+                console.log(`✅ Affiliate link posted as ${platform} comment!`);
               } else {
                 console.warn('⚠️ Failed to post affiliate link:', replyData);
               }
@@ -1914,12 +1923,13 @@ export default function Home() {
           : `🔗 ${post.affiliateLink}`;
         
         try {
-          const replyResponse = await fetch(`${API_URL}/threads/reply`, {
+          const replyResponse = await fetch(`${API_URL}/comment`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              platform: 'threads',
               postId: data.postId,
               text: commentText
             })
