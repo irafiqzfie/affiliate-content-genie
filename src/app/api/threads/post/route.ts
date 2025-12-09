@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/authOptions';
-import { getOAuthTokens } from '@/lib/oauth-helpers';
+import { getOAuthTokens, refreshThreadsToken } from '@/lib/oauth-helpers';
 
 /**
  * POST /api/threads/post
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch Threads connection from database
-    const threadsAccount = await getOAuthTokens(session.user.id, 'threads');
+    let threadsAccount = await getOAuthTokens(session.user.id, 'threads');
 
     if (!threadsAccount?.access_token) {
       return NextResponse.json(
@@ -34,13 +34,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if token is expired or expiring soon (within 7 days)
+    const now = Math.floor(Date.now() / 1000);
+    const sevenDays = 7 * 24 * 60 * 60;
+    
+    if (threadsAccount.expires_at && threadsAccount.expires_at < (now + sevenDays)) {
+      console.log('🔄 Token expired or expiring soon, refreshing...');
+      const newToken = await refreshThreadsToken(session.user.id);
+      
+      if (newToken) {
+        console.log('✅ Token refreshed successfully');
+        // Re-fetch account with new token
+        threadsAccount = await getOAuthTokens(session.user.id, 'threads');
+      } else {
+        console.error('❌ Token refresh failed');
+        return NextResponse.json(
+          { error: 'Your Threads token has expired. Please reconnect your account.' },
+          { status: 401 }
+        );
+      }
+    }
+
     const accessToken = threadsAccount.access_token;
     const threadsUserId = threadsAccount.threadsUserId || threadsAccount.providerAccountId;
 
     console.log('🔍 Threads account check:', {
       hasToken: !!accessToken,
       threadsUserId: threadsUserId,
-      userId: session.user.id
+      userId: session.user.id,
+      expiresAt: threadsAccount.expires_at ? new Date(threadsAccount.expires_at * 1000).toISOString() : 'unknown'
     });
 
     const body = await request.json();

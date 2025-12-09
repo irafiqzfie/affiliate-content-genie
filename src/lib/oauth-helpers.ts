@@ -161,26 +161,26 @@ export async function refreshThreadsToken(userId: string): Promise<string | null
   }
 
   try {
-    const params = new URLSearchParams({
-      grant_type: 'th_refresh_token',
-      access_token: account.access_token,
-    });
-
-    const response = await fetch(`https://graph.threads.net/oauth/access_token?${params.toString()}`, {
-      method: 'GET',
-    });
+    const response = await fetch(
+      'https://graph.threads.net/refresh_access_token?' + new URLSearchParams({
+        grant_type: 'th_refresh_token',
+        access_token: account.access_token,
+      })
+    );
 
     const data = await response.json();
 
-    if (!response.ok) {
+    if (!response.ok || data.error) {
       console.error('❌ Threads token refresh failed:', data);
       return null;
     }
 
+    console.log('✅ Threads token refreshed, expires in:', data.expires_in, 'seconds');
+
     // Store the new token
     await storeOAuthTokens(userId, 'threads', account.providerAccountId, {
       accessToken: data.access_token,
-      expiresAt: Math.floor(Date.now() / 1000) + (60 * 24 * 60 * 60), // 60 days
+      expiresAt: Math.floor(Date.now() / 1000) + data.expires_in,
       threadsUserId: account.threadsUserId || account.providerAccountId,
     });
 

@@ -79,9 +79,35 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log('✅ Short-lived token obtained');
+
+    // Exchange for long-lived token (60 days)
+    console.log('🔄 Exchanging for long-lived token...');
+    const longLivedTokenResponse = await fetch(
+      'https://graph.threads.net/access_token?' + new URLSearchParams({
+        grant_type: 'th_exchange_token',
+        client_secret: process.env.THREADS_APP_SECRET || '',
+        access_token: tokenData.access_token,
+      })
+    );
+
+    const longLivedTokenData = await longLivedTokenResponse.json();
+
+    if (!longLivedTokenResponse.ok || longLivedTokenData.error) {
+      console.error('⚠️ Long-lived token exchange failed:', longLivedTokenData);
+      console.log('⚠️ Continuing with short-lived token (1 hour expiry)');
+      // Continue with short-lived token if long-lived exchange fails
+    } else {
+      console.log('✅ Long-lived token obtained (60 days)');
+      console.log('📅 Token expires in:', longLivedTokenData.expires_in, 'seconds');
+    }
+
+    const finalAccessToken = longLivedTokenData.access_token || tokenData.access_token;
+    const expiresIn = longLivedTokenData.expires_in || (60 * 60); // 60 days or 1 hour
+
     // Get user info from Threads
     const userInfoResponse = await fetch(
-      `https://graph.threads.net/v1.0/me?fields=id,username,name,threads_profile_picture_url&access_token=${tokenData.access_token}`
+      `https://graph.threads.net/v1.0/me?fields=id,username,name,threads_profile_picture_url&access_token=${finalAccessToken}`
     );
 
     const userInfo = await userInfoResponse.json();
@@ -108,8 +134,8 @@ export async function GET(request: NextRequest) {
         'threads',
         userInfo.id,
         {
-          accessToken: tokenData.access_token,
-          expiresAt: Math.floor(Date.now() / 1000) + (60 * 24 * 60 * 60), // 60 days
+          accessToken: finalAccessToken,
+          expiresAt: Math.floor(Date.now() / 1000) + expiresIn,
           threadsUserId: userInfo.id,
         }
       );
