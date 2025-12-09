@@ -34,6 +34,19 @@ export async function storeOAuthTokens(
   console.log('💾 provider:', provider);
   console.log('💾 providerAccountId:', providerAccountId);
 
+  // Verify user exists in database before creating account
+  const userExists = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true }
+  });
+
+  if (!userExists) {
+    console.error('❌ User not found in database:', userId);
+    throw new Error(`Cannot store OAuth tokens: User ${userId} does not exist in database. Please sign in first.`);
+  }
+
+  console.log('✅ User verified in database');
+
   const result = await prisma.account.upsert({
     where: {
       provider_providerAccountId: {

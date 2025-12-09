@@ -54,7 +54,7 @@ model ScheduledPost {
 
 model Account {
   id                String   @id @default(cuid())
-  userId            String?
+  userId            String   // Required: OAuth accounts must be linked to a user
   provider          String   // 'threads', 'facebook', 'facebook-pages'
   providerAccountId String   // User ID from provider
   access_token      String?  @db.Text // Long-lived token (can be very long)
@@ -73,7 +73,7 @@ model Account {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId, provider]) // Optimize queries for user's connected accounts
