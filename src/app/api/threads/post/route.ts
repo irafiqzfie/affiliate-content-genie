@@ -166,6 +166,20 @@ export async function POST(request: NextRequest) {
     }
 
     const containerData = await containerResponse.json();
+    
+    console.log('📦 Container response:', JSON.stringify(containerData, null, 2));
+    
+    if (!containerData.id) {
+      console.error('❌ No container ID in response');
+      return NextResponse.json(
+        { 
+          error: 'Threads container creation failed - no ID returned',
+          details: containerData
+        },
+        { status: 400 }
+      );
+    }
+    
     const creationId = containerData.id;
 
     console.log('✅ Container created:', creationId);
@@ -224,9 +238,17 @@ export async function POST(request: NextRequest) {
     }
     
     console.log('✅ Container ready for publishing');
+    console.log('🔍 Publishing with container ID:', creationId);
+    console.log('🔍 Threads user ID:', threadsUserId);
+
+    // Small delay to ensure Threads backend is fully ready
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Step 2: Publish the container
     const publishUrl = `https://graph.threads.net/v1.0/${threadsUserId}/threads_publish`;
+    
+    console.log('📤 Publishing to:', publishUrl);
+    console.log('📤 With creation_id:', creationId);
     
     const publishResponse = await fetch(publishUrl, {
       method: 'POST',
@@ -239,12 +261,16 @@ export async function POST(request: NextRequest) {
       })
     });
 
+    console.log('📥 Publish response status:', publishResponse.status);
+    
+    const publishData = await publishResponse.json();
+    console.log('📥 Publish response data:', JSON.stringify(publishData, null, 2));
+
     if (!publishResponse.ok) {
-      const errorData = await publishResponse.json();
-      console.error('Threads publish failed:', errorData);
+      console.error('❌ Threads publish failed:', publishData);
       
       // Check for specific error codes
-      if (errorData.error?.code === 24 && errorData.error?.error_subcode === 4279009) {
+      if (publishData.error?.code === 24 && publishData.error?.error_subcode === 4279009) {
         return NextResponse.json(
           { 
             error: 'Media not found',
@@ -257,13 +283,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'Failed to publish Threads post',
-          details: errorData 
+          details: publishData 
         },
         { status: publishResponse.status }
       );
     }
-
-    const publishData = await publishResponse.json();
 
     console.log('✅ Published to Threads:', publishData.id);
 
