@@ -1631,52 +1631,46 @@ export default function Home() {
           // If there's an affiliate link and we got a post ID, post it as a comment
           const affiliateLinkToPost = options.affiliateLink || affiliateLink;
           if (affiliateLinkToPost && postId) {
-            console.log('💬 Posting affiliate link with CTA as comment...');
-            
-            // Get the CTA text from generated content
-            const postContent = editableContent.post;
-            const selectedCtaIndex = selectedOptionIndexes['cta'] ?? 0;
-            const ctaText = postContent?.cta?.[selectedCtaIndex];
-            
-            // Build the comment text: CTA + affiliate link
-            const commentText = ctaText 
-              ? `${stripHtml(ctaText)}\n\n🔗 ${affiliateLinkToPost}`
-              : `🔗 ${affiliateLinkToPost}`;
-            
-            try {
-              const commentPayload: {
-                platform: string;
-                postId: string;
-                text: string;
-                pageId?: string;
-              } = {
-                platform: platform.toLowerCase(),
-                postId: postId,
-                text: commentText
-              };
+            // Only Threads supports comments via API in Development Mode
+            // Facebook requires App Review for comment permissions
+            if (platform === 'Threads') {
+              console.log('💬 Posting affiliate link with CTA as comment...');
+              
+              // Get the CTA text from generated content
+              const postContent = editableContent.post;
+              const selectedCtaIndex = selectedOptionIndexes['cta'] ?? 0;
+              const ctaText = postContent?.cta?.[selectedCtaIndex];
+              
+              // Build the comment text: CTA + affiliate link
+              const commentText = ctaText 
+                ? `${stripHtml(ctaText)}\n\n🔗 ${affiliateLinkToPost}`
+                : `🔗 ${affiliateLinkToPost}`;
+              
+              try {
+                const replyResponse = await fetch(`${API_URL}/comment`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    platform: 'threads',
+                    postId: postId,
+                    text: commentText
+                  })
+                });
 
-              // Add pageId for Facebook
-              if (platform === 'Facebook' && pageId) {
-                commentPayload.pageId = pageId;
+                const replyData = await replyResponse.json();
+
+                if (replyResponse.ok) {
+                  console.log('✅ Affiliate link posted as Threads comment!');
+                } else {
+                  console.warn('⚠️ Failed to post affiliate link:', replyData);
+                }
+              } catch (replyErr) {
+                console.warn('⚠️ Error posting affiliate link comment:', replyErr);
               }
-
-              const replyResponse = await fetch(`${API_URL}/comment`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(commentPayload)
-              });
-
-              const replyData = await replyResponse.json();
-
-              if (replyResponse.ok) {
-                console.log(`✅ Affiliate link posted as ${platform} comment!`);
-              } else {
-                console.warn('⚠️ Failed to post affiliate link:', replyData);
-              }
-            } catch (replyErr) {
-              console.warn('⚠️ Error posting affiliate link comment:', replyErr);
+            } else if (platform === 'Facebook') {
+              console.log('ℹ️ Facebook: Affiliate link included in main post. Comment API requires App Review.');
             }
           }
           

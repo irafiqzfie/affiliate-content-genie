@@ -233,7 +233,9 @@ export default function PostConfirmationModal({
                   value={affiliateLink}
                   onChange={(e) => setAffiliateLink(e.target.value)}
                 />
-                <small className="input-hint">Will be posted as a comment after the main post</small>
+                <small className="input-hint">
+                  Threads: Posted as a comment. Facebook: Include manually in post text (API limitation).
+                </small>
               </div>
             </div>
           </div>
