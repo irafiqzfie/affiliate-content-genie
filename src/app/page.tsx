@@ -253,7 +253,7 @@ export default function Home() {
   const [connections, setConnections] = useState<{ 
     threads: boolean; 
     facebook: boolean;
-    facebookPages?: Array<{ id: string; name: string; }>;
+    facebookPages?: Array<{ id: string; pageId: string; name: string; }>;
   }>({ threads: false, facebook: false });
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
