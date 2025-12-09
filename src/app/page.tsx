@@ -1644,7 +1644,12 @@ export default function Home() {
               : `🔗 ${affiliateLinkToPost}`;
             
             try {
-              const commentPayload: any = {
+              const commentPayload: {
+                platform: string;
+                postId: string;
+                text: string;
+                pageId?: string;
+              } = {
                 platform: platform.toLowerCase(),
                 postId: postId,
                 text: commentText
