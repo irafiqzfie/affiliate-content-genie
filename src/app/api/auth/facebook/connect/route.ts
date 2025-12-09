@@ -280,7 +280,7 @@ export async function POST(request: NextRequest) {
   const authUrl = new URL('https://www.facebook.com/v20.0/dialog/oauth');
   authUrl.searchParams.set('client_id', process.env.FACEBOOK_CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', redirectUri);
-  authUrl.searchParams.set('scope', 'public_profile,pages_show_list,pages_manage_posts,pages_read_engagement');
+  authUrl.searchParams.set('scope', 'public_profile,pages_show_list,pages_manage_posts,pages_read_engagement,pages_manage_engagement');
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('state', crypto.randomUUID()); // CSRF protection
 
