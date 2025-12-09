@@ -8,9 +8,14 @@ export async function GET() {
   try {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
   
-    // For JWT-only sessions, all posts have null userId
-    const userId = null;
-    console.log('👤 GET User ID (JWT mode):', userId);
+    // Require authentication
+    if (!session?.user?.id) {
+      console.log('❌ GET /api/scheduled-posts: Unauthorized (no user ID)');
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    console.log('👤 GET User ID:', userId);
 
     // Check if Prisma is available
     if (!prisma) {
@@ -18,11 +23,12 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
-    // Get all posts with null userId (JWT mode posts)
+    // Only return posts belonging to this user
     const posts = await prisma.scheduledPost.findMany({ 
-      where: { userId: null }, 
+      where: { userId }, 
       orderBy: { scheduledTime: 'asc' } 
     });
+    console.log(`✅ Retrieved ${posts.length} scheduled posts for user ${userId}`);
     return NextResponse.json(posts);
   } catch (error) {
     console.error('GET /api/scheduled-posts error:', error);
@@ -38,9 +44,14 @@ export async function POST(request: Request) {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     console.log('🔐 Session:', session ? 'Authenticated' : 'Not authenticated');
     
-    // For JWT-only sessions, userId doesn't exist in database, so set to null
-    const userId = null;
-    console.log('👤 User ID (JWT mode):', userId);
+    // Require authentication
+    if (!session?.user?.id) {
+      console.log('❌ POST /api/scheduled-posts: Unauthorized (no user ID)');
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    console.log('👤 User ID:', userId);
 
     const body = await request.json();
     console.log('📦 Request body:', { platform: body.platform, scheduledTime: body.scheduledTime, status: body.status, hasAffiliateLink: !!body.affiliateLink, hasImage: !!body.imageUrl });
@@ -62,19 +73,21 @@ export async function POST(request: Request) {
       }, { status: 503 });
     }
     
-    // Build data object conditionally to avoid passing undefined/null for required fields
+    // Build data object with user ID (required for per-user isolation)
     const postData: {
       platform: string;
       scheduledTime: Date;
       caption: string;
       status: string;
+      userId: string;
       imageUrl?: string;
       affiliateLink?: string;
     } = {
       platform,
       scheduledTime: new Date(scheduledTime),
       caption,
-      status
+      status,
+      userId // Always include userId for per-user data isolation
     };
 
     // Only add imageUrl if it exists and is not null

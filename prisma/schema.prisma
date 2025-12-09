@@ -23,7 +23,7 @@ model User {
 
 model SavedItem {
   id         Int      @id @default(autoincrement())
-  userId     String?
+  userId     String   // Required: enforce per-user data isolation
   title      String
   productLink String?
   video      String
@@ -31,12 +31,14 @@ model SavedItem {
   info       String   @default("")
   imageUrl   String?
   createdAt  DateTime @default(now())
-  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId]) // Optimize queries for user's saved items
 }
 
 model ScheduledPost {
   id            Int      @id @default(autoincrement())
-  userId        String?
+  userId        String   // Required: enforce per-user data isolation
   platform      String
   scheduledTime DateTime
   imageUrl      String?
@@ -44,7 +46,10 @@ model ScheduledPost {
   affiliateLink String?
   status        String
   createdAt     DateTime @default(now())
-  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId]) // Optimize queries for user's scheduled posts
+  @@index([userId, scheduledTime]) // Optimize queries for user's posts by time
 }
 
 model Account {

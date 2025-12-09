@@ -11,14 +11,20 @@ export async function DELETE(request: Request) {
     const idStr = parts[parts.length - 1];
     const id = parseInt(idStr || '', 10);
     
+    if (isNaN(id)) {
+      return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
+    }
+    
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     
-    // For development: use test user ID if not authenticated
-    const userId = session?.user?.email || session?.user?.id || 'dev-user-localhost';
-    
-    if (!session && process.env.NODE_ENV !== 'development') {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    // Require authentication - no development bypass for security
+    if (!session?.user?.id) {
+      console.log('❌ DELETE /api/scheduled-posts/[id]: Unauthorized (no user ID)');
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+
+    const userId = session.user.id;
+    console.log(`🗑️  Attempting to delete scheduled post ${id} for user: ${userId}`);
 
     // Check if Prisma is available
     if (!prisma || typeof prisma.scheduledPost === 'undefined') {
@@ -26,15 +32,23 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ message: 'Database not available - posts are in-memory only' }, { status: 503 });
     }
 
-    // Remove userId filter since JWT users aren't in database
-    const deleted = await prisma.scheduledPost.deleteMany({ where: { id } });
+    // Only delete if the post belongs to this user (enforce data isolation)
+    const deleted = await prisma.scheduledPost.deleteMany({ 
+      where: { 
+        id,
+        userId // Critical: only delete if post belongs to authenticated user
+      } 
+    });
+    
     if (deleted.count === 0) {
+      console.log(`⚠️  Post ${id} not found or unauthorized for user ${userId}`);
       return NextResponse.json({ message: 'Post not found or unauthorized' }, { status: 404 });
     }
 
+    console.log(`✅ Post ${id} deleted successfully for user ${userId}`);
     return NextResponse.json({ message: `Post ${id} deleted successfully` }, { status: 200 });
   } catch (error) {
-    console.error('DELETE /api/scheduled-posts/[id] error:', error);
+    console.error('❌ DELETE /api/scheduled-posts/[id] error:', error);
     return NextResponse.json({ message: 'Error deleting post' }, { status: 500 });
   }
 }

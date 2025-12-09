@@ -17,15 +17,13 @@ export async function DELETE(request: Request) {
     
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null;
     
-    // Development fallback: allow deletion without auth in local dev
-    const isDev = process.env.NODE_ENV === 'development';
-    
-    if (!session && !isDev) {
-      console.log('❌ DELETE /api/saved-items/[id]: Unauthorized (no session)');
+    // Require authentication - no development bypass for security
+    if (!session?.user?.id) {
+      console.log('❌ DELETE /api/saved-items/[id]: Unauthorized (no user ID)');
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     
-    const userId = session?.user?.email || session?.user?.id || 'dev-user-localhost';
+    const userId = session.user.id;
     console.log(`🗑️  Attempting to delete saved item ${id} for user: ${userId}`);
 
     // Check if Prisma is available
@@ -34,15 +32,20 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ message: 'Database not available - items are in-memory only' }, { status: 503 });
     }
 
-    // Remove userId filter since JWT users aren't in database
-    const deleted = await prisma.savedItem.deleteMany({ where: { id } });
+    // Only delete if the item belongs to this user (enforce data isolation)
+    const deleted = await prisma.savedItem.deleteMany({ 
+      where: { 
+        id,
+        userId // Critical: only delete if item belongs to authenticated user
+      } 
+    });
     
     if (deleted.count === 0) {
       console.log(`⚠️  Item ${id} not found or unauthorized for user ${userId}`);
       return NextResponse.json({ message: 'Item not found or unauthorized' }, { status: 404 });
     }
 
-    console.log(`✅ Item ${id} deleted successfully`);
+    console.log(`✅ Item ${id} deleted successfully for user ${userId}`);
     return NextResponse.json({ message: `Item ${id} deleted successfully` }, { status: 200 });
   } catch (error) {
     console.error('❌ DELETE /api/saved-items/[id] error:', error);

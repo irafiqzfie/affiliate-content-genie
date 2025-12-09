@@ -8,9 +8,14 @@ export async function GET() {
   try {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     
-    // In JWT mode, we don't store users in the database, so always use null
-    const userId = null;
-    console.log('👤 GET User ID (JWT mode):', userId);
+    // Require authentication
+    if (!session?.user?.id) {
+      console.log('❌ GET /api/saved-items: Unauthorized (no user ID)');
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    console.log('👤 GET User ID:', userId);
 
     // Check if Prisma is available
     if (!prisma) {
@@ -18,10 +23,12 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
+    // Only return items belonging to this user
     const items = await prisma.savedItem.findMany({ 
-      where: userId ? { userId } : { userId: null }, 
+      where: { userId }, 
       orderBy: { id: 'desc' } 
     });
+    console.log(`✅ Retrieved ${items.length} saved items for user ${userId}`);
     return NextResponse.json(items);
   } catch (error) {
     console.error('GET /api/saved-items error:', error);
@@ -37,9 +44,14 @@ export async function POST(request: Request) {
     const session = (await getServerSession(authOptions as NextAuthOptions)) as Session | null
     console.log('🔐 Session:', session ? 'Authenticated' : 'Not authenticated');
     
-    // In JWT mode, we don't store users in the database, so always use null
-    const userId = null;
-    console.log('👤 User ID (JWT mode):', userId);
+    // Require authentication
+    if (!session?.user?.id) {
+      console.log('❌ POST /api/saved-items: Unauthorized (no user ID)');
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    console.log('👤 User ID:', userId);
 
     let body;
     try {
@@ -79,28 +91,25 @@ export async function POST(request: Request) {
       }, { status: 503 });
     }
     
-    // Build data object conditionally
+    // Build data object with user ID (required for per-user isolation)
     const dataToCreate: {
       title: string;
       video: string;
       post: string;
       info: string;
       imageUrl?: string | null;
-      userId?: string | null;
+      userId: string;
     } = {
       title,
       video: content.video || '',
       post: content.post || '',
-      info: content.info || ''
+      info: content.info || '',
+      userId // Always include userId for per-user data isolation
     };
     
     // Include imageUrl if provided
     if (imageUrl && imageUrl.trim() !== '') {
       dataToCreate.imageUrl = imageUrl;
-    }
-    
-    if (userId !== null) {
-      dataToCreate.userId = userId;
     }
     
     const newItem = await prisma.savedItem.create({ 
