@@ -115,22 +115,60 @@ export async function POST(request: NextRequest) {
 
     console.log('📤 Posting to Threads:', { threadsUserId, hasToken: !!accessToken, hasMedia: !!mediaUrl });
 
-    // Step 1: Create a container (media post preparation)
+    // For text-only posts, use single-step publishing (no container needed)
+    if (!mediaUrl) {
+      console.log('📝 Publishing text-only post directly (single-step)');
+      const publishUrl = `https://graph.threads.net/v1.0/${threadsUserId}/threads`;
+      
+      const publishResponse = await fetch(publishUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          media_type: 'TEXT',
+          text: text,
+          access_token: accessToken
+        })
+      });
+
+      if (!publishResponse.ok) {
+        const errorData = await publishResponse.json();
+        console.error('❌ Threads text post failed:', errorData);
+        
+        return NextResponse.json(
+          { 
+            error: 'Threads posting failed',
+            details: errorData.error?.message || 'Failed to post text-only content to Threads. Please try again.'
+          },
+          { status: publishResponse.status }
+        );
+      }
+
+      const publishData = await publishResponse.json();
+      console.log('✅ Text post published:', publishData);
+      
+      return NextResponse.json({ 
+        success: true, 
+        threadId: publishData.id 
+      });
+    }
+
+    // Step 1: Create a container (for media posts - images/videos)
+    console.log('🖼️ Creating media container for', mediaType);
     const containerUrl = `https://graph.threads.net/v1.0/${threadsUserId}/threads`;
     
     const containerParams: Record<string, string> = {
-      media_type: mediaUrl ? mediaType : 'TEXT',
+      media_type: mediaType,
       text: text,
       access_token: accessToken
     };
 
-    // Only add image/video URL if provided
-    if (mediaUrl) {
-      if (mediaType === 'IMAGE') {
-        containerParams.image_url = mediaUrl;
-      } else if (mediaType === 'VIDEO') {
-        containerParams.video_url = mediaUrl;
-      }
+    // Add media URL based on type
+    if (mediaType === 'IMAGE') {
+      containerParams.image_url = mediaUrl;
+    } else if (mediaType === 'VIDEO') {
+      containerParams.video_url = mediaUrl;
     }
 
     const containerResponse = await fetch(containerUrl, {
