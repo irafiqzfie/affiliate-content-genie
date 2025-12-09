@@ -225,8 +225,11 @@ export async function POST(request: NextRequest) {
     // Step 1.5: Wait for container to be ready
     console.log('⏳ Waiting for container to be ready...');
     
+    // Initial wait to let Threads backend register the container
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds initial wait
+    
     let statusAttempts = 0;
-    const maxAttempts = mediaUrl ? (mediaType === 'VIDEO' ? 30 : 15) : 5; // 15s for images (increased from 10), 30s for video, 5s for text
+    const maxAttempts = mediaUrl ? (mediaType === 'VIDEO' ? 30 : 20) : 10; // Increased: 20s for images, 30s for video, 10s for text
     let isReady = false;
     let lastError: string | null = null;
     
@@ -260,8 +263,8 @@ export async function POST(request: NextRequest) {
         console.warn(`⚠️ Failed to check status (attempt ${statusAttempts + 1})`);
       }
       
-      // Wait 1 second before checking again
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait 1.5 seconds before checking again (increased from 1s)
+      await new Promise(resolve => setTimeout(resolve, 1500));
       statusAttempts++;
     }
     
@@ -298,8 +301,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Small delay to ensure Threads backend is fully ready
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Additional delay to ensure Threads backend is fully ready
+    console.log('⏳ Final wait before publishing...');
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Increased from 500ms to 2s
 
     // Step 2: Publish the container
     const publishUrl = `https://graph.threads.net/v1.0/${threadsUserId}/threads_publish`;

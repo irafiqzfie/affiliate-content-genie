@@ -166,6 +166,47 @@ async function postToThreads(userId: string, content: PostContent): Promise<Post
       };
     }
 
+    const accessToken = account.access_token;
+    const threadsUserId = account.threadsUserId;
+
+    // For text-only posts, use single-step publishing (no container needed)
+    if (!content.imageUrl && !content.videoUrl) {
+      console.log('📝 Publishing text-only Threads post (single-step)');
+      
+      const publishResponse = await fetch(
+        `https://graph.threads.net/v1.0/${threadsUserId}/threads`,
+        {
+          method: 'POST',
+          body: new URLSearchParams({
+            media_type: 'TEXT',
+            text: content.text,
+            access_token: accessToken,
+          }),
+        }
+      );
+
+      const publishData = await publishResponse.json();
+
+      if (!publishResponse.ok || publishData.error) {
+        console.error('❌ Threads text post failed:', publishData);
+        return {
+          platform: 'threads',
+          success: false,
+          error: publishData.error?.message || 'Failed to publish text post to Threads',
+        };
+      }
+
+      console.log('✅ Text post published to Threads:', publishData.id);
+      return {
+        platform: 'threads',
+        success: true,
+        postId: publishData.id,
+      };
+    }
+
+    // For media posts (images/videos), use two-step process: create container → publish
+    console.log('🖼️ Creating Threads media container');
+
     // Step 1: Create media container
     const containerParams = new URLSearchParams({
       media_type: content.imageUrl ? 'IMAGE' : 'TEXT',
@@ -195,6 +236,57 @@ async function postToThreads(userId: string, content: PostContent): Promise<Post
         error: containerData.error?.message || 'Failed to create Threads post',
       };
     }
+
+    const creationId = containerData.id;
+    console.log('✅ Container created:', creationId);
+
+    // Step 1.5: Wait for container to be ready
+    console.log('⏳ Waiting for Threads container to be ready...');
+    
+    // Initial wait to let Threads backend register the container
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    let statusAttempts = 0;
+    const maxAttempts = content.videoUrl ? 30 : 20; // 20s for images, 30s for videos
+    let isReady = false;
+    
+    while (statusAttempts < maxAttempts && !isReady) {
+      const statusUrl = `https://graph.threads.net/v1.0/${creationId}?fields=status,error_message&access_token=${accessToken}`;
+      const statusResponse = await fetch(statusUrl);
+      
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        console.log(`📊 Container status (${statusAttempts + 1}/${maxAttempts}):`, statusData.status);
+        
+        if (statusData.status === 'FINISHED') {
+          isReady = true;
+          console.log('✅ Container ready');
+          break;
+        } else if (statusData.status === 'ERROR') {
+          console.error('❌ Container error:', statusData.error_message);
+          return {
+            platform: 'threads',
+            success: false,
+            error: statusData.error_message || 'Container processing failed',
+          };
+        }
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      statusAttempts++;
+    }
+    
+    if (!isReady) {
+      return {
+        platform: 'threads',
+        success: false,
+        error: `Container processing timeout after ${maxAttempts * 1.5}s`,
+      };
+    }
+
+    // Additional wait before publishing
+    console.log('⏳ Final wait before publishing...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Step 2: Publish the container
     const publishParams = new URLSearchParams({
