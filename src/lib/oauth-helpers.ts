@@ -140,6 +140,7 @@ export async function getUserConnections(userId: string) {
   console.log('🔍 Account details:', JSON.stringify(accounts, null, 2));
 
   interface AccountRecord {
+    id: string;
     provider: string;
     pageId: string | null;
     providerAccountId: string;
@@ -150,7 +151,8 @@ export async function getUserConnections(userId: string) {
   const facebookPages = (accounts as AccountRecord[])
     .filter((a) => a.provider === 'facebook-pages')
     .map((page) => ({
-      id: page.pageId || page.providerAccountId, // Use Facebook Page ID, not database ID
+      id: page.id, // Use database record ID for disconnect
+      pageId: page.pageId || page.providerAccountId, // Facebook Page ID
       name: page.pageName || `Page ${page.pageId || page.providerAccountId}`,
       pageAccessToken: page.pageAccessToken,
     }));
@@ -284,19 +286,29 @@ export function isTokenExpired(expiresAt: number | null): boolean {
 export async function disconnectProvider(userId: string, provider: string, accountId?: string) {
   if (accountId) {
     // Disconnect specific account (e.g., specific Facebook Page)
-    await prisma.account.delete({
+    const account = await prisma.account.findUnique({
       where: {
         id: accountId,
-        userId, // Ensure user owns this account
       },
     });
+
+    if (account && account.userId === userId) {
+      await prisma.account.delete({
+        where: {
+          id: accountId,
+        },
+      });
+    } else {
+      console.warn(`Account ${accountId} not found or doesn't belong to user ${userId}`);
+    }
   } else {
     // Disconnect all accounts for this provider
-    await prisma.account.deleteMany({
+    const deleteResult = await prisma.account.deleteMany({
       where: {
         userId,
         provider,
       },
     });
+    console.log(`Deleted ${deleteResult.count} ${provider} accounts for user ${userId}`);
   }
 }
