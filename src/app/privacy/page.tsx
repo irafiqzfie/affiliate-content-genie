@@ -15,7 +15,9 @@ export default function PrivacyPage() {
         <div className="header-row-1">
           <div className="branding">
             <div className="logo-container">
-              <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={52} height={52} />
+              <a href="/" className="logo-link" aria-label="Go to homepage">
+                <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={40} height={40} priority />
+              </a>
               <h1>Inabiz Online</h1>
             </div>
             <p>a MASTER SERVE innovation</p>
