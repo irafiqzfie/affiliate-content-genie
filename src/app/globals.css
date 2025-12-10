@@ -1826,8 +1826,8 @@ body::before {
 
 .primary-badge {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  top: 4px;
+  left: 4px;
   background: linear-gradient(135deg, #2563eb 0%, var(--gradient-blue) 100%);
   color: white;
   padding: 4px 8px;
@@ -1837,11 +1837,12 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
 
 .primary-badge.compact {
-  padding: 3px 6px;
-  font-size: 0.6rem;
+  padding: 2px 6px;
+  font-size: 0.55rem;
 }
 
 .image-upload-label {
@@ -2084,17 +2085,17 @@ body::before {
   width: 24px;
   height: 24px;
   border-radius: var(--radius-sm);
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-smooth) ease;
-  opacity: 0.8;
-  z-index: 2;
+  opacity: 0.9;
+  z-index: 10;
 }
 
 .remove-image-button:hover {
