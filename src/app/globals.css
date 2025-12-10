@@ -2079,26 +2079,30 @@ body::before {
 
 .remove-image-button {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--error-color);
-  border: 2px solid var(--app-bg);
-  color: white;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-smooth) ease;
-  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+  opacity: 0.8;
   z-index: 2;
 }
 
 .remove-image-button:hover {
-  background: #c53030;
-  transform: scale(1.1);
+  background: rgba(239, 68, 68, 0.9);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: white;
+  opacity: 1;
+  transform: scale(1.05);
 }
 
 /* OR Divider */
