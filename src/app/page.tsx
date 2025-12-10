@@ -3208,7 +3208,14 @@ export default function Home() {
           <div className="branding">
             <Link href="/" className="logo-link">
               <div className="logo-container">
-                <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={40} height={40} />
+                <Image
+                  src="/logo.svg"
+                  alt="Inabiz Online Logo"
+                  className="logo-icon"
+                  width={24}
+                  height={24}
+                  priority
+                />
                 <h1>Inabiz Online</h1>
               </div>
             </Link>

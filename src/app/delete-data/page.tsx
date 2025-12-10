@@ -33,7 +33,7 @@ export default function DeleteDataPage() {
           <div className="branding">
             <div className="logo-container">
               <Link href="/" className="logo-link" aria-label="Go to homepage">
-                <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={40} height={40} priority />
+                <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={24} height={24} priority />
               </Link>
               <h1>Inabiz Online</h1>
             </div>
