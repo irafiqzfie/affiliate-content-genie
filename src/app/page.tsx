@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
 import ConnectionStatus from './components/ConnectionStatus';
@@ -3204,9 +3205,9 @@ export default function Home() {
         <div className="header-row-1">
           <div className="branding">
             <div className="logo-container">
-              <a href="/" className="logo-link" aria-label="Go to homepage">
+              <Link href="/" className="logo-link" aria-label="Go to homepage">
                 <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={40} height={40} priority />
-              </a>
+              </Link>
               <h1>Inabiz Online</h1>
             </div>
             <p>a MASTER SERVE innovation</p>
