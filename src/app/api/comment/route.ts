@@ -111,6 +111,18 @@ async function postThreadsComment(userId: string, postId: string, text: string) 
 
   if (!containerResponse.ok || containerData.error) {
     console.error('❌ Failed to create Threads reply container:', containerData);
+    
+    // Check if it's a permissions error (can only reply to own posts)
+    if (containerData.error?.code === 10) {
+      return NextResponse.json(
+        {
+          error: 'Cannot reply to this post',
+          details: 'Threads API only allows replying to your own posts. The affiliate link comment feature only works on posts created by this account.',
+        },
+        { status: 403 }
+      );
+    }
+    
     return NextResponse.json(
       {
         error: 'Failed to create Threads reply',

@@ -1673,7 +1673,11 @@ export default function Home() {
               if (replyResponse.ok) {
                 console.log(`✅ Affiliate link posted as ${platform} comment!`);
               } else {
-                console.warn('⚠️ Failed to post affiliate link:', replyData);
+                console.warn('⚠️ Failed to post affiliate link comment:', replyData);
+                // Don't show error to user - post was successful, only comment failed
+                if (replyData.details && replyData.details.includes('only allows replying to your own posts')) {
+                  console.info('ℹ️ Note: Affiliate link comments only work on posts from the connected account');
+                }
               }
             } catch (replyErr) {
               console.warn('⚠️ Error posting affiliate link comment:', replyErr);
