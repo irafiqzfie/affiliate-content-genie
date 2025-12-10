@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
 import ConnectionStatus from './components/ConnectionStatus';
@@ -3205,10 +3206,12 @@ export default function Home() {
         {/* Row 1: Brand + Navigation Links */}
         <div className="header-row-1">
           <div className="branding">
-            <div className="logo-container">
-              <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={52} height={52} />
-              <h1>Inabiz Online</h1>
-            </div>
+            <Link href="/" className="logo-link">
+              <div className="logo-container">
+                <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={36} height={36} />
+                <h1>Inabiz Online</h1>
+              </div>
+            </Link>
             <p>a MASTER SERVE innovation</p>
           </div>
           
