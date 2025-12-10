@@ -2743,10 +2743,11 @@ export default function Home() {
           <div className="output-actions-left">
             <span className="output-title">
               <span className="pill-icon" aria-hidden="true">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" fill="url(#g)" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="url(#outputGradient)" strokeWidth="2" fill="none" />
+                  <path d="M12 8v8M8 12h8" stroke="url(#outputGradient)" strokeWidth="2" strokeLinecap="round" />
                   <defs>
-                    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                    <linearGradient id="outputGradient" x1="0" y1="0" x2="1" y2="1">
                       <stop offset="0" stopColor="#ff7b00" />
                       <stop offset="1" stopColor="#00aaff" />
                     </linearGradient>

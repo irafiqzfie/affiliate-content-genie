@@ -3136,13 +3136,16 @@ body::before {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
 }
 
 .pill-text {
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--primary-text-color);
 }
 
 .option-selector {
