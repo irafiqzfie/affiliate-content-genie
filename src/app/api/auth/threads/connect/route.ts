@@ -207,10 +207,11 @@ export async function POST(request: NextRequest) {
     const authUrl = new URL('https://threads.net/oauth/authorize');
     authUrl.searchParams.set('client_id', process.env.THREADS_APP_ID);
     authUrl.searchParams.set('redirect_uri', redirectUri);
-    authUrl.searchParams.set('scope', 'threads_basic,threads_content_publish');
+    authUrl.searchParams.set('scope', 'threads_basic,threads_content_publish,threads_manage_replies');
     authUrl.searchParams.set('response_type', 'code');
 
     console.log('✅ Threads auth URL generated:', authUrl.toString());
+    console.log('📋 Threads permissions: threads_basic, threads_content_publish, threads_manage_replies');
     
     return NextResponse.json({ authUrl: authUrl.toString() });
   } catch (error) {
