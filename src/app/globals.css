@@ -2082,28 +2082,33 @@ body::before {
   position: absolute;
   top: 4px;
   right: 4px;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-sm);
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.9);
+  width: auto;
+  height: auto;
+  padding: 4px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #ef4444; /* red X */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-smooth) ease;
-  opacity: 0.9;
+  opacity: 1;
   z-index: 10;
 }
 
 .remove-image-button:hover {
-  background: rgba(239, 68, 68, 0.9);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: white;
+  background: rgba(15, 23, 42, 0.6); /* subtle dark hover */
+  color: #fca5a5; /* lighter red on hover */
   opacity: 1;
-  transform: scale(1.05);
+}
+
+.remove-image-icon {
+  font-size: 14px; /* bigger X */
+  line-height: 1;
+  font-weight: 800;
+  pointer-events: none;
 }
 
 /* OR Divider */

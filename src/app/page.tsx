@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import AuthButton from './components/AuthButton';
 import ConnectionStatus from './components/ConnectionStatus';
@@ -738,9 +737,7 @@ export default function Home() {
         if (analyzeResponse.ok) {
           const analysisData = await analyzeResponse.json();
           console.log('✅ Analysis data received:', analysisData);
-          console.log('📊 Trendscore value:', analysisData.trendscore);
           setTrendscore(analysisData.trendscore ?? null);
-          console.log('📊 Trendscore state after set:', analysisData.trendscore);
           setProductSummary(analysisData.productSummary || '');
           setAffiliatePotential(analysisData.affiliatePotential || '');
           setProductFeatures(analysisData.productFeatures || []);
@@ -2436,11 +2433,10 @@ export default function Home() {
         <button className="accordion-header" onClick={() => setIsFormCollapsed(!isFormCollapsed)} aria-expanded={!isFormCollapsed}>
             <h3 className="input-title">
               <span className="pill-icon" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
-                  <circle cx="12" cy="12" r="9" stroke="url(#inputGrad)" strokeWidth="2" fill="none" />
-                  <path d="M12 8v8M8 12h8" stroke="url(#inputGrad)" strokeWidth="2" strokeLinecap="round" />
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" fill="url(#g2)" />
                   <defs>
-                    <linearGradient id="inputGrad" x1="0" y1="0" x2="1" y2="1">
+                    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
                       <stop offset="0" stopColor="#2563eb" />
                       <stop offset="1" stopColor="#00aaff" />
                     </linearGradient>
@@ -2516,9 +2512,8 @@ export default function Home() {
                                     className="remove-image-button"
                                     aria-label={`Remove image ${index + 1}`}
                                   >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                                      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                                     </svg>
                                   </button>
                                   {index === 0 && (
@@ -2748,11 +2743,10 @@ export default function Home() {
           <div className="output-actions-left">
             <span className="output-title">
               <span className="pill-icon" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" stroke="url(#outputGradient)" strokeWidth="2" fill="none" />
-                  <path d="M12 8v8M8 12h8" stroke="url(#outputGradient)" strokeWidth="2" strokeLinecap="round" />
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" fill="url(#g)" />
                   <defs>
-                    <linearGradient id="outputGradient" x1="0" y1="0" x2="1" y2="1">
+                    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
                       <stop offset="0" stopColor="#ff7b00" />
                       <stop offset="1" stopColor="#00aaff" />
                     </linearGradient>
@@ -2842,7 +2836,7 @@ export default function Home() {
             {activeOutputTab === 'info' ? (
               <>
                 {(trendscore !== null || productSummary || affiliatePotential || productFeatures) ? (
-                  <div className="info-grid-layout">
+                  <>
                     {trendscore !== null && (
                       <div className="output-card">
                         <div className="card-header">
@@ -2907,7 +2901,7 @@ export default function Home() {
                         </div>
                       </div>
                     )}
-                  </div>
+                  </>
                 ) : null}
               </>
             ) : activeOutputTab === 'post' ? (
@@ -3208,9 +3202,7 @@ export default function Home() {
         <div className="header-row-1">
           <div className="branding">
             <div className="logo-container">
-              <Link href="/" className="logo-link" aria-label="Go to homepage">
-                <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={40} height={40} priority />
-              </Link>
+              <Image src="/logo.svg" alt="Inabiz Online Logo" className="logo-icon" width={52} height={52} />
               <h1>Inabiz Online</h1>
             </div>
             <p>a MASTER SERVE innovation</p>
