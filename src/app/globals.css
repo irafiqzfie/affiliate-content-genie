@@ -2930,6 +2930,21 @@ body::before {
     height: 100%;
 }
 
+/* Info tab 2x2 grid layout */
+.info-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+/* Mobile responsive - stack vertically */
+@media (max-width: 768px) {
+    .info-grid-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
 .output-card {
     display: flex;
     flex-direction: column;
