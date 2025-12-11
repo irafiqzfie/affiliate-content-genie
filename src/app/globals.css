@@ -7493,16 +7493,12 @@ body::before {
 
 /* Ready to Post - Minimalist Post Preview */
 .ready-to-post-section {
-  margin-bottom: 1.25rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: linear-gradient(180deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.03) 100%);
+  padding: var(--spacing-lg);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
   backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  padding: 1.25rem 0;
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12), 0 2px 8px rgba(0, 0, 0, 0.25);
-  border-bottom: 1px solid rgba(37, 99, 235, 0.15);
+  margin-bottom: 1.25rem;
 }
 
 .ready-to-post-section .section-title {
