@@ -466,8 +466,10 @@ body::before {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 /* Header Row 1: Brand + Navigation Links */
@@ -475,7 +477,7 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px var(--spacing-md);
+  padding: 14px var(--spacing-md);
   gap: var(--spacing-md);
 }
 
@@ -484,7 +486,7 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px var(--spacing-md);
+  padding: 10px var(--spacing-md);
   gap: var(--spacing-md);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.15);
