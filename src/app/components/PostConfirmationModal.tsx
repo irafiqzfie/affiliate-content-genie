@@ -42,6 +42,8 @@ export default function PostConfirmationModal({
   const [selectedPageIds, setSelectedPageIds] = useState<Set<string>>(new Set(facebookPages.map(p => p.pageId)));
   const [affiliateLink, setAffiliateLink] = useState('');
 
+  console.log('🎯 PostConfirmationModal - isPosting:', isPosting);
+
   if (!isOpen) return null;
 
   const togglePlatform = (plat: 'Facebook' | 'Threads') => {

@@ -1496,8 +1496,8 @@ export default function Home() {
       return;
     }
     
-    setShowPostConfirmation(false);
     setIsPosting(true);
+    console.log('🔄 Setting isPosting to true');
 
     const postContent = editableContent.post;
     
@@ -1741,6 +1741,7 @@ export default function Home() {
     } finally {
         setIsLoading(false);
         setIsPosting(false);
+        setShowPostConfirmation(false);
     }
   };
   
