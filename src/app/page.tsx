@@ -234,6 +234,7 @@ export default function Home() {
   const [postedPosts, setPostedPosts] = useState<ScheduledPost[]>([]);
   const [schedulingPlatform, setSchedulingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [showPostConfirmation, setShowPostConfirmation] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
   const [pendingPlatform, setPendingPlatform] = useState<'Facebook' | 'Threads' | null>(null);
   const [affiliateLink, setAffiliateLink] = useState('');
   const [currentPostingItemId, setCurrentPostingItemId] = useState<string | null>(null);
@@ -1496,6 +1497,7 @@ export default function Home() {
     }
     
     setShowPostConfirmation(false);
+    setIsPosting(true);
 
     const postContent = editableContent.post;
     
@@ -1738,6 +1740,7 @@ export default function Home() {
         alert(errorMsg);
     } finally {
         setIsLoading(false);
+        setIsPosting(false);
     }
   };
   
@@ -1975,11 +1978,10 @@ export default function Home() {
       console.error(err);
       setError(err instanceof Error ? err.message : 'Failed to post to Threads. Please try again.');
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
+        setIsPosting(false);
     }
-  };
-
-  const renderGeneratorPage = () => {
+  };  const renderGeneratorPage = () => {
     const nonVisualizableSections = sectionsConfig;
 
     const chunkedNonVisualizableSections = nonVisualizableSections
@@ -3312,6 +3314,7 @@ export default function Home() {
         hasHook={!!(editableContent.post?.['body-hook'] && editableContent.post['body-hook'].length > 0)}
         connectedPlatforms={{ threads: connections.threads, facebook: connections.facebook }}
         facebookPages={connections.facebookPages || []}
+        isPosting={isPosting}
       />
     </div>
   );

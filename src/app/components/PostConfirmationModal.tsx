@@ -13,6 +13,7 @@ interface PostConfirmationModalProps {
   hasHook: boolean;
   connectedPlatforms: { threads: boolean; facebook: boolean };
   facebookPages?: Array<{ id: string; pageId: string; name: string }>;
+  isPosting?: boolean;
 }
 
 export interface PostOptions {
@@ -31,7 +32,8 @@ export default function PostConfirmationModal({
   hasLongForm,
   hasHook,
   connectedPlatforms,
-  facebookPages = []
+  facebookPages = [],
+  isPosting = false
 }: PostConfirmationModalProps) {
   const [postType, setPostType] = useState<'short-hook-picture' | 'short-hook-text' | 'long-form-text'>(
     hasImage && hasHook ? 'short-hook-picture' : (hasHook ? 'short-hook-text' : 'long-form-text')
@@ -240,11 +242,16 @@ export default function PostConfirmationModal({
         </div>
 
         <div className="modal-footer">
-          <button className="modal-btn ghost" onClick={onClose}>
+          <button className="modal-btn ghost" onClick={onClose} disabled={isPosting}>
             Cancel
           </button>
-          <button className="modal-btn primary" onClick={handleSubmit}>
-            {selectedPlatforms.size === 0 ? (
+          <button className="modal-btn primary" onClick={handleSubmit} disabled={isPosting || selectedPlatforms.size === 0}>
+            {isPosting ? (
+              <>
+                <span className="posting-spinner"></span>
+                Posting...
+              </>
+            ) : selectedPlatforms.size === 0 ? (
               '⚠️ Select Platform'
             ) : selectedPlatforms.size === 1 ? (
               <>
