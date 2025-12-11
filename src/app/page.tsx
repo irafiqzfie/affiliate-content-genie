@@ -1498,6 +1498,9 @@ export default function Home() {
     
     setIsPosting(true);
     console.log('🔄 Setting isPosting to true');
+    
+    // Small delay to ensure state updates and UI renders
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     const postContent = editableContent.post;
     
