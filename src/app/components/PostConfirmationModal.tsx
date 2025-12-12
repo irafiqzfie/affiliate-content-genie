@@ -108,41 +108,47 @@ export default function PostConfirmationModal({
 
           <div className="post-options-grid">
             <div className="option-section">
-              <h3>Post to Platforms</h3>
+              <h3>Platforms</h3>
               <div className="platforms-container">
-                <label className={`checkbox-option ${!connectedPlatforms.threads ? 'disabled' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={selectedPlatforms.has('Threads')}
-                    onChange={() => togglePlatform('Threads')}
-                    disabled={!connectedPlatforms.threads}
-                  />
-                  <span className="checkbox-label">
+                <div className={`platform-toggle-row ${!connectedPlatforms.threads ? 'disabled' : ''}`}>
+                  <div className="platform-info">
                     <span className="option-icon">
-                      <ThreadsIcon size={20} />
+                      <ThreadsIcon size={24} />
                     </span>
                     <strong>Threads</strong>
                     {!connectedPlatforms.threads && <span className="connection-pill">⚠️ Not connected</span>}
-                  </span>
-                </label>
+                  </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={selectedPlatforms.has('Threads')}
+                      onChange={() => togglePlatform('Threads')}
+                      disabled={!connectedPlatforms.threads}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                </div>
 
-                <label className={`checkbox-option ${!connectedPlatforms.facebook ? 'disabled' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={selectedPlatforms.has('Facebook')}
-                    onChange={() => togglePlatform('Facebook')}
-                    disabled={!connectedPlatforms.facebook}
-                  />
-                  <span className="checkbox-label">
+                <div className={`platform-toggle-row ${!connectedPlatforms.facebook ? 'disabled' : ''}`}>
+                  <div className="platform-info">
                     <span className="option-icon">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
                       </svg>
                     </span>
                     <strong>Facebook</strong>
                     {!connectedPlatforms.facebook && <span className="connection-pill">⚠️ Not connected</span>}
-                  </span>
-                </label>
+                  </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={selectedPlatforms.has('Facebook')}
+                      onChange={() => togglePlatform('Facebook')}
+                      disabled={!connectedPlatforms.facebook}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                </div>
               </div>
 
               {/* Facebook Page Selector */}
@@ -170,8 +176,8 @@ export default function PostConfirmationModal({
             </div>
 
             <div className="option-section">
-              <h3>Post Type</h3>
-              <p className="section-description">Choose how your content will appear on social media</p>
+              <h3>Post Format</h3>
+              <p className="section-description">Choose how your content will appear</p>
               
               {(hasHook && hasImage) && (
                 <label className={`card-option-compact ${postType === 'short-hook-picture' ? 'selected' : ''}`}>
@@ -226,7 +232,7 @@ export default function PostConfirmationModal({
             </div>
 
             <div className="option-section">
-              <h3>Affiliate Link (Optional)</h3>
+              <h3>Advanced Options</h3>
               <div className="input-field-wrapper">
                 <input
                   type="url"
