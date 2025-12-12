@@ -682,11 +682,13 @@ export default function Home() {
         }
 
         const suggestions = await response.json();
+        console.log('📊 Analysis suggestions received:', suggestions);
+        console.log('📊 Trendscore value:', suggestions.trendscore, 'Type:', typeof suggestions.trendscore);
         setAdvancedInputs(prev => ({
             ...prev,
             ...suggestions,
         }));
-        setTrendscore(suggestions.trendscore);
+        setTrendscore(suggestions.trendscore ?? 75);
         setProductSummary(suggestions.productSummary);
         setProductFeatures(suggestions.productFeatures);
         setAffiliatePotential(suggestions.affiliatePotential);
@@ -739,7 +741,8 @@ export default function Home() {
         if (analyzeResponse.ok) {
           const analysisData = await analyzeResponse.json();
           console.log('✅ Analysis data received:', analysisData);
-          setTrendscore(analysisData.trendscore ?? null);
+          console.log('📊 Auto-analyze trendscore:', analysisData.trendscore, 'Type:', typeof analysisData.trendscore);
+          setTrendscore(analysisData.trendscore ?? 75);
           setProductSummary(analysisData.productSummary || '');
           setAffiliatePotential(analysisData.affiliatePotential || '');
           setProductFeatures(analysisData.productFeatures || []);
@@ -2848,7 +2851,7 @@ export default function Home() {
               <>
                 {(trendscore !== null || productSummary || affiliatePotential || productFeatures) ? (
                   <div className="info-grid-layout">
-                    {trendscore !== null && (
+                    {trendscore !== null && trendscore !== undefined && (
                       <div className="output-card">
                         <div className="card-header">
                           <h3 className="card-title">
@@ -2858,7 +2861,7 @@ export default function Home() {
                         </div>
                         <div className="card-content">
                           <div className="trend-score-display">
-                            <div className="trend-score-fill" style={{ width: `${trendscore}%` }}></div>
+                            <div className="trend-score-fill" style={{ width: `${trendscore}%`, minWidth: trendscore > 0 ? '20px' : '0' }}></div>
                             <span className="trend-score-label">{trendscore}/100</span>
                           </div>
                         </div>
