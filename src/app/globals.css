@@ -7554,7 +7554,7 @@ body::before {
 
 /* Ready to Post - Minimalist Post Preview */
 .ready-to-post-section {
-  padding: var(--spacing-lg);
+  padding: 1.25rem;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
@@ -7727,10 +7727,9 @@ body::before {
 
 .scheduled-posts-section {
   margin-bottom: 2rem;
-  padding-left: 1rem;
 }
 
-.scheduled-posts-section .section-title {
+.scheduled-posts-section > .section-title {
   font-size: 1.35rem;
   font-weight: 700;
   color: var(--primary-text-color);
@@ -7749,7 +7748,7 @@ body::before {
   grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-sm);
   width: 100%;
-  padding: 0 1rem;
+  padding: 0;
 }
 
 @media (max-width: 1400px) {
