@@ -260,6 +260,53 @@ export default function Home() {
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
 
+  // Helper functions for localStorage persistence (user-specific)
+  const getStorageKey = useCallback((key: string) => {
+    const userId = session?.user?.email || 'guest';
+    return `${key}_${userId}`;
+  }, [session?.user?.email]);
+
+  const saveReadyToPostItems = useCallback((items: typeof readyToPostItems) => {
+    try {
+      localStorage.setItem(getStorageKey('readyToPostItems'), JSON.stringify(items));
+      console.log('💾 Saved', items.length, 'items to localStorage');
+    } catch (err) {
+      console.error('Failed to save to localStorage:', err);
+    }
+  }, [getStorageKey]);
+
+  const loadReadyToPostItems = useCallback((): typeof readyToPostItems => {
+    try {
+      const stored = localStorage.getItem(getStorageKey('readyToPostItems'));
+      if (stored) {
+        const items = JSON.parse(stored);
+        console.log('📂 Loaded', items.length, 'items from localStorage');
+        return items;
+      }
+    } catch (err) {
+      console.error('Failed to load from localStorage:', err);
+    }
+    return [];
+  }, [getStorageKey]);
+
+  // Load persisted items on mount
+  useEffect(() => {
+    if (session?.user) {
+      const persistedItems = loadReadyToPostItems();
+      if (persistedItems.length > 0) {
+        setReadyToPostItems(persistedItems);
+        setShowReadyToPost(true);
+      }
+    }
+  }, [session?.user, loadReadyToPostItems]);
+
+  // Persist items whenever they change
+  useEffect(() => {
+    if (session?.user) {
+      saveReadyToPostItems(readyToPostItems);
+    }
+  }, [readyToPostItems, session?.user, saveReadyToPostItems]);
+
   // Fetch connection status
   useEffect(() => {
     if (session?.user) {
@@ -2718,22 +2765,6 @@ export default function Home() {
             </div>
         </div>
       </div>
-
-      {isLoading && !generatedContent.video && (
-        <div className="loading-indicator">
-          <div className="spinner"></div>
-          <div className="loading-progress">
-            <p className="loading-title">✨ Creating your content...</p>
-            <p className="loading-subtitle">This may take 20-40 seconds</p>
-            <div className="loading-steps">
-              <div className="step">🤖 Analyzing product...</div>
-              <div className="step">📝 Crafting video script...</div>
-              <div className="step">✍️ Writing social post...</div>
-              <div className="step">🎨 Finalizing content...</div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {error && (
         <div className="error-message">
