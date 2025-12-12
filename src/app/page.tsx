@@ -2447,8 +2447,21 @@ export default function Home() {
         <button className="accordion-header" onClick={() => setIsFormCollapsed(!isFormCollapsed)} aria-expanded={!isFormCollapsed}>
             <h3 className="input-title">
               <span className="pill-icon" aria-hidden="true">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" fill="url(#g2)" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <g stroke="url(#g2)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h9" />
+                    <path d="M16 6h5" />
+                    <path d="M12 6v0" />
+                    <path d="M3 12h5" />
+                    <path d="M12 12h9" />
+                    <path d="M8 12v0" />
+                    <path d="M3 18h13" />
+                    <path d="M20 18h1" />
+                    <path d="M16 18v0" />
+                    <path d="M12 4v4" />
+                    <path d="M8 10v4" />
+                    <path d="M16 16v4" />
+                  </g>
                   <defs>
                     <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
                       <stop offset="0" stopColor="#2563eb" />
@@ -2757,8 +2770,15 @@ export default function Home() {
           <div className="output-actions-left">
             <span className="output-title">
               <span className="pill-icon" aria-hidden="true">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" fill="url(#g)" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <path
+                    d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.437a.5.5 0 0 1 0-.974L8.5 10.216A2 2 0 0 0 9.937 8.78l1.437-6.135a.5.5 0 0 1 .974 0L13.784 8.78a2 2 0 0 0 1.437 1.437l6.135 1.437a.5.5 0 0 1 0 .974l-6.135 1.437a2 2 0 0 0-1.437 1.437l-1.437 6.135a.5.5 0 0 1-.974 0z"
+                    stroke="url(#g)"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
                   <defs>
                     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
                       <stop offset="0" stopColor="#ff7b00" />

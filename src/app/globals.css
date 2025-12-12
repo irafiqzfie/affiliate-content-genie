@@ -2561,7 +2561,7 @@ body::before {
   backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
-  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   margin-bottom: var(--spacing-xs);  /* Reduced from --spacing-sm (8px) */
   flex-wrap: wrap;
@@ -3234,8 +3234,8 @@ body::before {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
-    min-height: 80px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  min-height: 72px;
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
     border: none;
     border-bottom: 1px solid rgba(59, 130, 246, 0.15);
@@ -5277,7 +5277,7 @@ body::before {
   }
   
   .accordion-header {
-    min-height: 80px; /* Adequate touch target for accordion */
+    min-height: 72px; /* Slightly more compact, still touch-friendly */
     padding: var(--spacing-md); /* 24px consistent padding */
   }
   
