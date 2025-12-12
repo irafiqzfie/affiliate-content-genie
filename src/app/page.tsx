@@ -2847,7 +2847,7 @@ export default function Home() {
             {activeOutputTab === 'info' ? (
               <>
                 {(trendscore !== null || productSummary || affiliatePotential || productFeatures) ? (
-                  <>
+                  <div className="info-grid-layout">
                     {trendscore !== null && (
                       <div className="output-card">
                         <div className="card-header">
@@ -2912,7 +2912,7 @@ export default function Home() {
                         </div>
                       </div>
                     )}
-                  </>
+                  </div>
                 ) : null}
               </>
             ) : activeOutputTab === 'post' ? (
