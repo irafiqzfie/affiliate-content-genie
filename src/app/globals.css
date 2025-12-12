@@ -7746,9 +7746,11 @@ body::before {
 .ready-to-post-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   width: 100%;
   padding: 0;
+  align-items: stretch;
+  grid-auto-rows: 1fr;
 }
 
 @media (max-width: 1400px) {
@@ -7781,6 +7783,7 @@ body::before {
   display: flex;
   flex-direction: column;
   height: 100%;
+  backdrop-filter: blur(10px);
 }
 
 .scheduled-preview-card:hover {
@@ -7797,6 +7800,7 @@ body::before {
   background: rgba(0, 0, 0, 0.4);
   position: relative;
   flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .scheduled-preview-image-wrapper::after {
@@ -7827,12 +7831,11 @@ body::before {
 }
 
 .scheduled-preview-content {
-  padding: var(--spacing-md);
+  padding: 0.95rem;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 0.625rem;
   flex: 1;
-  justify-content: space-between;
 }
 
 .scheduled-preview-meta {
@@ -7930,7 +7933,7 @@ body::before {
   padding: 0;
   cursor: pointer;
   transition: all var(--transition-base) ease;
-  margin-top: auto;
+  margin-top: 0.25rem;
 }
 
 .view-details-link:hover {
@@ -7950,12 +7953,13 @@ body::before {
   display: flex;
   gap: var(--spacing-sm);
   margin-top: auto;
-  padding-top: var(--spacing-sm);
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .scheduled-action-btn {
   flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 0.75rem 0.9rem;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 0.8125rem;
@@ -7966,6 +7970,8 @@ body::before {
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
+  min-height: 44px;
+  white-space: nowrap;
 }
 
 /* Primary Action - Post Now with Lift & Glow */
@@ -7976,8 +7982,8 @@ body::before {
 }
 
 .scheduled-btn-post:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ea580c 0%, #1d4ed8 100%);
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5), 0 0 20px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45), 0 0 20px rgba(37, 99, 235, 0.25);
   transform: translateY(-2px);
 }
 
