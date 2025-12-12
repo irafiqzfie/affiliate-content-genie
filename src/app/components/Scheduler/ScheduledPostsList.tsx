@@ -25,8 +25,8 @@ export function ScheduledPostsList({ scheduledPosts, onDeletePost, onPostNow }: 
     <div className="scheduler-page">
       <div className="scheduled-list-container">
         <div className="scheduled-list-header">
-          <h2>Ready to Post</h2>
-          <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+          <h2 className="section-title">📤 Ready to Post</h2>
+          <p className="section-subtitle">
             Review your saved posts and publish when ready
           </p>
         </div>

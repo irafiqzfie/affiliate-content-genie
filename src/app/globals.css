@@ -2056,7 +2056,7 @@ body::before {
 
 .section-title {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 1.1rem;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--primary-text-color);
   margin: 0;
@@ -3945,24 +3945,17 @@ body::before {
     align-items: center;
     flex-wrap: wrap;
     gap: var(--spacing-md);
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem;
+  background: rgba(100, 116, 139, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
 }
 
 .saved-list-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: var(--primary-text-color);
-}
-
-.saved-list-header h2::before {
-    content: '💾';
-    font-size: 1.75rem;
 }
 
 .saved-list-controls {
@@ -4213,14 +4206,17 @@ body::before {
 }
 
 .scheduled-list-header {
-    margin-bottom: 0.25rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem;
+  background: rgba(100, 116, 139, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
 }
 
 .scheduled-list-header h2 {
-    font-size: var(--font-size-xl);
-    font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .scheduled-list {
@@ -6492,8 +6488,10 @@ body::before {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--glass-border);
+  padding: 0.9rem 1rem;
+  background: rgba(100, 116, 139, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
 }
 
 .post-history-header > div {
@@ -6504,9 +6502,6 @@ body::before {
 
 .post-history-header h3 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--primary-text-color);
 }
 
 .clear-all-btn {
@@ -7573,8 +7568,11 @@ body::before {
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--spacing-md);
-  padding: 0 1rem;
-  margin-bottom: 1.5rem;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.25rem;
+  background: rgba(100, 116, 139, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
   flex-wrap: wrap;
 }
 
@@ -7589,7 +7587,7 @@ body::before {
   font-size: var(--font-size-sm);
   font-weight: 500;
   margin: 0;
-  padding-left: 1rem;
+  padding-left: 0;
 }
 
 .status-chip-enhanced {

@@ -76,7 +76,7 @@ export function PostHistory({ posts, onDeletePost, onClearAll }: PostHistoryProp
     <div className="post-history-container">
       <div className="post-history-header">
         <div>
-          <h3>📜 Post History</h3>
+          <h3 className="section-title">📜 Post History</h3>
           <span className="post-count">{posts.length} post{posts.length !== 1 ? 's' : ''}</span>
         </div>
         <button 

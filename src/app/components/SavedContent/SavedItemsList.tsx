@@ -51,7 +51,7 @@ export function SavedItemsList({ savedList, onLoadItem, onDeleteItem }: SavedIte
     <div className="saved-page">
       <div className="saved-list-container">
         <div className="saved-list-header">
-          <h2>Saved Ideas</h2>
+          <h2 className="section-title">💾 Saved Ideas</h2>
           <div className="saved-list-controls">
             <input
               type="search"
