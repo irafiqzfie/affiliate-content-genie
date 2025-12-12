@@ -42,8 +42,6 @@ export default function PostConfirmationModal({
   const [selectedPageIds, setSelectedPageIds] = useState<Set<string>>(new Set(facebookPages.map(p => p.pageId)));
   const [affiliateLink, setAffiliateLink] = useState('');
 
-  console.log('🎯 PostConfirmationModal - isPosting:', isPosting);
-
   if (!isOpen) return null;
 
   const togglePlatform = (plat: 'Facebook' | 'Threads') => {
@@ -100,7 +98,7 @@ export default function PostConfirmationModal({
       <div className="modal-content post-confirmation-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>📤 Confirm Post</h2>
-          <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
+          <button className="modal-close-button" onClick={onClose} aria-label="Close">×</button>
         </div>
 
         <div className="modal-body">
@@ -124,7 +122,7 @@ export default function PostConfirmationModal({
                       <ThreadsIcon size={20} />
                     </span>
                     <strong>Threads</strong>
-                    {!connectedPlatforms.threads && <span style={{ color: '#f59e0b', fontSize: '0.75rem', marginLeft: '0.5rem' }}>⚠️ Not connected</span>}
+                    {!connectedPlatforms.threads && <span className="connection-pill">⚠️ Not connected</span>}
                   </span>
                 </label>
 
@@ -142,20 +140,20 @@ export default function PostConfirmationModal({
                       </svg>
                     </span>
                     <strong>Facebook</strong>
-                    {!connectedPlatforms.facebook && <span style={{ color: '#f59e0b', fontSize: '0.75rem', marginLeft: '0.5rem' }}>⚠️ Not connected</span>}
+                    {!connectedPlatforms.facebook && <span className="connection-pill">⚠️ Not connected</span>}
                   </span>
                 </label>
               </div>
 
               {/* Facebook Page Selector */}
               {selectedPlatforms.has('Facebook') && facebookPages.length > 0 && (
-                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                  <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)', marginBottom: '0.5rem' }}>
+                <div className="facebook-pages-section">
+                  <p className="facebook-pages-title">
                     Select Facebook Pages:
                   </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div className="facebook-pages-list">
                     {facebookPages.map(page => (
-                      <label key={page.id} className="checkbox-option" style={{ fontSize: '0.875rem' }}>
+                      <label key={page.id} className="checkbox-option facebook-page-option">
                         <input
                           type="checkbox"
                           checked={selectedPageIds.has(page.pageId)}

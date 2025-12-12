@@ -6721,7 +6721,7 @@ body::before {
 }
 
 .post-confirmation-modal .modal-header {
-  padding-bottom: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-md);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -6769,6 +6769,43 @@ body::before {
   display: flex;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
+}
+
+.connection-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(245, 158, 11, 0.95);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  letter-spacing: 0.01em;
+}
+
+.facebook-pages-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.facebook-pages-title {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 0.5rem 0;
+}
+
+.facebook-pages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.facebook-page-option {
+  font-size: 0.875rem;
+  min-width: auto;
 }
 
 .option-section h3 {
