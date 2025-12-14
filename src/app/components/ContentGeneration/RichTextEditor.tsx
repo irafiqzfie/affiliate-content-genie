@@ -119,12 +119,32 @@ const RichTextEditorComponent: React.FC<RichTextEditorProps> = ({
     // Handle keyboard shortcuts
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      onSave();
+      // Flush pending changes before saving
+      if (changeTimeoutRef.current) {
+        clearTimeout(changeTimeoutRef.current);
+        if (editorRef.current) {
+          onChange(editorRef.current.innerHTML);
+        }
+      }
+      // Small delay to ensure state updates
+      setTimeout(onSave, 50);
     } else if (e.key === 'Escape') {
       e.preventDefault();
       onCancel();
     }
-  }, [onSave, onCancel]);
+  }, [onSave, onCancel, onChange]);
+
+  const handleSave = useCallback(() => {
+    // Flush any pending changes before saving
+    if (changeTimeoutRef.current) {
+      clearTimeout(changeTimeoutRef.current);
+      if (editorRef.current) {
+        onChange(editorRef.current.innerHTML);
+      }
+    }
+    // Small delay to ensure state updates
+    setTimeout(onSave, 50);
+  }, [onSave, onChange]);
 
   return (
     <div className="edit-area">
@@ -171,7 +191,7 @@ const RichTextEditorComponent: React.FC<RichTextEditorProps> = ({
       />
       <div className="edit-actions">
         <button onClick={onCancel} className="cancel-edit-button">Cancel</button>
-        <button onClick={onSave} className="save-edit-button">Save</button>
+        <button onClick={handleSave} className="save-edit-button">Save</button>
         <span className="edit-hint">Ctrl+Enter to save • Esc to cancel</span>
       </div>
     </div>

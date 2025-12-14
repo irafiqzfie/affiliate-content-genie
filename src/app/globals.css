@@ -3575,20 +3575,6 @@ body::after {
     opacity: 0.7;
 }
 
-/* Highlight timestamp markers in Video Idea section */
-.section-idea .option-display-area {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    padding: var(--spacing-md);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
-}
-
-.section-idea .option-display-area:hover {
-    background: rgba(37, 99, 235, 0.12);
-    border-color: rgba(37, 99, 235, 0.2);
-}
-
 .option-actions {
     display: flex;
     justify-content: flex-end;
