@@ -581,6 +581,34 @@ body::after {
   gap: 12px;
 }
 
+/* Stats Button */
+.stats-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  height: 34px;
+  padding: 0 14px;
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.stats-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.stats-button.active {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent-purple);
+}
+
 /* Navigation Links - Row 1 */
 .nav-link {
   display: inline-flex;

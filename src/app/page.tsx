@@ -3478,15 +3478,15 @@ export default function Home() {
           </nav>
           
           <div className="header-user-actions">
-            {session && <ConnectionStatus />}
             {session && (
               <button 
-                className={`unified-tab ${currentPage === 'stats' ? 'active' : ''}`} 
+                className={`stats-button ${currentPage === 'stats' ? 'active' : ''}`} 
                 onClick={() => setCurrentPage('stats')}
               >
                 <span className="tab-label">Stats</span>
               </button>
             )}
+            {session && <ConnectionStatus />}
             <AuthButton />
           </div>
         </div>
