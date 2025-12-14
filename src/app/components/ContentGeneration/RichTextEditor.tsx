@@ -9,7 +9,7 @@ interface RichTextEditorProps {
   onCancel: () => void;
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
+const RichTextEditorComponent: React.FC<RichTextEditorProps> = ({ 
   value, 
   onChange, 
   onSave, 
@@ -18,7 +18,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [activeFormats, setActiveFormats] = useState(new Set<string>());
   const editorRef = useRef<HTMLDivElement>(null);
   const isInitializedRef = useRef(false);
-  const initialValueRef = useRef(value); // Store initial value
+  const changeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const updateToolbarState = useCallback(() => {
     const newFormats = new Set<string>();
@@ -44,37 +44,42 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     document.execCommand(command, false, undefined);
     if (editorRef.current) {
       editorRef.current.focus();
-      // Trigger onChange immediately after format to capture content
-      requestAnimationFrame(() => {
+      // Debounce onChange to prevent excessive re-renders
+      if (changeTimeoutRef.current) {
+        clearTimeout(changeTimeoutRef.current);
+      }
+      changeTimeoutRef.current = setTimeout(() => {
         if (editorRef.current) {
           onChange(editorRef.current.innerHTML);
         }
-      });
+      }, 100);
     }
     updateToolbarState();
   };
 
-  // Initialize content only once - make this truly uncontrolled
+  // Initialize content only once
   useEffect(() => {
     const editor = editorRef.current;
     if (editor && !isInitializedRef.current) {
-      editor.innerHTML = initialValueRef.current;
+      editor.innerHTML = value;
       isInitializedRef.current = true;
-      // Focus at the end of content
-      requestAnimationFrame(() => {
+      
+      // Focus and position cursor at end
+      setTimeout(() => {
         if (editor) {
           editor.focus();
           const range = document.createRange();
           const sel = window.getSelection();
-          if (editor.childNodes.length > 0) {
-            const lastNode = editor.childNodes[editor.childNodes.length - 1];
-            range.setStartAfter(lastNode);
-            range.collapse(true);
-            sel?.removeAllRanges();
-            sel?.addRange(range);
+          
+          // Move cursor to the end
+          if (sel) {
+            range.selectNodeContents(editor);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
           }
         }
-      });
+      }, 50);
     }
   }, []); // Empty dependency array - only run once
 
@@ -92,8 +97,23 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }, [updateToolbarState]);
 
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
-    onChange(e.currentTarget.innerHTML);
+    // Debounce onChange to prevent cursor jumping from re-renders
+    if (changeTimeoutRef.current) {
+      clearTimeout(changeTimeoutRef.current);
+    }
+    changeTimeoutRef.current = setTimeout(() => {
+      onChange(e.currentTarget.innerHTML);
+    }, 150);
   }, [onChange]);
+  
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (changeTimeoutRef.current) {
+        clearTimeout(changeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     // Handle keyboard shortcuts
@@ -157,3 +177,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     </div>
   );
 };
+
+// Memoize to prevent re-renders when parent updates
+export const RichTextEditor = React.memo(RichTextEditorComponent);
