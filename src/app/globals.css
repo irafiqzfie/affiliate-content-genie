@@ -3687,6 +3687,15 @@ body::after {
   outline: none;
 }
 
+/* Ensure inner textarea in edit card visually matches display state */
+.edit-area .editable-textarea {
+  background: transparent !important;
+  border: none !important;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+}
+
 .rte-toolbar {
     display: flex;
     gap: 0.25rem;
@@ -3747,6 +3756,15 @@ body::after {
 
 .editable-div:focus {
   outline: none;
+}
+
+/* Ensure rich-text editable div also inherits card styling only */
+.edit-area .editable-div {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
 }
 
 .editable-div ul {
