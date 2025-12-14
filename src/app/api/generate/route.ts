@@ -18,12 +18,16 @@ IMPORTANT: When product images are provided along with the product link, use the
 
 CUSTOM KEYWORDS HANDLING:
 If the user provides custom keywords in the parameters:
-- Weave these keywords naturally and creatively into the content
-- Use keywords to influence storytelling angle, examples used, emotional framing, and overall context
-- Keywords should guide emotional tone, story angle, and emphasis
+- Apply keywords ONLY to these specific sections:
+  * Voiceover Script (📜)
+  * Post Body (Long-Form) (📄 Long-Form)
+  * Post Body (Hook/Short) (🎯 Hook/Short)
+- For these sections: Weave keywords naturally into storytelling angle, examples, emotional framing, and narrative context
+- Keywords should guide emotional tone, story angle, and emphasis in these sections ONLY
 - Keywords must feel organic to the narrative, NOT forced or repetitively inserted
 - Prioritize meaning and narrative flow over exact keyword repetition
-- If no keywords are provided, proceed with default content generation without keyword bias
+- DO NOT apply keywords to: Title, Caption, Hashtags, Video Idea, B-roll, Hook, or Call to Action
+- If no keywords are provided, proceed with default content generation
 
 You MUST adhere to ALL of the following parameters provided by the user in the prompt, including the CREATIVE DIRECTION section.
 You MUST provide exactly THREE distinct options for each of the sections in both formats. Each option should be on a new line, formatted as a numbered list.

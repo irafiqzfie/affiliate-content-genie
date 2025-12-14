@@ -2293,9 +2293,9 @@ export default function Home() {
                     ) : (
                         <div className="option-display-area">
                             {isRichText ? (
-                                <div className="prose" dangerouslySetInnerHTML={{ __html: highlightKeywords(selectedOption, keywordChips) }} />
+                                <div className="prose" dangerouslySetInnerHTML={{ __html: key === 'script' ? highlightKeywords(selectedOption, keywordChips) : selectedOption }} />
                             ) : (
-                                <p dangerouslySetInnerHTML={{ __html: highlightKeywords(selectedOption, keywordChips) }} />
+                                <p dangerouslySetInnerHTML={{ __html: key === 'script' ? highlightKeywords(selectedOption, keywordChips) : selectedOption }} />
                             )}
                             <div className="option-actions">
                                  <button 
