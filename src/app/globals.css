@@ -4368,7 +4368,7 @@ body::after {
 .stats-page {
     margin-top: 1rem;
     padding: 0 var(--spacing-md);
-    max-width: 1400px;
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
 }

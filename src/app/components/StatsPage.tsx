@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
   PieChart,
   Pie,
   Cell,
@@ -183,29 +185,55 @@ export default function StatsPage() {
           <div className="analytics-chart">
             {stats.monthlyData.length > 0 ? (
               <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={stats.monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis 
-                    dataKey="month" 
-                    tickFormatter={formatMonth}
-                    stroke="rgba(255,255,255,0.5)"
-                    style={{ fontSize: '11px' }}
-                  />
-                  <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '11px' }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(13, 15, 27, 0.95)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      color: '#fff',
-                      fontSize: '12px',
-                    }}
-                    labelFormatter={formatMonth}
-                  />
-                  <Legend wrapperStyle={{ color: '#fff', fontSize: '12px' }} />
-                  <Bar dataKey="generated" fill="#6366f1" name="Generated" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="posted" fill="#8b5cf6" name="Posted" radius={[6, 6, 0, 0]} />
-                </BarChart>
+                {timeFilter === 'all' ? (
+                  <LineChart data={stats.monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                    <XAxis 
+                      dataKey="month" 
+                      tickFormatter={formatMonth}
+                      stroke="rgba(255,255,255,0.5)"
+                      style={{ fontSize: '11px' }}
+                    />
+                    <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '11px' }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(13, 15, 27, 0.95)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '12px',
+                      }}
+                      labelFormatter={formatMonth}
+                    />
+                    <Legend wrapperStyle={{ color: '#fff', fontSize: '12px' }} />
+                    <Line type="monotone" dataKey="generated" stroke="#6366f1" strokeWidth={3} name="Generated" dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="posted" stroke="#8b5cf6" strokeWidth={3} name="Posted" dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                ) : (
+                  <BarChart data={stats.monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                    <XAxis 
+                      dataKey="month" 
+                      tickFormatter={formatMonth}
+                      stroke="rgba(255,255,255,0.5)"
+                      style={{ fontSize: '11px' }}
+                    />
+                    <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '11px' }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(13, 15, 27, 0.95)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '12px',
+                      }}
+                      labelFormatter={formatMonth}
+                    />
+                    <Legend wrapperStyle={{ color: '#fff', fontSize: '12px' }} />
+                    <Bar dataKey="generated" fill="#6366f1" name="Generated" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="posted" fill="#8b5cf6" name="Posted" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                )}
               </ResponsiveContainer>
             ) : (
               <div className="chart-empty">
