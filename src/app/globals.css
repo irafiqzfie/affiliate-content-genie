@@ -3681,6 +3681,12 @@ body::after {
   overflow-y: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.editable-textarea::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .editable-textarea:focus {
@@ -3694,6 +3700,12 @@ body::after {
   padding: 0;
   margin: 0;
   box-shadow: none;
+}
+
+/* Fix for Video Idea section editing mismatch */
+.section-idea .edit-area .editable-textarea {
+    line-height: 2;
+    font-family: 'Inter', monospace;
 }
 
 .rte-toolbar {
