@@ -3730,7 +3730,11 @@ body::after {
     font-family: 'Inter', monospace;
 }
 
-/* Title section - always stretch textarea to maximum available height */
+/* Title section - always stretch to maximum available height */
+.section-title .option-display-area {
+    min-height: 150px;
+}
+
 .section-title .edit-area {
     min-height: 150px;
 }
