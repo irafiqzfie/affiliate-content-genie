@@ -736,6 +736,9 @@ export default function Home() {
     
     if (isLoading) return;
 
+    // Clear editing state when generating new content
+    setCurrentEditingIdeaId(null);
+
     // mark that user attempted generation so UI shows output area (even if empty/loading)
     setHasGeneratedAttempt(true);
 
@@ -1334,6 +1337,13 @@ export default function Home() {
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
             console.error('❌ Save failed:', errorData);
+            
+            // If update failed with 404, the item doesn't exist - clear the editing ID and suggest retry
+            if (isUpdate && response.status === 404) {
+                setCurrentEditingIdeaId(null);
+                throw new Error('The saved item no longer exists. Your changes will be saved as a new item on next save.');
+            }
+            
             throw new Error(errorData.message || `Failed to save item. Status: ${response.status}`);
         }
 
@@ -1348,9 +1358,11 @@ export default function Home() {
             console.log('📝 Updated existing item in list');
         } else {
             setSavedList(prevList => [savedItem, ...prevList]);
-            setCurrentEditingIdeaId(savedItem.id); // Track the newly created item
             console.log('✨ Added new item to list');
         }
+        
+        // Clear editing state after save so next save creates a new item
+        setCurrentEditingIdeaId(null);
         
         setSaveButtonState('success');
         
