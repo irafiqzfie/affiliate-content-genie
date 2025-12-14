@@ -41,7 +41,7 @@ export async function GET() {
 
     // Calculate monthly data for generated content
     const monthlyGenerated: Record<string, number> = {};
-    savedItems.forEach(item => {
+    savedItems.forEach((item: { id: number; createdAt: Date }) => {
       const month = item.createdAt.toISOString().substring(0, 7); // YYYY-MM
       monthlyGenerated[month] = (monthlyGenerated[month] || 0) + 1;
     });
@@ -50,7 +50,7 @@ export async function GET() {
     const monthlyPosted: Record<string, number> = {};
     const platformBreakdown: Record<string, number> = {};
     
-    scheduledPosts.forEach(post => {
+    scheduledPosts.forEach((post: { id: number; platform: string; status: string; createdAt: Date; scheduledTime: Date }) => {
       const month = post.createdAt.toISOString().substring(0, 7); // YYYY-MM
       monthlyPosted[month] = (monthlyPosted[month] || 0) + 1;
       
