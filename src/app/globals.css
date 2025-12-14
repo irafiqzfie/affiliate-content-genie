@@ -4647,9 +4647,6 @@ body::after {
     }
 }
 
-    color: var(--primary-text-color);
-}
-
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .stats-charts-grid {
