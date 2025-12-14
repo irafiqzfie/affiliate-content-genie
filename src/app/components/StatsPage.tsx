@@ -202,7 +202,7 @@ export default function StatsPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(props: any) => {
+                    label={(props: { name?: string; percent?: number }) => {
                       const name = props.name || '';
                       const percent = props.percent || 0;
                       return `${name}: ${(percent * 100).toFixed(0)}%`;
