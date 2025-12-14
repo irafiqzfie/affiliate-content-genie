@@ -3078,11 +3078,6 @@ body::after {
     grid-template-columns: 1fr 1fr;
 }
 
-/* Title section spans full width in 2-column layout */
-.standard-section-row:has(.output-card.section-title) {
-    grid-template-columns: 1fr;
-}
-
 .three-column-row {
     display: grid;
     gap: var(--spacing-section);  /* 16px uniform gap (standardized from 0.5rem) */
@@ -3553,6 +3548,7 @@ body::after {
 .output-card.section-title .option-display-area,
 .output-card.section-title .edit-area {
     min-height: 150px !important;
+    width: 100%; /* Full width of the card */
 }
 
 .option-display-area:hover, .edit-area:hover {
