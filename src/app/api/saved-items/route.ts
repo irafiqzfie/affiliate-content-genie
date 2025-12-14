@@ -116,6 +116,19 @@ export async function POST(request: Request) {
       data: dataToCreate
     });
 
+    // Log analytics event (immutable, append-only)
+    const now = new Date();
+    await prisma.analyticsEvent.create({
+      data: {
+        userId,
+        eventType: 'content_generated',
+        platform: null, // Generated content has no platform yet
+        timestamp: now,
+        monthKey: now.toISOString().substring(0, 7), // YYYY-MM
+        yearKey: now.toISOString().substring(0, 4),   // YYYY
+      },
+    });
+
     console.log('✅ Item saved successfully:', newItem.id);
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {

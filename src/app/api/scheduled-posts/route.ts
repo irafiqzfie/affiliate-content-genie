@@ -102,6 +102,19 @@ export async function POST(request: Request) {
 
     const newPost = await prisma.scheduledPost.create({ data: postData });
 
+    // Log analytics event (immutable, append-only)
+    const now = new Date();
+    await prisma.analyticsEvent.create({
+      data: {
+        userId,
+        eventType: 'content_posted',
+        platform, // The platform where content is posted
+        timestamp: now,
+        monthKey: now.toISOString().substring(0, 7), // YYYY-MM
+        yearKey: now.toISOString().substring(0, 4),   // YYYY
+      },
+    });
+
     console.log('✅ Post scheduled successfully:', newPost.id);
     return NextResponse.json(newPost, { status: 201 });
   } catch (error) {

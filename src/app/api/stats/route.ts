@@ -18,50 +18,49 @@ export async function GET() {
       return NextResponse.json({ message: 'Database unavailable' }, { status: 503 });
     }
 
-    // Fetch user's saved items (generated content)
-    const savedItems = await prisma.savedItem.findMany({
+    // Fetch all analytics events for this user (immutable, append-only)
+    const events = await prisma.analyticsEvent.findMany({
       where: { userId },
       select: {
-        id: true,
-        createdAt: true,
-      },
-    });
-
-    // Fetch user's scheduled posts (posted content)
-    const scheduledPosts = await prisma.scheduledPost.findMany({
-      where: { userId },
-      select: {
-        id: true,
+        eventType: true,
         platform: true,
-        status: true,
-        createdAt: true,
-        scheduledTime: true,
+        timestamp: true,
+        monthKey: true,
+        yearKey: true,
       },
+      orderBy: { timestamp: 'asc' },
     });
 
-    // Calculate monthly data for generated content
+    // Aggregate by month and event type
     const monthlyGenerated: Record<string, number> = {};
-    const yearlyGenerated: Record<string, number> = {};
-    savedItems.forEach((item: { id: number; createdAt: Date }) => {
-      const month = item.createdAt.toISOString().substring(0, 7); // YYYY-MM
-      const year = item.createdAt.toISOString().substring(0, 4); // YYYY
-      monthlyGenerated[month] = (monthlyGenerated[month] || 0) + 1;
-      yearlyGenerated[year] = (yearlyGenerated[year] || 0) + 1;
-    });
-
-    // Calculate monthly data for posted content
     const monthlyPosted: Record<string, number> = {};
+    const yearlyGenerated: Record<string, number> = {};
     const yearlyPosted: Record<string, number> = {};
     const platformBreakdown: Record<string, number> = {};
-    
-    scheduledPosts.forEach((post: { id: number; platform: string; status: string; createdAt: Date; scheduledTime: Date }) => {
-      const month = post.createdAt.toISOString().substring(0, 7); // YYYY-MM
-      const year = post.createdAt.toISOString().substring(0, 4); // YYYY
-      monthlyPosted[month] = (monthlyPosted[month] || 0) + 1;
-      yearlyPosted[year] = (yearlyPosted[year] || 0) + 1;
-      
-      // Track platform breakdown
-      platformBreakdown[post.platform] = (platformBreakdown[post.platform] || 0) + 1;
+
+    let totalGenerated = 0;
+    let totalPosted = 0;
+    let lastActivity: Date | null = null;
+
+    events.forEach((event: { eventType: string; platform: string | null; timestamp: Date; monthKey: string; yearKey: string }) => {
+      if (event.eventType === 'content_generated') {
+        totalGenerated++;
+        monthlyGenerated[event.monthKey] = (monthlyGenerated[event.monthKey] || 0) + 1;
+        yearlyGenerated[event.yearKey] = (yearlyGenerated[event.yearKey] || 0) + 1;
+      } else if (event.eventType === 'content_posted') {
+        totalPosted++;
+        monthlyPosted[event.monthKey] = (monthlyPosted[event.monthKey] || 0) + 1;
+        yearlyPosted[event.yearKey] = (yearlyPosted[event.yearKey] || 0) + 1;
+        
+        if (event.platform) {
+          platformBreakdown[event.platform] = (platformBreakdown[event.platform] || 0) + 1;
+        }
+      }
+
+      // Track last activity
+      if (!lastActivity || event.timestamp > lastActivity) {
+        lastActivity = event.timestamp;
+      }
     });
 
     // Get all unique months and sort them
@@ -89,8 +88,6 @@ export async function GET() {
     }));
 
     // Calculate additional metrics
-    const totalGenerated = savedItems.length;
-    const totalPosted = scheduledPosts.length;
     const postingRatio = totalGenerated > 0 
       ? Math.round((totalPosted / totalGenerated) * 100) 
       : 0;
@@ -111,11 +108,6 @@ export async function GET() {
     const avgPostsPerMonth = activeMonths > 0 
       ? Math.round(totalPosted / activeMonths) 
       : 0;
-
-    // Last activity date
-    const lastActivity = [...savedItems, ...scheduledPosts]
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]?.createdAt
-      || null;
 
     const stats = {
       totalGenerated,
