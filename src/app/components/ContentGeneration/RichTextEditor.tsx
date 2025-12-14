@@ -143,24 +143,6 @@ const RichTextEditorComponent: React.FC<RichTextEditorProps> = ({
       <div className="rte-toolbar">
         <button 
           type="button" 
-          onClick={() => applyFormat('bold')} 
-          className={`rte-button ${activeFormats.has('bold') ? 'active' : ''}`} 
-          aria-pressed={activeFormats.has('bold')} 
-          aria-label="Bold"
-        >
-          <b>B</b>
-        </button>
-        <button 
-          type="button" 
-          onClick={() => applyFormat('italic')} 
-          className={`rte-button ${activeFormats.has('italic') ? 'active' : ''}`} 
-          aria-pressed={activeFormats.has('italic')} 
-          aria-label="Italic"
-        >
-          <i>I</i>
-        </button>
-        <button 
-          type="button" 
           onClick={() => applyFormat('insertUnorderedList')} 
           className={`rte-button ${activeFormats.has('ul') ? 'active' : ''}`} 
           aria-pressed={activeFormats.has('ul')} 
