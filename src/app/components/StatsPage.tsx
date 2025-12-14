@@ -34,6 +34,7 @@ export default function StatsPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [timeFilter, setTimeFilter] = useState<'7days' | '30days' | 'all'>('all');
 
   useEffect(() => {
     fetchStats();
@@ -111,75 +112,99 @@ export default function StatsPage() {
 
   return (
     <div className="stats-page">
+      {/* Header with Time Filter */}
       <div className="stats-header">
-        <h2>📊 Stats & Analytics</h2>
-        <p className="stats-subtitle">Your content generation and posting performance</p>
-      </div>
-
-      {/* Metric Cards */}
-      <div className="stats-metrics-grid">
-        <div className="stat-card">
-          <div className="stat-icon">✨</div>
-          <div className="stat-content">
-            <h3 className="stat-value">{stats.totalGenerated}</h3>
-            <p className="stat-label">Content Generated</p>
-          </div>
+        <div className="stats-header-left">
+          <h2>📊 Stats & Analytics</h2>
+          <p className="stats-subtitle">Your content generation and posting performance</p>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">📮</div>
-          <div className="stat-content">
-            <h3 className="stat-value">{stats.totalPosted}</h3>
-            <p className="stat-label">Content Posted</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <h3 className="stat-value">{stats.postingRatio}%</h3>
-            <p className="stat-label">Posting Ratio</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">📈</div>
-          <div className="stat-content">
-            <h3 className="stat-value">{stats.avgPostsPerMonth}</h3>
-            <p className="stat-label">Avg Posts/Month</p>
-          </div>
+        <div className="stats-time-filter">
+          <button
+            className={`filter-btn ${timeFilter === '7days' ? 'active' : ''}`}
+            onClick={() => setTimeFilter('7days')}
+          >
+            Last 7 days
+          </button>
+          <button
+            className={`filter-btn ${timeFilter === '30days' ? 'active' : ''}`}
+            onClick={() => setTimeFilter('30days')}
+          >
+            30 days
+          </button>
+          <button
+            className={`filter-btn ${timeFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setTimeFilter('all')}
+          >
+            All time
+          </button>
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="stats-charts-grid">
+      {/* Compact KPI Strip */}
+      <div className="stats-kpi-strip">
+        <div className="kpi-item">
+          <div className="kpi-icon">✨</div>
+          <div className="kpi-content">
+            <div className="kpi-value">{stats.totalGenerated}</div>
+            <div className="kpi-label">Generated</div>
+          </div>
+        </div>
+
+        <div className="kpi-item">
+          <div className="kpi-icon">📮</div>
+          <div className="kpi-content">
+            <div className="kpi-value">{stats.totalPosted}</div>
+            <div className="kpi-label">Posted</div>
+          </div>
+        </div>
+
+        <div className="kpi-item">
+          <div className="kpi-icon">📊</div>
+          <div className="kpi-content">
+            <div className="kpi-value">{stats.postingRatio}%</div>
+            <div className="kpi-label">Post Ratio</div>
+          </div>
+        </div>
+
+        <div className="kpi-item">
+          <div className="kpi-icon">📈</div>
+          <div className="kpi-content">
+            <div className="kpi-value">{stats.avgPostsPerMonth}</div>
+            <div className="kpi-label">Avg / Month</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Two-Column Analytics Row */}
+      <div className="stats-analytics-row">
         {/* Monthly Activity Chart */}
-        <div className="stats-chart-card">
-          <h3 className="chart-title">📅 Monthly Activity</h3>
-          <div className="chart-container">
+        <div className="analytics-card">
+          <h3 className="analytics-title">📅 Monthly Activity</h3>
+          <div className="analytics-chart">
             {stats.monthlyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={stats.monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis 
                     dataKey="month" 
                     tickFormatter={formatMonth}
                     stroke="rgba(255,255,255,0.5)"
-                    style={{ fontSize: '12px' }}
+                    style={{ fontSize: '11px' }}
                   />
-                  <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '11px' }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: 'rgba(13, 15, 27, 0.95)',
                       border: '1px solid rgba(255,255,255,0.1)',
                       borderRadius: '8px',
                       color: '#fff',
+                      fontSize: '12px',
                     }}
                     labelFormatter={formatMonth}
                   />
-                  <Legend wrapperStyle={{ color: '#fff' }} />
-                  <Bar dataKey="generated" fill="#6366f1" name="Generated" radius={[8, 8, 0, 0]} />
-                  <Bar dataKey="posted" fill="#8b5cf6" name="Posted" radius={[8, 8, 0, 0]} />
+                  <Legend wrapperStyle={{ color: '#fff', fontSize: '12px' }} />
+                  <Bar dataKey="generated" fill="#6366f1" name="Generated" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="posted" fill="#8b5cf6" name="Posted" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -191,11 +216,11 @@ export default function StatsPage() {
         </div>
 
         {/* Platform Breakdown */}
-        <div className="stats-chart-card">
-          <h3 className="chart-title">🌐 Platform Breakdown</h3>
-          <div className="chart-container">
+        <div className="analytics-card">
+          <h3 className="analytics-title">🌐 Platform Breakdown</h3>
+          <div className="analytics-chart">
             {platformData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={240}>
                 <PieChart>
                   <Pie
                     data={platformData}
@@ -207,7 +232,7 @@ export default function StatsPage() {
                       const percent = props.percent || 0;
                       return `${name}: ${(percent * 100).toFixed(0)}%`;
                     }}
-                    outerRadius={80}
+                    outerRadius={70}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -221,6 +246,7 @@ export default function StatsPage() {
                       border: '1px solid rgba(255,255,255,0.1)',
                       borderRadius: '8px',
                       color: '#fff',
+                      fontSize: '12px',
                     }}
                   />
                 </PieChart>
@@ -234,18 +260,19 @@ export default function StatsPage() {
         </div>
       </div>
 
-      {/* Additional Metrics */}
-      <div className="stats-info-grid">
-        <div className="info-card">
-          <h4>🔥 Most Active Month</h4>
-          <p className="info-value">
-            {stats.mostActiveMonth ? formatMonth(stats.mostActiveMonth) : 'N/A'}
-          </p>
+      {/* Inline Metadata Info Bar */}
+      <div className="stats-metadata-bar">
+        <div className="metadata-item">
+          <span className="metadata-icon">🔥</span>
+          <span className="metadata-text">
+            Most Active: <strong>{stats.mostActiveMonth ? formatMonth(stats.mostActiveMonth) : 'N/A'}</strong>
+          </span>
         </div>
-
-        <div className="info-card">
-          <h4>🕐 Last Activity</h4>
-          <p className="info-value">{formatDate(stats.lastActivity)}</p>
+        <div className="metadata-item">
+          <span className="metadata-icon">⏱</span>
+          <span className="metadata-text">
+            Last Activity: <strong>{formatDate(stats.lastActivity)}</strong>
+          </span>
         </div>
       </div>
     </div>
