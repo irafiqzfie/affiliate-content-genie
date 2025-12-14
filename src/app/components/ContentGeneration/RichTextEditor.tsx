@@ -18,6 +18,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [activeFormats, setActiveFormats] = useState(new Set<string>());
   const editorRef = useRef<HTMLDivElement>(null);
   const isInitializedRef = useRef(false);
+  const initialValueRef = useRef(value); // Store initial value
 
   const updateToolbarState = useCallback(() => {
     const newFormats = new Set<string>();
@@ -41,32 +42,39 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const applyFormat = (command: string) => {
     document.execCommand(command, false, undefined);
-    editorRef.current?.focus();
-    updateToolbarState();
-    // Trigger onChange to capture the formatted content
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      editorRef.current.focus();
+      // Trigger onChange immediately after format to capture content
+      requestAnimationFrame(() => {
+        if (editorRef.current) {
+          onChange(editorRef.current.innerHTML);
+        }
+      });
     }
+    updateToolbarState();
   };
 
-  // Initialize content only once to prevent cursor jumping
+  // Initialize content only once - make this truly uncontrolled
   useEffect(() => {
     const editor = editorRef.current;
     if (editor && !isInitializedRef.current) {
-      editor.innerHTML = value;
+      editor.innerHTML = initialValueRef.current;
       isInitializedRef.current = true;
       // Focus at the end of content
-      setTimeout(() => {
-        editor.focus();
-        const range = document.createRange();
-        const sel = window.getSelection();
-        if (editor.childNodes.length > 0) {
-          range.selectNodeContents(editor);
-          range.collapse(false); // Collapse to end
-          sel?.removeAllRanges();
-          sel?.addRange(range);
+      requestAnimationFrame(() => {
+        if (editor) {
+          editor.focus();
+          const range = document.createRange();
+          const sel = window.getSelection();
+          if (editor.childNodes.length > 0) {
+            const lastNode = editor.childNodes[editor.childNodes.length - 1];
+            range.setStartAfter(lastNode);
+            range.collapse(true);
+            sel?.removeAllRanges();
+            sel?.addRange(range);
+          }
         }
-      }, 0);
+      });
     }
   }, []); // Empty dependency array - only run once
 
