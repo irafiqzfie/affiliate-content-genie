@@ -4556,14 +4556,14 @@ body::after {
 }
 
 .analytics-chart {
-    min-height: 240px;
+    min-height: 280px;
 }
 
 .chart-empty {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 240px;
+    height: 280px;
     color: var(--secondary-text-color);
     font-style: italic;
     font-size: 0.875rem;

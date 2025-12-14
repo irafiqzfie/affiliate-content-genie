@@ -189,7 +189,7 @@ export default function StatsPage() {
           <h3 className="analytics-title">📅 Monthly Activity</h3>
           <div className="analytics-chart">
             {stats.monthlyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={280}>
                 {timeFilter === 'all' ? (
                   <LineChart data={stats.monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
@@ -198,6 +198,10 @@ export default function StatsPage() {
                       tickFormatter={formatMonth}
                       stroke="rgba(255,255,255,0.5)"
                       style={{ fontSize: '11px' }}
+                      interval={0}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
                     />
                     <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '11px' }} />
                     <Tooltip
@@ -222,6 +226,10 @@ export default function StatsPage() {
                       tickFormatter={formatMonth}
                       stroke="rgba(255,255,255,0.5)"
                       style={{ fontSize: '11px' }}
+                      interval={0}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
                     />
                     <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '11px' }} />
                     <Tooltip
@@ -305,6 +313,7 @@ export default function StatsPage() {
                   dataKey="year"
                   stroke="rgba(255,255,255,0.5)"
                   style={{ fontSize: '12px' }}
+                  interval={0}
                 />
                 <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '12px' }} />
                 <Tooltip
