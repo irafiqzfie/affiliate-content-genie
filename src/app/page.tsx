@@ -1409,15 +1409,31 @@ export default function Home() {
     // Track the ID of the loaded item for future updates
     setCurrentEditingIdeaId(item.id);
     console.log('📂 Loading saved item ID:', item.id);
+    console.log('📦 Item content:', { 
+      videoLength: item.video?.length, 
+      postLength: item.post?.length,
+      videoPreview: item.video?.substring(0, 200),
+      postPreview: item.post?.substring(0, 200)
+    });
     
     setGeneratedContent({
       video: item.video,
       post: item.post,
       info: item.info,
     });
+    
+    const parsedVideo = parseContent(item.video);
+    const parsedPost = parseContent(item.post);
+    console.log('🔍 Parsed content:', {
+      videoKeys: Object.keys(parsedVideo),
+      postKeys: Object.keys(parsedPost),
+      videoSample: parsedVideo.title?.[0] || parsedVideo.hook?.[0],
+      postSample: parsedPost.hook?.[0] || parsedPost['body-long']?.[0]?.substring(0, 100)
+    });
+    
     setEditableContent({
-        video: parseContent(item.video),
-        post: parseContent(item.post),
+        video: parsedVideo,
+        post: parsedPost,
         info: parseContent(item.info),
     });
     
