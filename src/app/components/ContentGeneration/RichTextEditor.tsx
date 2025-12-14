@@ -140,19 +140,6 @@ const RichTextEditorComponent: React.FC<RichTextEditorProps> = ({
 
   return (
     <div className="edit-area">
-      <div className="rte-toolbar">
-        <button 
-          type="button" 
-          onClick={() => applyFormat('insertUnorderedList')} 
-          className={`rte-button ${activeFormats.has('ul') ? 'active' : ''}`} 
-          aria-pressed={activeFormats.has('ul')} 
-          aria-label="Bulleted List"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path fillRule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-          </svg>
-        </button>
-      </div>
       <div
         ref={editorRef}
         className="editable-div"
