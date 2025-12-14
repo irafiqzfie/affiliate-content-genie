@@ -177,6 +177,7 @@ const initialAdvancedInputs = {
     goal: 'Awareness',
     videoLength: '20 sec',
     language: 'Mixed (Eng + BM)',
+    customKeywords: '',
     ...(goalPresets['Awareness'])
 };
 
@@ -209,6 +210,8 @@ export default function Home() {
   const [imageUrlInput, setImageUrlInput] = useState('');
 
   const [advancedInputs, setAdvancedInputs] = useState(initialAdvancedInputs);
+  const [keywordChips, setKeywordChips] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<{ video: string | null, post: string | null, info: string | null }>({ video: null, post: null, info: null });
@@ -338,6 +341,21 @@ export default function Home() {
     const videoIndexes = sectionsConfigVideo.reduce((acc, sec) => ({ ...acc, [sec.key]: 0 }), {});
     const postIndexes = sectionsConfigPost.reduce((acc, sec) => ({ ...acc, [sec.key]: 0 }), {});
     setSelectedOptionIndexes({ ...videoIndexes, ...postIndexes });
+  }, []);
+
+  // Highlight keywords in content with orange color
+  const highlightKeywords = useCallback((text: string, keywords: string[]): string => {
+    if (!keywords.length || !text) return text;
+    
+    let highlightedText = text;
+    keywords.forEach(keyword => {
+      if (keyword.trim()) {
+        // Case-insensitive match, but preserve original case
+        const regex = new RegExp(`(${keyword.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
+        highlightedText = highlightedText.replace(regex, '<span class="keyword-highlight">$1</span>');
+      }
+    });
+    return highlightedText;
   }, []);
 
   const parseContent = useCallback((content: string): ParsedContent => {
@@ -700,6 +718,29 @@ export default function Home() {
     } else {
         setAdvancedInputs(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleKeywordInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && keywordInput.trim()) {
+        e.preventDefault();
+        const newKeyword = keywordInput.trim();
+        if (!keywordChips.includes(newKeyword)) {
+            const updatedChips = [...keywordChips, newKeyword];
+            setKeywordChips(updatedChips);
+            setAdvancedInputs(prev => ({ ...prev, customKeywords: updatedChips.join(', ') }));
+        }
+        setKeywordInput('');
+    } else if (e.key === 'Backspace' && !keywordInput && keywordChips.length > 0) {
+        const updatedChips = keywordChips.slice(0, -1);
+        setKeywordChips(updatedChips);
+        setAdvancedInputs(prev => ({ ...prev, customKeywords: updatedChips.join(', ') }));
+    }
+  };
+
+  const handleRemoveKeyword = (indexToRemove: number) => {
+    const updatedChips = keywordChips.filter((_, index) => index !== indexToRemove);
+    setKeywordChips(updatedChips);
+    setAdvancedInputs(prev => ({ ...prev, customKeywords: updatedChips.join(', ') }));
   };
 
   const handleAnalyze = async () => {
@@ -2095,7 +2136,7 @@ export default function Home() {
                                 />
                             ) : (
                                 <div className="option-display-area">
-                                    <div className="prose" dangerouslySetInnerHTML={{ __html: selectedOption }} />
+                                    <div className="prose" dangerouslySetInnerHTML={{ __html: highlightKeywords(selectedOption, keywordChips) }} />
                                     <div className="option-actions">
                                         <button 
                                             className="edit-button"
@@ -2314,9 +2355,9 @@ export default function Home() {
                     ) : (
                         <div className="option-display-area">
                             {isRichText ? (
-                                <div className="prose" dangerouslySetInnerHTML={{ __html: selectedOption }} />
+                                <div className="prose" dangerouslySetInnerHTML={{ __html: highlightKeywords(selectedOption, keywordChips) }} />
                             ) : (
-                                <p>{selectedOption}</p>
+                                <p dangerouslySetInnerHTML={{ __html: highlightKeywords(selectedOption, keywordChips) }} />
                             )}
                             <div className="option-actions">
                                  <button 
@@ -2752,6 +2793,33 @@ export default function Home() {
                                     <option>Malay</option>
                                     <option>Mixed (Eng + BM)</option>
                                 </select>
+                            </div>
+                            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                                <label htmlFor="customKeywords" className="input-label">Custom Keywords</label>
+                                <div className="keyword-chip-container">
+                                    {keywordChips.map((keyword, index) => (
+                                        <div key={index} className="keyword-chip">
+                                            <span>{keyword}</span>
+                                            <button
+                                                type="button"
+                                                className="keyword-chip-remove"
+                                                onClick={() => handleRemoveKeyword(index)}
+                                                aria-label={`Remove ${keyword}`}
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <input 
+                                        type="text" 
+                                        id="customKeywords" 
+                                        className="keyword-chip-input" 
+                                        value={keywordInput} 
+                                        onChange={(e) => setKeywordInput(e.target.value)}
+                                        onKeyDown={handleKeywordInputKeyDown}
+                                        placeholder={keywordChips.length === 0 ? "Optional — keywords to guide storytelling and emphasis (press Enter)" : "Add keyword..."}
+                                    />
+                                </div>
                             </div>
                         </div>
                       </fieldset>

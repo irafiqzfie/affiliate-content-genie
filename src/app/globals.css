@@ -347,28 +347,98 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   background-color: var(--app-bg);
-  background-image: 
-    radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
-  background-position: 0 0;
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden;
 }
 
-/* Add subtle secondary dot layer for depth */
+/* Animated Starfield Background Layer */
 body::before {
   content: '';
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--app-bg);
   background-image: 
-    radial-gradient(circle, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 48px 48px;
-  background-position: 12px 12px;
+    /* Layer 1: Large dots with slow pulse */
+    radial-gradient(circle, rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px),
+    /* Layer 2: Medium dots */
+    radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    /* Layer 3: Small dots - most numerous */
+    radial-gradient(circle, rgba(255, 255, 255, 0.04) 0.5px, transparent 0.5px),
+    /* Layer 4: Tiny scattered dots */
+    radial-gradient(circle, rgba(255, 255, 255, 0.03) 0.5px, transparent 0.5px);
+  background-size: 
+    120px 120px,
+    80px 80px,
+    40px 40px,
+    60px 60px;
+  background-position: 
+    0 0,
+    20px 20px,
+    10px 10px,
+    35px 45px;
   pointer-events: none;
   z-index: 0;
+  animation: starfield-pulse 8s ease-in-out infinite;
+}
+
+/* Secondary animated layer for organic pulsing effect */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    /* Pulsing stars - offset pattern */
+    radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.04) 0.8px, transparent 0.8px);
+  background-size: 
+    100px 100px,
+    70px 70px;
+  background-position: 
+    50px 30px,
+    15px 60px;
+  pointer-events: none;
+  z-index: 0;
+  animation: starfield-twinkle 6s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Starfield pulse animation - subtle opacity shifts */
+@keyframes starfield-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Secondary twinkle animation - different timing for organic feel */
+@keyframes starfield-twinkle {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.6;
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none !important;
+    opacity: 0.9;
+  }
 }
 
 /* ================================================================
@@ -9115,6 +9185,113 @@ section:nth-child(5) { animation-delay: 0.4s; }
       rgba(255, 255, 255, 0.03)
     );
   }
+}
+
+/* Keyword Chip Input System */
+.keyword-chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(26, 28, 48, 0.4);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-sm);
+  min-height: 56px;
+  transition: all 0.2s ease;
+}
+
+.keyword-chip-container:focus-within {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(26, 28, 48, 0.6);
+}
+
+.keyword-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(96, 165, 250, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: var(--radius-full);
+  color: #60a5fa;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.keyword-chip:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(96, 165, 250, 0.18) 100%);
+  border-color: rgba(59, 130, 246, 0.55);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+}
+
+.keyword-chip span {
+  white-space: nowrap;
+}
+
+.keyword-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: rgba(96, 165, 250, 0.7);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.keyword-chip-remove:hover {
+  background: transparent;
+  color: #f87171;
+}
+
+.keyword-chip-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--primary-text-color);
+  font-size: 0.9375rem;
+  font-family: inherit;
+}
+
+.keyword-chip-input::placeholder {
+  color: rgba(96, 165, 250, 0.4);
+  opacity: 1;
+}
+
+/* Keyword Highlighting in Generated Content - Bright Blue */
+.keyword-highlight {
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.2);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+}
+
+.prose .keyword-highlight {
+  display: inline;
+}
+
+.keyword-highlight:hover {
+  background: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
 }
 
 
