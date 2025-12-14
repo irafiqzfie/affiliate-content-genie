@@ -1430,36 +1430,39 @@ export default function Home() {
     
     console.log('🔄 Migrating old post format to new format');
     
-    // Build new format content
+    // Build new format content with proper headers and numbering
     const sections: string[] = [];
     
     // Create body-long section from hook + hashtags + cta
     if (parsed.hook || parsed.hashtags || parsed.cta) {
-      sections.push('📝 Post Body (Long-Form):');
+      sections.push('📄 Post Body (Long-Form):');
+      
+      const combinedContent: string[] = [];
+      
+      // Combine all parts into one cohesive post
       if (parsed.hook) {
-        parsed.hook.forEach(hookText => {
-          sections.push(`\n${hookText}\n`);
-        });
+        combinedContent.push(...parsed.hook);
       }
       if (parsed.hashtags) {
-        sections.push('');
-        parsed.hashtags.forEach(hashtagText => {
-          sections.push(hashtagText);
-        });
+        combinedContent.push(...parsed.hashtags);
       }
       if (parsed.cta) {
-        sections.push('');
-        parsed.cta.forEach(ctaText => {
-          sections.push(ctaText);
-        });
+        combinedContent.push(...parsed.cta);
       }
+      
+      // Add as numbered options
+      combinedContent.forEach((text, index) => {
+        sections.push(`${index + 1}. ${text}`);
+      });
+      
+      sections.push(''); // Empty line between sections
     }
     
     // Create body-hook section from hook only
     if (parsed.hook) {
-      sections.push('\n\n📣 Post Body (Hook Only):');
-      parsed.hook.forEach(hookText => {
-        sections.push(`\n${hookText}`);
+      sections.push('🎯 Post Body (Hook/Short):');
+      parsed.hook.forEach((hookText, index) => {
+        sections.push(`${index + 1}. ${hookText}`);
       });
     }
     
