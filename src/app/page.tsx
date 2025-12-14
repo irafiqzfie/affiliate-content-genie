@@ -2075,6 +2075,24 @@ export default function Home() {
         const longFormContent = editableContent[activeOutputTab]?.['body-long'];
         const hookContent = editableContent[activeOutputTab]?.['body-hook'];
         
+        // Check if this saved item uses the old format (separate hook/cta instead of body-long/body-hook)
+        const hasOldFormat = !longFormContent && !hookContent && editableContent[activeOutputTab]?.['hook'];
+        
+        if (hasOldFormat) {
+            return (
+                <div className="output-card">
+                    <div className="card-header">
+                        <h3>{icon} {title}</h3>
+                    </div>
+                    <div className="card-content">
+                        <p className="placeholder-text" style={{ fontStyle: 'italic', color: 'var(--secondary-text-color)' }}>
+                            This saved item uses an older format. Content is shown in the Hook, Hashtags, and CTA sections below.
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+        
         const selectedIndex = selectedOptionIndexes[key] ?? 0;
         const selectedLongForm = longFormContent?.[selectedIndex];
         const selectedHook = hookContent?.[selectedIndex];
