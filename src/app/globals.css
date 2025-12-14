@@ -3730,6 +3730,16 @@ body::after {
     font-family: 'Inter', monospace;
 }
 
+/* Title section - always stretch textarea to maximum available height */
+.section-title .edit-area {
+    min-height: 150px;
+}
+
+.section-title .edit-area .editable-textarea {
+    min-height: 120px;
+    height: 120px; /* Fixed height for consistent appearance */
+}
+
 .rte-toolbar {
     display: flex;
     gap: 0.25rem;
