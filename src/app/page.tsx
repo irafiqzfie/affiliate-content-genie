@@ -3448,12 +3448,6 @@ export default function Home() {
             {session && (
               <>
                 <button 
-                  className={`unified-tab ${currentPage === 'stats' ? 'active' : ''}`} 
-                  onClick={() => setCurrentPage('stats')}
-                >
-                  <span className="tab-label">Stats</span>
-                </button>
-                <button 
                   className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
                   onClick={() => setCurrentPage('generator')}
                 >
@@ -3485,6 +3479,14 @@ export default function Home() {
           
           <div className="header-user-actions">
             {session && <ConnectionStatus />}
+            {session && (
+              <button 
+                className={`unified-tab ${currentPage === 'stats' ? 'active' : ''}`} 
+                onClick={() => setCurrentPage('stats')}
+              >
+                <span className="tab-label">Stats</span>
+              </button>
+            )}
             <AuthButton />
           </div>
         </div>
