@@ -276,9 +276,15 @@ export default function Home() {
     let highlightedText = text;
     keywords.forEach(keyword => {
       if (keyword.trim()) {
-        // Case-insensitive match, but preserve original case
-        const regex = new RegExp(`(${keyword.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
-        highlightedText = highlightedText.replace(regex, '<span class="keyword-highlight">$1</span>');
+        // Match keyword with optional markdown asterisks around it
+        // This matches: word, *word*, **word**, * word *, etc.
+        const escapedKeyword = keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\*{0,2}\\s*${escapedKeyword}\\s*\\*{0,2}`, 'gi');
+        highlightedText = highlightedText.replace(regex, (match) => {
+          // Extract just the keyword without asterisks
+          const cleanWord = match.replace(/\*/g, '').trim();
+          return `<span class="keyword-highlight">${cleanWord}</span>`;
+        });
       }
     });
     return highlightedText;
