@@ -3085,10 +3085,6 @@ body::after {
     align-items: stretch;
 }
 
-.three-column-row > * {
-    height: 100%;
-}
-
 /* Info tab 2x2 grid layout */
 .info-grid-layout {
     display: grid;
@@ -3274,10 +3270,6 @@ body::after {
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-section);  /* Standardized 16px gap */
     align-items: stretch;
-}
-
-.standard-section-row > * {
-    height: 100%;
 }
 
 .body-subsection {
