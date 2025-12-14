@@ -117,8 +117,9 @@ const sectionsConfigVideo = [
 ];
 
 const sectionsConfigPost = [
+  { key: 'body-long', title: 'Post Body (Long-Form)', icon: '📄' },
+  { key: 'body-hook', title: 'Post Body (Hook/Short)', icon: '🎯' },
   { key: 'hook', title: 'Hook', icon: '✍️' },
-  { key: 'body', title: 'Post Body', icon: '📄' },
   { key: 'cta', title: 'Call to Action', icon: '🔗' },
   { key: 'hashtags', title: 'Hashtags', icon: '🔖' },
 ];
@@ -1318,6 +1319,7 @@ export default function Home() {
         };
 
         console.log('📤 Attempting to save item:', { ...newItemPayload, imageUrl: blobImageUrl ? 'included' : 'none' });
+        console.log('📝 Post content preview being saved:', postContent.substring(0, 300));
         
         // Determine if we're updating an existing item or creating a new one
         const isUpdate = currentEditingIdeaId !== null;
@@ -1425,10 +1427,16 @@ export default function Home() {
     const hasOldFormat = parsed.hook && !parsed['body-long'] && !parsed['body-hook'];
     
     if (!hasOldFormat) {
+      console.log('✅ Content already in new format or empty');
       return postContent; // Already new format or empty
     }
     
     console.log('🔄 Migrating old post format to new format');
+    console.log('📋 Old format parsed:', {
+      hook: parsed.hook?.length || 0,
+      hashtags: parsed.hashtags?.length || 0,
+      cta: parsed.cta?.length || 0
+    });
     
     // Build new format content with proper headers and numbering
     const sections: string[] = [];
@@ -1466,7 +1474,10 @@ export default function Home() {
       });
     }
     
-    return sections.join('\n');
+    const migratedContent = sections.join('\n');
+    console.log('✅ Migrated content preview:', migratedContent.substring(0, 200));
+    
+    return migratedContent;
   };
 
   const handleLoadSavedItem = (item: SavedItem) => {
