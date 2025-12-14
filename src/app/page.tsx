@@ -1417,6 +1417,55 @@ export default function Home() {
     }
   };
 
+  // Helper function to migrate old post format to new format
+  const migrateOldPostFormat = (postContent: string): string => {
+    const parsed = parseContent(postContent);
+    
+    // Check if it's old format (has hook/hashtags/cta but not body-long/body-hook)
+    const hasOldFormat = parsed.hook && !parsed['body-long'] && !parsed['body-hook'];
+    
+    if (!hasOldFormat) {
+      return postContent; // Already new format or empty
+    }
+    
+    console.log('🔄 Migrating old post format to new format');
+    
+    // Build new format content
+    const sections: string[] = [];
+    
+    // Create body-long section from hook + hashtags + cta
+    if (parsed.hook || parsed.hashtags || parsed.cta) {
+      sections.push('📝 Post Body (Long-Form):');
+      if (parsed.hook) {
+        parsed.hook.forEach(hookText => {
+          sections.push(`\n${hookText}\n`);
+        });
+      }
+      if (parsed.hashtags) {
+        sections.push('');
+        parsed.hashtags.forEach(hashtagText => {
+          sections.push(hashtagText);
+        });
+      }
+      if (parsed.cta) {
+        sections.push('');
+        parsed.cta.forEach(ctaText => {
+          sections.push(ctaText);
+        });
+      }
+    }
+    
+    // Create body-hook section from hook only
+    if (parsed.hook) {
+      sections.push('\n\n📣 Post Body (Hook Only):');
+      parsed.hook.forEach(hookText => {
+        sections.push(`\n${hookText}`);
+      });
+    }
+    
+    return sections.join('\n');
+  };
+
   const handleLoadSavedItem = (item: SavedItem) => {
     // Track the ID of the loaded item for future updates
     setCurrentEditingIdeaId(item.id);
@@ -1428,14 +1477,17 @@ export default function Home() {
       postPreview: item.post?.substring(0, 200)
     });
     
+    // Migrate old post format if needed
+    const migratedPost = migrateOldPostFormat(item.post);
+    
     setGeneratedContent({
       video: item.video,
-      post: item.post,
+      post: migratedPost,
       info: item.info,
     });
     
     const parsedVideo = parseContent(item.video);
-    const parsedPost = parseContent(item.post);
+    const parsedPost = parseContent(migratedPost);
     console.log('🔍 Parsed content:', {
       videoKeys: Object.keys(parsedVideo),
       postKeys: Object.keys(parsedPost),
