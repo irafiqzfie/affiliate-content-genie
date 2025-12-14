@@ -1471,11 +1471,12 @@ export default function Home() {
     setEditText('');
   };
 
-  const handleSaveEdit = (sectionKey: string, index: number) => {
+  const handleSaveEdit = (sectionKey: string, index: number, freshText?: string) => {
     if (activeOutputTab === 'info') return; // Info tab has no editable content
     if (!editableContent[activeOutputTab]) return;
+    const textToSave = freshText !== undefined ? freshText : editText;
     const newEditableContent = JSON.parse(JSON.stringify(editableContent));
-    newEditableContent[activeOutputTab]![sectionKey as keyof ParsedContent]![index] = editText;
+    newEditableContent[activeOutputTab]![sectionKey as keyof ParsedContent]![index] = textToSave;
     setEditableContent(newEditableContent);
 
     const newMarkdown = reconstructContent(newEditableContent[activeOutputTab], activeOutputTab);
@@ -2059,7 +2060,7 @@ export default function Home() {
                                 <RichTextEditor
                                     value={editText}
                                     onChange={setEditText}
-                                    onSave={() => handleSaveEdit(subsectionKey.includes('body-long') ? 'body-long' : 'body-hook', selectedIndex)}
+                                    onSave={(freshContent) => handleSaveEdit(subsectionKey.includes('body-long') ? 'body-long' : 'body-hook', selectedIndex, freshContent)}
                                     onCancel={handleCancelEdit}
                                 />
                             ) : (
@@ -2262,7 +2263,7 @@ export default function Home() {
                             <RichTextEditor
                                 value={editText}
                                 onChange={setEditText}
-                                onSave={() => handleSaveEdit(key, selectedIndex)}
+                                onSave={(freshContent) => handleSaveEdit(key, selectedIndex, freshContent)}
                                 onCancel={handleCancelEdit}
                             />
                         ) : (

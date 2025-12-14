@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
-  onSave: () => void;
+  onSave: (freshContent?: string) => void;
   onCancel: () => void;
 }
 
@@ -119,32 +119,24 @@ const RichTextEditorComponent: React.FC<RichTextEditorProps> = ({
     // Handle keyboard shortcuts
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      // Flush pending changes before saving
-      if (changeTimeoutRef.current) {
-        clearTimeout(changeTimeoutRef.current);
-        if (editorRef.current) {
-          onChange(editorRef.current.innerHTML);
-        }
+      // Get fresh content and pass it directly
+      if (editorRef.current) {
+        const freshContent = editorRef.current.innerHTML;
+        onSave(freshContent);
       }
-      // Small delay to ensure state updates
-      setTimeout(onSave, 50);
     } else if (e.key === 'Escape') {
       e.preventDefault();
       onCancel();
     }
-  }, [onSave, onCancel, onChange]);
+  }, [onSave, onCancel]);
 
   const handleSave = useCallback(() => {
-    // Flush any pending changes before saving
-    if (changeTimeoutRef.current) {
-      clearTimeout(changeTimeoutRef.current);
-      if (editorRef.current) {
-        onChange(editorRef.current.innerHTML);
-      }
+    // Get fresh content directly from the editor and pass to onSave
+    if (editorRef.current) {
+      const freshContent = editorRef.current.innerHTML;
+      onSave(freshContent);
     }
-    // Small delay to ensure state updates
-    setTimeout(onSave, 50);
-  }, [onSave, onChange]);
+  }, [onSave]);
 
   return (
     <div className="edit-area">

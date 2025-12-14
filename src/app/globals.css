@@ -3180,7 +3180,6 @@ body::after {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
 }
 
 /* Body Card Subsections */
