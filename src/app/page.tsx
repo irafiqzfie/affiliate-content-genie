@@ -11,6 +11,7 @@ import { SavedItemsList } from '@/app/components/SavedContent';
 import { ScheduledPostsList, PostHistory } from '@/app/components/Scheduler';
 import PostConfirmationModal, { PostOptions } from './components/PostConfirmationModal';
 import { RichTextEditor } from './components/ContentGeneration/RichTextEditor';
+import StatsPage from './components/StatsPage';
 // import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
@@ -155,7 +156,7 @@ export default function Home() {
   const [savedList, setSavedList] = useState<SavedItem[]>([]);
   const [selectedOptionIndexes, setSelectedOptionIndexes] = useState<Record<string, number>>({});
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler'>('generator');
+  const [currentPage, setCurrentPage] = useState<'generator' | 'saved' | 'scheduler' | 'stats'>('generator');
   const [activeOutputTab, setActiveOutputTab] = useState<'info' | 'post' | 'video'>('info');
   const [trendscore, setTrendscore] = useState<number | null>(null);
   const [productSummary, setProductSummary] = useState<string | null>(null);
@@ -3143,6 +3144,10 @@ export default function Home() {
   );
   }
 
+  const renderStatsPage = () => (
+    <StatsPage />
+  );
+
   const renderSavedPage = () => (
     <SavedItemsList 
       savedList={savedList}
@@ -3443,6 +3448,12 @@ export default function Home() {
             {session && (
               <>
                 <button 
+                  className={`unified-tab ${currentPage === 'stats' ? 'active' : ''}`} 
+                  onClick={() => setCurrentPage('stats')}
+                >
+                  <span className="tab-label">Stats</span>
+                </button>
+                <button 
                   className={`unified-tab ${currentPage === 'generator' ? 'active' : ''}`} 
                   onClick={() => setCurrentPage('generator')}
                 >
@@ -3486,6 +3497,7 @@ export default function Home() {
             <p>Please sign in to access the AI content generator and all features.</p>
           </div>
         )}
+        {session && currentPage === 'stats' && renderStatsPage()}
         {session && currentPage === 'generator' && renderGeneratorPage()}
         {session && currentPage === 'saved' && renderSavedPage()}
         {session && currentPage === 'scheduler' && renderSchedulerPage()}
