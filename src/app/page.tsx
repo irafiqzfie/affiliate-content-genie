@@ -1535,7 +1535,9 @@ export default function Home() {
   
   const handleEdit = (optionKey: string, currentText: string) => {
     setEditingKey(optionKey);
-    setEditText(currentText);
+    // Strip HTML tags from highlighted content before editing
+    const cleanText = currentText.replace(/<span class="keyword-highlight">([^<]*)<\/span>/g, '$1');
+    setEditText(cleanText);
   };
 
   const handleCancelEdit = () => {
@@ -2344,11 +2346,20 @@ export default function Home() {
                                     value={editText}
                                     onChange={(e) => setEditText(e.target.value)}
                                     autoFocus
-                                    onFocus={(e) => e.target.select()}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                        e.preventDefault();
+                                        handleSaveEdit(key, selectedIndex);
+                                      } else if (e.key === 'Escape') {
+                                        e.preventDefault();
+                                        handleCancelEdit();
+                                      }
+                                    }}
                                 />
                                 <div className="edit-actions">
                                     <button onClick={handleCancelEdit} className="cancel-edit-button">Cancel</button>
                                     <button onClick={() => handleSaveEdit(key, selectedIndex)} className="save-edit-button">Save</button>
+                                    <span className="edit-hint">Ctrl+Enter to save • Esc to cancel</span>
                                 </div>
                             </div>
                         )

@@ -17,6 +17,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const [activeFormats, setActiveFormats] = useState(new Set<string>());
   const editorRef = useRef<HTMLDivElement>(null);
+  const isInitializedRef = useRef(false);
 
   const updateToolbarState = useCallback(() => {
     const newFormats = new Set<string>();
@@ -42,7 +43,32 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     document.execCommand(command, false, undefined);
     editorRef.current?.focus();
     updateToolbarState();
+    // Trigger onChange to capture the formatted content
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
   };
+
+  // Initialize content only once to prevent cursor jumping
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (editor && !isInitializedRef.current) {
+      editor.innerHTML = value;
+      isInitializedRef.current = true;
+      // Focus at the end of content
+      setTimeout(() => {
+        editor.focus();
+        const range = document.createRange();
+        const sel = window.getSelection();
+        if (editor.childNodes.length > 0) {
+          range.selectNodeContents(editor);
+          range.collapse(false); // Collapse to end
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+        }
+      }, 0);
+    }
+  }, []); // Empty dependency array - only run once
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -57,9 +83,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [updateToolbarState]);
 
-  useEffect(() => {
-    editorRef.current?.focus();
-  }, []);
+  const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>) => {
+    onChange(e.currentTarget.innerHTML);
+  }, [onChange]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Handle keyboard shortcuts
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      onSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onCancel();
+    }
+  }, [onSave, onCancel]);
 
   return (
     <div className="edit-area">
@@ -98,14 +135,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         ref={editorRef}
         className="editable-div"
         contentEditable
-        dangerouslySetInnerHTML={{ __html: value }}
-        onInput={(e) => onChange(e.currentTarget.innerHTML)}
+        suppressContentEditableWarning
+        onInput={handleInput}
         onKeyUp={updateToolbarState}
         onFocus={updateToolbarState}
+        onKeyDown={handleKeyDown}
       />
       <div className="edit-actions">
         <button onClick={onCancel} className="cancel-edit-button">Cancel</button>
         <button onClick={onSave} className="save-edit-button">Save</button>
+        <span className="edit-hint">Ctrl+Enter to save • Esc to cancel</span>
       </div>
     </div>
   );
