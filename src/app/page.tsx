@@ -825,8 +825,11 @@ export default function Home() {
       const infoContentMatch = content.match(/---INFO START---([\s\S]*?)---INFO END---/);
 
       const videoContent = videoContentMatch ? videoContentMatch[1].trim() : '';
-      const postContent = postContentMatch ? postContentMatch[1].trim() : '';
+      let postContent = postContentMatch ? postContentMatch[1].trim() : '';
       const infoContent = infoContentMatch ? infoContentMatch[1].trim() : '';
+      
+      // Migrate post content from old format to new format if needed
+      postContent = migrateOldPostFormat(postContent);
       
       if (!videoContent && !postContent && !infoContent) {
         throw new Error('Generated content was in an unexpected format. Please try again.');
