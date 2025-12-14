@@ -117,6 +117,7 @@ const sectionsConfigVideo = [
 ];
 
 const sectionsConfigPost = [
+  { key: 'body', title: 'Post Body', icon: '📄' }, // Special key that triggers renderBodyCard
   { key: 'body-long', title: 'Post Body (Long-Form)', icon: '📄' },
   { key: 'body-hook', title: 'Post Body (Hook/Short)', icon: '🎯' },
   { key: 'hook', title: 'Hook', icon: '✍️' },
