@@ -41,18 +41,24 @@ export async function GET() {
 
     // Calculate monthly data for generated content
     const monthlyGenerated: Record<string, number> = {};
+    const yearlyGenerated: Record<string, number> = {};
     savedItems.forEach((item: { id: number; createdAt: Date }) => {
       const month = item.createdAt.toISOString().substring(0, 7); // YYYY-MM
+      const year = item.createdAt.toISOString().substring(0, 4); // YYYY
       monthlyGenerated[month] = (monthlyGenerated[month] || 0) + 1;
+      yearlyGenerated[year] = (yearlyGenerated[year] || 0) + 1;
     });
 
     // Calculate monthly data for posted content
     const monthlyPosted: Record<string, number> = {};
+    const yearlyPosted: Record<string, number> = {};
     const platformBreakdown: Record<string, number> = {};
     
     scheduledPosts.forEach((post: { id: number; platform: string; status: string; createdAt: Date; scheduledTime: Date }) => {
       const month = post.createdAt.toISOString().substring(0, 7); // YYYY-MM
+      const year = post.createdAt.toISOString().substring(0, 4); // YYYY
       monthlyPosted[month] = (monthlyPosted[month] || 0) + 1;
+      yearlyPosted[year] = (yearlyPosted[year] || 0) + 1;
       
       // Track platform breakdown
       platformBreakdown[post.platform] = (platformBreakdown[post.platform] || 0) + 1;
@@ -68,6 +74,18 @@ export async function GET() {
       month,
       generated: monthlyGenerated[month] || 0,
       posted: monthlyPosted[month] || 0,
+    }));
+
+    // Get all unique years and sort them
+    const allYears = Array.from(
+      new Set([...Object.keys(yearlyGenerated), ...Object.keys(yearlyPosted)])
+    ).sort();
+
+    // Build yearly comparison data
+    const yearlyData = allYears.map(year => ({
+      year,
+      generated: yearlyGenerated[year] || 0,
+      posted: yearlyPosted[year] || 0,
     }));
 
     // Calculate additional metrics
@@ -104,6 +122,7 @@ export async function GET() {
       totalPosted,
       postingRatio,
       monthlyData,
+      yearlyData,
       platformBreakdown,
       mostActiveMonth,
       avgPostsPerMonth,

@@ -26,6 +26,11 @@ interface StatsData {
     generated: number;
     posted: number;
   }>;
+  yearlyData: Array<{
+    year: string;
+    generated: number;
+    posted: number;
+  }>;
   platformBreakdown: Record<string, number>;
   mostActiveMonth: string;
   avgPostsPerMonth: number;
@@ -287,6 +292,38 @@ export default function StatsPage() {
           </div>
         </div>
       </div>
+
+      {/* Yearly Activity Chart */}
+      {stats.yearlyData && stats.yearlyData.length > 0 && (
+        <div className="stats-yearly-section">
+          <h3 className="analytics-title">📊 Yearly Overview</h3>
+          <div className="yearly-chart-container">
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={stats.yearlyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis 
+                  dataKey="year"
+                  stroke="rgba(255,255,255,0.5)"
+                  style={{ fontSize: '12px' }}
+                />
+                <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '12px' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(13, 15, 27, 0.95)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontSize: '12px',
+                  }}
+                />
+                <Legend wrapperStyle={{ color: '#fff', fontSize: '12px' }} />
+                <Bar dataKey="generated" fill="#6366f1" name="Generated" radius={[8, 8, 0, 0]} barSize={60} />
+                <Bar dataKey="posted" fill="#8b5cf6" name="Posted" radius={[8, 8, 0, 0]} barSize={60} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       {/* Inline Metadata Info Bar */}
       <div className="stats-metadata-bar">
