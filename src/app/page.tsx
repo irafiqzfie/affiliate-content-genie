@@ -186,6 +186,7 @@ export default function Home() {
     facebook: boolean;
     facebookPages?: Array<{ id: string; pageId: string; name: string; }>;
   }>({ threads: false, facebook: false });
+  const [currentEditingIdeaId, setCurrentEditingIdeaId] = useState<number | null>(null);
 
   const sectionsConfig = useMemo(() => activeOutputTab === 'video' ? sectionsConfigVideo : sectionsConfigPost, [activeOutputTab]);
 
@@ -1315,8 +1316,15 @@ export default function Home() {
 
         console.log('📤 Attempting to save item:', { ...newItemPayload, imageUrl: blobImageUrl ? 'included' : 'none' });
         
-        const response = await fetch(`${API_URL}/saved-items`, {
-            method: 'POST',
+        // Determine if we're updating an existing item or creating a new one
+        const isUpdate = currentEditingIdeaId !== null;
+        const method = isUpdate ? 'PUT' : 'POST';
+        const endpoint = isUpdate ? `${API_URL}/saved-items/${currentEditingIdeaId}` : `${API_URL}/saved-items`;
+        
+        console.log(isUpdate ? `🔄 Updating existing item ID: ${currentEditingIdeaId}` : '✨ Creating new saved item');
+        
+        const response = await fetch(endpoint, {
+            method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newItemPayload)
         });
@@ -1332,7 +1340,18 @@ export default function Home() {
         const savedItem = await response.json();
         console.log('✅ Item saved successfully:', savedItem);
         
-        setSavedList(prevList => [savedItem, ...prevList]);
+        // Update the list: replace existing item or add new item
+        if (isUpdate) {
+            setSavedList(prevList => prevList.map(item => 
+                item.id === currentEditingIdeaId ? savedItem : item
+            ));
+            console.log('📝 Updated existing item in list');
+        } else {
+            setSavedList(prevList => [savedItem, ...prevList]);
+            setCurrentEditingIdeaId(savedItem.id); // Track the newly created item
+            console.log('✨ Added new item to list');
+        }
+        
         setSaveButtonState('success');
         
         // Reset to idle after 2 seconds
@@ -1387,6 +1406,10 @@ export default function Home() {
   };
 
   const handleLoadSavedItem = (item: SavedItem) => {
+    // Track the ID of the loaded item for future updates
+    setCurrentEditingIdeaId(item.id);
+    console.log('📂 Loading saved item ID:', item.id);
+    
     setGeneratedContent({
       video: item.video,
       post: item.post,
