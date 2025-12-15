@@ -21,6 +21,11 @@ interface StatsData {
   totalGenerated: number;
   totalPosted: number;
   postingRatio: number;
+  dailyData: Array<{
+    day: string;
+    generated: number;
+    posted: number;
+  }>;
   monthlyData: Array<{
     month: string;
     generated: number;
@@ -72,6 +77,11 @@ export default function StatsPage() {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
 
+  const formatDay = (dayStr: string) => {
+    const date = new Date(dayStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'N/A';
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -84,25 +94,86 @@ export default function StatsPage() {
   const getFilteredData = () => {
     if (!stats) return { data: [], label: 'month' as const };
     
+    // Handle yearly view
     if (timeFilter === 'yearly') {
-      return { data: stats.yearlyData, label: 'year' as const };
+      // Generate complete year range
+      const years = stats.yearlyData.map(item => parseInt(item.year));
+      if (years.length === 0) return { data: [], label: 'year' as const };
+      
+      const minYear = Math.min(...years);
+      const maxYear = Math.max(...years);
+      const completeYearData = [];
+      
+      for (let year = minYear; year <= maxYear; year++) {
+        const existing = stats.yearlyData.find(item => parseInt(item.year) === year);
+        completeYearData.push({
+          year: year.toString(),
+          generated: existing?.generated || 0,
+          posted: existing?.posted || 0,
+        });
+      }
+      
+      return { data: completeYearData, label: 'year' as const };
     }
     
+    // Handle daily views (7 days / 30 days)
     if (timeFilter === '7days' || timeFilter === '30days') {
       const days = timeFilter === '7days' ? 7 : 30;
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - days);
+      const dailyData: Array<{ day: string; generated: number; posted: number }> = [];
       
-      return {
-        data: stats.monthlyData.filter(item => {
-          const itemDate = new Date(item.month + '-01');
-          return itemDate >= cutoffDate;
-        }),
-        label: 'month' as const
-      };
+      // Generate complete daily range for the last N days
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().substring(0, 10); // YYYY-MM-DD
+        
+        // Find matching data from API
+        const existing = stats.dailyData.find(item => item.day === dateStr);
+        
+        dailyData.push({
+          day: dateStr,
+          generated: existing?.generated || 0,
+          posted: existing?.posted || 0,
+        });
+      }
+      
+      return { data: dailyData, label: 'day' as const };
     }
     
-    return { data: stats.monthlyData, label: 'month' as const };
+    // Handle monthly view (all time)
+    // Generate complete month range
+    const months = stats.monthlyData.map(item => item.month);
+    if (months.length === 0) return { data: [], label: 'month' as const };
+    
+    const sortedMonths = months.sort();
+    const firstMonth = sortedMonths[0];
+    const lastMonth = sortedMonths[sortedMonths.length - 1];
+    
+    const [firstYear, firstMonthNum] = firstMonth.split('-').map(Number);
+    const [lastYear, lastMonthNum] = lastMonth.split('-').map(Number);
+    
+    const completeMonthlyData = [];
+    let currentYear = firstYear;
+    let currentMonth = firstMonthNum;
+    
+    while (currentYear < lastYear || (currentYear === lastYear && currentMonth <= lastMonthNum)) {
+      const monthKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+      const existing = stats.monthlyData.find(item => item.month === monthKey);
+      
+      completeMonthlyData.push({
+        month: monthKey,
+        generated: existing?.generated || 0,
+        posted: existing?.posted || 0,
+      });
+      
+      currentMonth++;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
+      }
+    }
+    
+    return { data: completeMonthlyData, label: 'month' as const };
   };
 
   if (loading) {
@@ -222,7 +293,9 @@ export default function StatsPage() {
           <div className="analytics-chart">
             {(() => {
               const { data, label } = getFilteredData();
-              const formatLabel = label === 'year' ? (year: string) => year : formatMonth;
+              const formatLabel = label === 'year' ? (year: string) => year : 
+                                  label === 'day' ? formatDay : formatMonth;
+              const dataKey = label; // 'year', 'month', or 'day'
               
               return data.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
@@ -230,7 +303,7 @@ export default function StatsPage() {
                     <LineChart data={data}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                       <XAxis 
-                        dataKey={label}
+                        dataKey={dataKey}
                         tickFormatter={formatLabel}
                         stroke="rgba(255,255,255,0.5)"
                         style={{ fontSize: '11px' }}
@@ -258,7 +331,7 @@ export default function StatsPage() {
                     <BarChart data={data}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                       <XAxis 
-                        dataKey={label}
+                        dataKey={dataKey}
                         tickFormatter={formatLabel}
                         stroke="rgba(255,255,255,0.5)"
                         style={{ fontSize: '11px' }}

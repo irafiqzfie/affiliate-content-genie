@@ -32,6 +32,8 @@ export async function GET() {
     });
 
     // Aggregate by month and event type
+    const dailyGenerated: Record<string, number> = {};
+    const dailyPosted: Record<string, number> = {};
     const monthlyGenerated: Record<string, number> = {};
     const monthlyPosted: Record<string, number> = {};
     const yearlyGenerated: Record<string, number> = {};
@@ -43,12 +45,16 @@ export async function GET() {
     let lastActivity: Date | null = null;
 
     events.forEach((event: { eventType: string; platform: string | null; timestamp: Date; monthKey: string; yearKey: string }) => {
+      const dayKey = event.timestamp.toISOString().substring(0, 10); // YYYY-MM-DD
+      
       if (event.eventType === 'content_generated') {
         totalGenerated++;
+        dailyGenerated[dayKey] = (dailyGenerated[dayKey] || 0) + 1;
         monthlyGenerated[event.monthKey] = (monthlyGenerated[event.monthKey] || 0) + 1;
         yearlyGenerated[event.yearKey] = (yearlyGenerated[event.yearKey] || 0) + 1;
       } else if (event.eventType === 'content_posted') {
         totalPosted++;
+        dailyPosted[dayKey] = (dailyPosted[dayKey] || 0) + 1;
         monthlyPosted[event.monthKey] = (monthlyPosted[event.monthKey] || 0) + 1;
         yearlyPosted[event.yearKey] = (yearlyPosted[event.yearKey] || 0) + 1;
         
@@ -62,6 +68,18 @@ export async function GET() {
         lastActivity = event.timestamp;
       }
     });
+
+    // Get all unique days and sort them
+    const allDays = Array.from(
+      new Set([...Object.keys(dailyGenerated), ...Object.keys(dailyPosted)])
+    ).sort();
+
+    // Build daily comparison data
+    const dailyData = allDays.map(day => ({
+      day,
+      generated: dailyGenerated[day] || 0,
+      posted: dailyPosted[day] || 0,
+    }));
 
     // Get all unique months and sort them
     const allMonths = Array.from(
@@ -113,6 +131,7 @@ export async function GET() {
       totalGenerated,
       totalPosted,
       postingRatio,
+      dailyData,
       monthlyData,
       yearlyData,
       platformBreakdown,
