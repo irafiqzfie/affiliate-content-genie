@@ -6,6 +6,8 @@ import {
   Bar,
   LineChart,
   Line,
+  AreaChart,
+  Area,
   PieChart,
   Pie,
   Cell,
@@ -40,6 +42,12 @@ interface StatsData {
   mostActiveMonth: string;
   avgPostsPerMonth: number;
   lastActivity: string | null;
+  trends: {
+    generated: number;
+    posted: number;
+    ratio: number;
+  };
+  streak: number;
 }
 
 export default function StatsPage() {
@@ -47,6 +55,7 @@ export default function StatsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeFilter, setTimeFilter] = useState<'7days' | '30days' | 'yearly' | 'all'>('all');
+  const [visibleSeries, setVisibleSeries] = useState({ generated: true, posted: true });
 
   useEffect(() => {
     fetchStats();
@@ -69,6 +78,46 @@ export default function StatsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleSeries = (series: 'generated' | 'posted') => {
+    setVisibleSeries(prev => ({ ...prev, [series]: !prev[series] }));
+  };
+
+  const exportData = () => {
+    if (!stats) return;
+    
+    const csvContent = [
+      ['Metric', 'Value'],
+      ['Total Generated', stats.totalGenerated],
+      ['Total Posted', stats.totalPosted],
+      ['Posting Ratio', `${stats.postingRatio}%`],
+      ['Avg Posts/Month', stats.avgPostsPerMonth],
+      ['Current Streak', `${stats.streak} days`],
+      [''],
+      ['Date', 'Generated', 'Posted'],
+      ...stats.dailyData.map(d => [d.day, d.generated, d.posted])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `stats-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const getTrendIcon = (trend: number) => {
+    if (trend > 0) return '↑';
+    if (trend < 0) return '↓';
+    return '→';
+  };
+
+  const getTrendColor = (trend: number) => {
+    if (trend > 0) return '#10b981'; // green
+    if (trend < 0) return '#ef4444'; // red
+    return '#6b7280'; // gray
   };
 
   const formatMonth = (monthStr: string) => {
@@ -183,8 +232,16 @@ export default function StatsPage() {
           <h2>📊 Stats & Analytics</h2>
         </div>
         <div className="stats-loading">
-          <div className="spinner"></div>
-          <p>Loading your analytics...</p>
+          {/* Skeleton loaders */}
+          <div className="skeleton-kpi-strip">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="skeleton-kpi skeleton-pulse"></div>
+            ))}
+          </div>
+          <div className="skeleton-charts">
+            <div className="skeleton-chart skeleton-pulse"></div>
+            <div className="skeleton-chart skeleton-pulse"></div>
+          </div>
         </div>
       </div>
     );
@@ -196,9 +253,13 @@ export default function StatsPage() {
         <div className="stats-header">
           <h2>📊 Stats & Analytics</h2>
         </div>
-        <div className="stats-error">
-          <p>{error || 'Failed to load stats'}</p>
-          <button onClick={fetchStats} className="retry-button">Retry</button>
+        <div className="stats-error-state">
+          <div className="error-icon">⚠️</div>
+          <h3>Oops! Something went wrong</h3>
+          <p className="error-message">{error || 'Failed to load stats'}</p>
+          <button onClick={fetchStats} className="retry-button">
+            🔄 Retry
+          </button>
         </div>
       </div>
     );
@@ -214,93 +275,188 @@ export default function StatsPage() {
 
   return (
     <div className="stats-page">
-      {/* Header with Time Filter */}
+      {/* Header with Time Filter and Export */}
       <div className="stats-header">
         <div className="stats-header-left">
           <h2>📊 Stats & Analytics</h2>
           <p className="stats-subtitle">Your content generation and posting performance</p>
         </div>
-        <div className="stats-time-filter">
-          <button
-            className={`filter-btn ${timeFilter === '7days' ? 'active' : ''}`}
-            onClick={() => setTimeFilter('7days')}
-          >
-            Last 7 days
-          </button>
-          <button
-            className={`filter-btn ${timeFilter === '30days' ? 'active' : ''}`}
-            onClick={() => setTimeFilter('30days')}
-          >
-            30 days
-          </button>
-          <button
-            className={`filter-btn ${timeFilter === 'yearly' ? 'active' : ''}`}
-            onClick={() => setTimeFilter('yearly')}
-          >
-            Yearly
-          </button>
-          <button
-            className={`filter-btn ${timeFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setTimeFilter('all')}
-          >
-            All time
+        <div className="stats-header-right">
+          <div className="stats-time-filter">
+            <button
+              className={`filter-btn ${timeFilter === '7days' ? 'active' : ''}`}
+              onClick={() => setTimeFilter('7days')}
+            >
+              Last 7 days
+            </button>
+            <button
+              className={`filter-btn ${timeFilter === '30days' ? 'active' : ''}`}
+              onClick={() => setTimeFilter('30days')}
+            >
+              30 days
+            </button>
+            <button
+              className={`filter-btn ${timeFilter === 'yearly' ? 'active' : ''}`}
+              onClick={() => setTimeFilter('yearly')}
+            >
+              Yearly
+            </button>
+            <button
+              className={`filter-btn ${timeFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setTimeFilter('all')}
+            >
+              All time
+            </button>
+          </div>
+          <button className="export-btn" onClick={exportData} title="Export data to CSV">
+            📥 Export
           </button>
         </div>
       </div>
 
-      {/* Compact KPI Strip */}
+      {/* Enhanced KPI Strip with Trends and Sparklines */}
       <div className="stats-kpi-strip">
-        <div className="kpi-item">
-          <div className="kpi-icon">✨</div>
+        <div className="kpi-item kpi-animated">
+          <div className="kpi-icon kpi-icon-animated">✨</div>
           <div className="kpi-content">
-            <div className="kpi-value">{stats.totalGenerated}</div>
+            <div className="kpi-header">
+              <div className="kpi-value">{stats.totalGenerated}</div>
+              <div 
+                className="kpi-trend" 
+                style={{ color: getTrendColor(stats.trends.generated) }}
+              >
+                {getTrendIcon(stats.trends.generated)} {Math.abs(stats.trends.generated)}%
+              </div>
+            </div>
             <div className="kpi-label">Generated</div>
+            {/* Mini sparkline */}
+            <div className="kpi-sparkline">
+              {stats.dailyData.slice(-7).map((d, i) => (
+                <div 
+                  key={i} 
+                  className="sparkline-bar"
+                  style={{ 
+                    height: `${(d.generated / Math.max(...stats.dailyData.slice(-7).map(x => x.generated), 1)) * 100}%` 
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="kpi-item">
-          <div className="kpi-icon">📮</div>
+        <div className="kpi-item kpi-animated">
+          <div className="kpi-icon kpi-icon-animated">📮</div>
           <div className="kpi-content">
-            <div className="kpi-value">{stats.totalPosted}</div>
+            <div className="kpi-header">
+              <div className="kpi-value">{stats.totalPosted}</div>
+              <div 
+                className="kpi-trend"
+                style={{ color: getTrendColor(stats.trends.posted) }}
+              >
+                {getTrendIcon(stats.trends.posted)} {Math.abs(stats.trends.posted)}%
+              </div>
+            </div>
             <div className="kpi-label">Posted</div>
+            {/* Mini sparkline */}
+            <div className="kpi-sparkline">
+              {stats.dailyData.slice(-7).map((d, i) => (
+                <div 
+                  key={i} 
+                  className="sparkline-bar"
+                  style={{ 
+                    height: `${(d.posted / Math.max(...stats.dailyData.slice(-7).map(x => x.posted), 1)) * 100}%` 
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="kpi-item">
-          <div className="kpi-icon">📊</div>
+        <div className="kpi-item kpi-animated">
+          <div className="kpi-icon kpi-icon-animated">📊</div>
           <div className="kpi-content">
-            <div className="kpi-value">{stats.postingRatio}%</div>
+            <div className="kpi-header">
+              <div className="kpi-value">{stats.postingRatio}%</div>
+              <div 
+                className="kpi-trend"
+                style={{ color: getTrendColor(stats.trends.ratio) }}
+              >
+                {getTrendIcon(stats.trends.ratio)} {Math.abs(stats.trends.ratio)}%
+              </div>
+            </div>
             <div className="kpi-label">Post Ratio</div>
+            <div className="kpi-progress-bar">
+              <div 
+                className="kpi-progress-fill" 
+                style={{ width: `${stats.postingRatio}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="kpi-item">
-          <div className="kpi-icon">📈</div>
+        <div className="kpi-item kpi-animated">
+          <div className="kpi-icon kpi-icon-animated">🔥</div>
           <div className="kpi-content">
-            <div className="kpi-value">{stats.avgPostsPerMonth}</div>
-            <div className="kpi-label">Avg / Month</div>
+            <div className="kpi-header">
+              <div className="kpi-value">{stats.streak}</div>
+              <div className="kpi-badge">days</div>
+            </div>
+            <div className="kpi-label">Current Streak</div>
+            <div className="kpi-streak-indicator">
+              {Array.from({ length: Math.min(stats.streak, 7) }).map((_, i) => (
+                <span key={i} className="streak-dot">🔥</span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Two-Column Analytics Row */}
+      {/* Two-Column Analytics Row with Enhanced Charts */}
       <div className="stats-analytics-row">
-        {/* Activity Chart (Monthly/Yearly based on filter) */}
+        {/* Activity Chart with Area/Gradient fills */}
         <div className="analytics-card">
-          <h3 className="analytics-title">
-            {timeFilter === 'yearly' ? '📊 Yearly Overview' : '📅 Monthly Activity'}
-          </h3>
+          <div className="analytics-header">
+            <h3 className="analytics-title">
+              {timeFilter === 'yearly' ? '📊 Yearly Overview' : '📅 Activity Overview'}
+            </h3>
+            <div className="chart-legend-toggle">
+              <button
+                className={`legend-btn ${visibleSeries.generated ? 'active' : ''}`}
+                onClick={() => toggleSeries('generated')}
+              >
+                <span className="legend-color" style={{ backgroundColor: '#6366f1' }} />
+                Generated
+              </button>
+              <button
+                className={`legend-btn ${visibleSeries.posted ? 'active' : ''}`}
+                onClick={() => toggleSeries('posted')}
+              >
+                <span className="legend-color" style={{ backgroundColor: '#8b5cf6' }} />
+                Posted
+              </button>
+            </div>
+          </div>
           <div className="analytics-chart">
             {(() => {
               const { data, label } = getFilteredData();
               const formatLabel = label === 'year' ? (year: string) => year : 
                                   label === 'day' ? formatDay : formatMonth;
-              const dataKey = label; // 'year', 'month', or 'day'
+              const dataKey = label;
               
               return data.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   {timeFilter === 'all' || timeFilter === 'yearly' ? (
-                    <LineChart data={data}>
+                    <AreaChart data={data}>
+                      <defs>
+                        <linearGradient id="colorGenerated" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1}/>
+                        </linearGradient>
+                        <linearGradient id="colorPosted" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                       <XAxis 
                         dataKey={dataKey}
@@ -323,12 +479,43 @@ export default function StatsPage() {
                         }}
                         labelFormatter={formatLabel}
                       />
-                      <Legend wrapperStyle={{ color: '#fff', fontSize: '12px' }} />
-                      <Line type="monotone" dataKey="generated" stroke="#6366f1" strokeWidth={3} name="Generated" dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                      <Line type="monotone" dataKey="posted" stroke="#8b5cf6" strokeWidth={3} name="Posted" dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                    </LineChart>
+                      {visibleSeries.generated && (
+                        <Area 
+                          type="monotone" 
+                          dataKey="generated" 
+                          stroke="#6366f1" 
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#colorGenerated)" 
+                          name="Generated" 
+                          animationDuration={1000}
+                        />
+                      )}
+                      {visibleSeries.posted && (
+                        <Area 
+                          type="monotone" 
+                          dataKey="posted" 
+                          stroke="#8b5cf6" 
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#colorPosted)" 
+                          name="Posted" 
+                          animationDuration={1000}
+                        />
+                      )}
+                    </AreaChart>
                   ) : (
                     <BarChart data={data}>
+                      <defs>
+                        <linearGradient id="barGenerated" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.7}/>
+                        </linearGradient>
+                        <linearGradient id="barPosted" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.7}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                       <XAxis 
                         dataKey={dataKey}
@@ -351,22 +538,42 @@ export default function StatsPage() {
                         }}
                         labelFormatter={formatLabel}
                       />
-                      <Legend wrapperStyle={{ color: '#fff', fontSize: '12px' }} />
-                      <Bar dataKey="generated" fill="#6366f1" name="Generated" radius={[6, 6, 0, 0]} />
-                      <Bar dataKey="posted" fill="#8b5cf6" name="Posted" radius={[6, 6, 0, 0]} />
+                      {visibleSeries.generated && (
+                        <Bar 
+                          dataKey="generated" 
+                          fill="url(#barGenerated)" 
+                          name="Generated" 
+                          radius={[6, 6, 0, 0]}
+                          animationDuration={800}
+                        />
+                      )}
+                      {visibleSeries.posted && (
+                        <Bar 
+                          dataKey="posted" 
+                          fill="url(#barPosted)" 
+                          name="Posted" 
+                          radius={[6, 6, 0, 0]}
+                          animationDuration={800}
+                        />
+                      )}
                     </BarChart>
                   )}
                 </ResponsiveContainer>
               ) : (
-                <div className="chart-empty">
-                  <p>No activity data yet</p>
+                <div className="chart-empty-state">
+                  <div className="empty-icon">📊</div>
+                  <h4>No activity data yet</h4>
+                  <p>Start creating content to see your stats!</p>
+                  <button className="empty-action-btn" onClick={() => window.location.href = '/'}>
+                    ✨ Create Content
+                  </button>
                 </div>
               );
             })()}
           </div>
         </div>
 
-        {/* Platform Breakdown */}
+        {/* Platform Breakdown with Enhanced Empty State */}
         <div className="analytics-card">
           <h3 className="analytics-title">🌐 Platform Breakdown</h3>
           <div className="analytics-chart">
@@ -386,9 +593,14 @@ export default function StatsPage() {
                     outerRadius={70}
                     fill="#8884d8"
                     dataKey="value"
+                    animationDuration={1000}
+                    animationBegin={0}
                   >
                     {platformData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip
@@ -403,8 +615,13 @@ export default function StatsPage() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="chart-empty">
-                <p>No posts yet</p>
+              <div className="chart-empty-state">
+                <div className="empty-icon">📱</div>
+                <h4>No posts yet</h4>
+                <p>Schedule your first post to see platform distribution!</p>
+                <button className="empty-action-btn" onClick={() => window.location.href = '/'}>
+                  📮 Schedule Post
+                </button>
               </div>
             )}
           </div>

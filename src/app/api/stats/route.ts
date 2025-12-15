@@ -127,6 +127,63 @@ export async function GET() {
       ? Math.round(totalPosted / activeMonths) 
       : 0;
 
+    // Calculate trend indicators (compare last 30 days vs previous 30 days)
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const sixtyDaysAgo = new Date(today);
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+    let recentGenerated = 0;
+    let recentPosted = 0;
+    let previousGenerated = 0;
+    let previousPosted = 0;
+
+    events.forEach((event: { eventType: string; platform: string | null; timestamp: Date; monthKey: string; yearKey: string }) => {
+      const eventDate = new Date(event.timestamp);
+      
+      if (eventDate >= thirtyDaysAgo) {
+        if (event.eventType === 'content_generated') recentGenerated++;
+        else if (event.eventType === 'content_posted') recentPosted++;
+      } else if (eventDate >= sixtyDaysAgo) {
+        if (event.eventType === 'content_generated') previousGenerated++;
+        else if (event.eventType === 'content_posted') previousPosted++;
+      }
+    });
+
+    const generatedTrend = previousGenerated > 0 
+      ? Math.round(((recentGenerated - previousGenerated) / previousGenerated) * 100)
+      : (recentGenerated > 0 ? 100 : 0);
+
+    const postedTrend = previousPosted > 0
+      ? Math.round(((recentPosted - previousPosted) / previousPosted) * 100)
+      : (recentPosted > 0 ? 100 : 0);
+
+    const ratioTrend = previousGenerated > 0 && recentGenerated > 0
+      ? Math.round(((recentPosted / recentGenerated) - (previousPosted / previousGenerated)) * 100)
+      : 0;
+
+    // Calculate streak
+    let currentStreak = 0;
+    if (events.length > 0) {
+      const sortedDays = allDays.sort().reverse();
+      const todayStr = today.toISOString().substring(0, 10);
+      
+      for (const day of sortedDays) {
+        if (day > todayStr) continue;
+        const dayDate = new Date(day);
+        const expectedDay = new Date(today);
+        expectedDay.setDate(expectedDay.getDate() - currentStreak);
+        const expectedStr = expectedDay.toISOString().substring(0, 10);
+        
+        if (day === expectedStr) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+
     const stats = {
       totalGenerated,
       totalPosted,
@@ -138,6 +195,12 @@ export async function GET() {
       mostActiveMonth,
       avgPostsPerMonth,
       lastActivity,
+      trends: {
+        generated: generatedTrend,
+        posted: postedTrend,
+        ratio: ratioTrend,
+      },
+      streak: currentStreak,
     };
 
     return NextResponse.json(stats);
