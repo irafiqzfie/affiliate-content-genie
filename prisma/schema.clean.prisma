@@ -20,6 +20,7 @@ model User {
   sessions      Session[]
   savedItems    SavedItem[]
   scheduledPosts ScheduledPost[]
+  analyticsEvents AnalyticsEvent[]
 }
 
 model SavedItem {
@@ -89,4 +90,22 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+// Immutable event log for analytics tracking
+// Events are write-once and never deleted, ensuring stats remain accurate
+// even when SavedItem or ScheduledPost records are deleted
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  eventType String   // 'content_generated' or 'content_posted'
+  platform  String?  // e.g., 'threads', 'facebook', 'instagram', null for generated content
+  timestamp DateTime @default(now())
+  monthKey  String   // Format: 'YYYY-MM' for efficient aggregation
+  yearKey   String   // Format: 'YYYY' for yearly aggregation
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, eventType, monthKey]) // Optimize monthly stats queries
+  @@index([userId, eventType, yearKey])  // Optimize yearly stats queries
+  @@index([userId, timestamp])           // Optimize time-range queries
 }
