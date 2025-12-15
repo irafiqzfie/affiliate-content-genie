@@ -53,6 +53,30 @@ export async function POST(request: Request) {
     const userId = session.user.id;
     console.log('👤 User ID:', userId);
 
+    // Check if Prisma is available first
+    if (!prisma) {
+      console.warn('⚠️ Prisma not available - cannot save item');
+      return NextResponse.json({ 
+        message: 'Database temporarily unavailable. Please try again later.' 
+      }, { status: 503 });
+    }
+
+    // Verify the user exists in the database
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true }
+    });
+
+    if (!userExists) {
+      console.error('❌ User not found in database:', userId);
+      return NextResponse.json({ 
+        message: 'User session is invalid. Please sign out and sign in again.',
+        details: 'User ID from session does not exist in database'
+      }, { status: 401 });
+    }
+
+    console.log('✅ User verified in database');
+
     let body;
     try {
       body = await request.json();
@@ -112,25 +136,41 @@ export async function POST(request: Request) {
       dataToCreate.imageUrl = imageUrl;
     }
     
-    const newItem = await prisma.savedItem.create({ 
-      data: dataToCreate
-    });
+    try {
+      const newItem = await prisma.savedItem.create({ 
+        data: dataToCreate
+      });
 
-    // Log analytics event (immutable, append-only)
-    const now = new Date();
-    await prisma.analyticsEvent.create({
-      data: {
-        userId,
-        eventType: 'content_generated',
-        platform: null, // Generated content has no platform yet
-        timestamp: now,
-        monthKey: now.toISOString().substring(0, 7), // YYYY-MM
-        yearKey: now.toISOString().substring(0, 4),   // YYYY
-      },
-    });
+      // Log analytics event (immutable, append-only)
+      const now = new Date();
+      await prisma.analyticsEvent.create({
+        data: {
+          userId,
+          eventType: 'content_generated',
+          platform: null, // Generated content has no platform yet
+          timestamp: now,
+          monthKey: now.toISOString().substring(0, 7), // YYYY-MM
+          yearKey: now.toISOString().substring(0, 4),   // YYYY
+        },
+      });
 
-    console.log('✅ Item saved successfully:', newItem.id);
-    return NextResponse.json(newItem, { status: 201 });
+      console.log('✅ Item saved successfully:', newItem.id);
+      return NextResponse.json(newItem, { status: 201 });
+    } catch (dbError: any) {
+      console.error('❌ Database operation failed:', dbError);
+      
+      // Handle specific Prisma errors
+      if (dbError.code === 'P2003') {
+        // Foreign key constraint failed
+        console.error('Foreign key constraint error - userId:', userId);
+        return NextResponse.json({ 
+          message: 'Authentication error. Please sign out and sign in again.',
+          details: 'User session is no longer valid'
+        }, { status: 401 });
+      }
+      
+      throw dbError; // Re-throw for outer catch
+    }
   } catch (error) {
     console.error('❌ POST /api/saved-items error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Error saving item';

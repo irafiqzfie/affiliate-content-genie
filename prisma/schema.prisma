@@ -20,6 +20,7 @@ model User {
   savedItems    SavedItem[]
   scheduledPosts ScheduledPost[]
   analyticsEvents AnalyticsEvent[]
+  imageMetadata ImageMetadata[]
 }
 
 model SavedItem {
@@ -113,4 +114,20 @@ model AnalyticsEvent {
   @@index([userId, eventType, monthKey]) // Optimize monthly stats queries
   @@index([userId, eventType, yearKey])  // Optimize yearly stats queries
   @@index([userId, timestamp])           // Optimize time-range queries
+}
+// Immutable image metadata for tracking generated images
+// Prevents redundant image generation API calls
+model ImageMetadata {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  imageUrl      String   // Cloudflare R2 URL
+  imageType     String   // 'generated' | 'user_uploaded'
+  prompt        String?  // Stored prompt for reference
+  
+  generatedAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([userId, imageType])
 }

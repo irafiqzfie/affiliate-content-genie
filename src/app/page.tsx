@@ -12,6 +12,7 @@ import { ScheduledPostsList, PostHistory } from '@/app/components/Scheduler';
 import PostConfirmationModal, { PostOptions } from './components/PostConfirmationModal';
 import { RichTextEditor } from './components/ContentGeneration/RichTextEditor';
 import StatsPage from './components/StatsPage';
+import { shouldSkipImageGeneration, logImageGenerationTelemetry, isValidImageUrl } from '@/lib/image-generation';
 // import { useDebounce } from '@/app/hooks/useDebounce'; // Ready for future use
 
 const API_URL = '/api';
@@ -869,8 +870,28 @@ export default function Home() {
     }
   }, [productTitle, productImagePreviews, isLoading, advancedInputs, initializeOptionIndexes, parseContent]);
   
-  const handleGenerateImage = useCallback(async (key: string, promptText: string) => {
-    console.log('🎨 Generating image for key:', key, 'with prompt:', promptText.substring(0, 100) + '...');
+  const handleGenerateImage = useCallback(async (key: string, promptText: string, existingImageUrl?: string | null) => {
+    console.log('🎨 Image generation requested for key:', key);
+    
+    // GUARD: Skip if image already exists
+    if (shouldSkipImageGeneration(existingImageUrl)) {
+      console.log('✅ Image already exists, reusing:', existingImageUrl?.substring(0, 50) + '...');
+      logImageGenerationTelemetry('generation_skipped', {
+        key,
+        hasExistingUrl: true,
+        prompt: promptText.substring(0, 50)
+      });
+      setGeneratedImages(prev => ({ ...prev, [key]: existingImageUrl! }));
+      return;
+    }
+    
+    const startTime = performance.now();
+    logImageGenerationTelemetry('generation_started', {
+      key,
+      hasExistingUrl: false,
+      prompt: promptText.substring(0, 50)
+    });
+    
     setImageLoadingStates(prev => ({ ...prev, [key]: true }));
     setError(null);
     try {
@@ -890,10 +911,10 @@ export default function Home() {
           conditionImage, // Include the uploaded image if available
           transformation: hasUploadedImages ? 'enhance' : 'generate' // Indicate transformation type
         };
-        console.log('📡 Sending enhanced request to /api/visualize/image with body:', 
+        console.log('📡 Sending enhanced request to /api/visualize/generate with body:', 
           { ...requestBody, conditionImage: conditionImage ? '[IMAGE_DATA]' : null });
         
-        const response = await fetch(`${API_URL}/visualize/image`, {
+        const response = await fetch(`${API_URL}/visualize/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody),
@@ -917,17 +938,29 @@ export default function Home() {
             console.log('🎯 Image Analysis:', analysis);
         }
         
-        if (!imageUrl) {
-            throw new Error('No image URL returned from API');
+        if (!imageUrl || !isValidImageUrl(imageUrl)) {
+            throw new Error('No valid image URL returned from API');
         }
         
-        console.log('🖼️ Setting image URL:', imageUrl);
+        console.log('🖼️ Setting image URL:', imageUrl.substring(0, 50) + '...');
         setGeneratedImages(prev => ({ ...prev, [key]: imageUrl }));
+        
+        const duration = performance.now() - startTime;
+        logImageGenerationTelemetry('generation_completed', {
+          key,
+          duration: Math.round(duration),
+          prompt: promptText.substring(0, 50)
+        });
 
     } catch (err: unknown) {
         console.error('❌ Image generation failed:', err);
         const message = extractErrorMessage(err);
         setError(message || 'Failed to generate image. Please try again.');
+        logImageGenerationTelemetry('generation_failed', {
+          key,
+          error: message || 'Unknown error',
+          prompt: promptText.substring(0, 50)
+        });
     } finally {
         setImageLoadingStates(prev => ({ ...prev, [key]: false }));
     }
@@ -1240,8 +1273,9 @@ export default function Home() {
     const title = titleSource || `Saved Idea - ${new Date().toLocaleString()}`;
 
     // Ensure we always send non-empty strings for content
-    const videoContent = generatedContent.video || '';
-    const postContent = generatedContent.post || '';
+    // Convert to string and handle null/undefined cases
+    const videoContent = String(generatedContent.video || '');
+    const postContent = String(generatedContent.post || '');
     
     // Serialize Info tab data into a structured string
     let infoContent = '';
@@ -1323,8 +1357,25 @@ export default function Home() {
           imageUrl: blobImageUrl,
         };
 
-        console.log('📤 Attempting to save item:', { ...newItemPayload, imageUrl: blobImageUrl ? 'included' : 'none' });
-        console.log('📝 Post content preview being saved:', postContent.substring(0, 300));
+        console.log('📤 Attempting to save item:', { 
+            title, 
+            contentTypes: {
+                video: typeof videoContent,
+                post: typeof postContent,
+                info: typeof infoContent
+            },
+            contentLengths: {
+                video: videoContent?.length || 0,
+                post: postContent?.length || 0,
+                info: infoContent?.length || 0
+            },
+            imageUrl: blobImageUrl ? 'included' : 'none' 
+        });
+        console.log('📝 Content structure:', JSON.stringify({
+            video: videoContent?.substring(0, 100) || '(empty)',
+            post: postContent?.substring(0, 100) || '(empty)',
+            info: infoContent?.substring(0, 100) || '(empty)'
+        }));
         
         // Determine if we're updating an existing item or creating a new one
         const isUpdate = currentEditingIdeaId !== null;
@@ -1342,13 +1393,44 @@ export default function Home() {
         console.log('📥 Save response status:', response.status);
         
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-            console.error('❌ Save failed:', errorData);
+            let errorData;
+            const contentType = response.headers.get('content-type');
+            
+            try {
+                if (contentType?.includes('application/json')) {
+                    errorData = await response.json();
+                } else {
+                    const textError = await response.text();
+                    errorData = { message: textError || `HTTP ${response.status}: ${response.statusText}` };
+                }
+            } catch (parseError) {
+                errorData = { message: `HTTP ${response.status}: ${response.statusText}` };
+            }
+            
+            console.error('❌ Save failed:', {
+                status: response.status,
+                statusText: response.statusText,
+                error: errorData,
+                payload: newItemPayload
+            });
             
             // If update failed with 404, the item doesn't exist - clear the editing ID and suggest retry
             if (isUpdate && response.status === 404) {
                 setCurrentEditingIdeaId(null);
                 throw new Error('The saved item no longer exists. Your changes will be saved as a new item on next save.');
+            }
+            
+            // Handle specific error cases
+            if (response.status === 401) {
+                throw new Error('Authentication error. Please sign out and sign in again to continue.');
+            }
+            
+            if (response.status === 400) {
+                throw new Error(errorData.message || 'Invalid data. Please check your content and try again.');
+            }
+            
+            if (response.status === 503) {
+                throw new Error('Database is temporarily unavailable. Please try again in a moment.');
             }
             
             throw new Error(errorData.message || `Failed to save item. Status: ${response.status}`);
@@ -2566,7 +2648,7 @@ export default function Home() {
                         <div className="visualization-actions">
                             <button 
                                 className="visualize-button"
-                                onClick={() => handleGenerateImage(optionKey, selectedOption)}
+                                onClick={() => handleGenerateImage(optionKey, selectedOption, generatedImage)}
                                 disabled={isLoadingImage || (activeOutputTab === 'video' && !!videoLoadingInfo?.status)}
                             >
                                 {isLoadingImage ? 'Generating...' : '🎨 Visualize Image'}
