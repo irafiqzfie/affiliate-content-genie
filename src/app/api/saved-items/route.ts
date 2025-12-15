@@ -156,11 +156,11 @@ export async function POST(request: Request) {
 
       console.log('✅ Item saved successfully:', newItem.id);
       return NextResponse.json(newItem, { status: 201 });
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       console.error('❌ Database operation failed:', dbError);
       
       // Handle specific Prisma errors
-      if (dbError.code === 'P2003') {
+      if (dbError && typeof dbError === 'object' && 'code' in dbError && dbError.code === 'P2003') {
         // Foreign key constraint failed
         console.error('Foreign key constraint error - userId:', userId);
         return NextResponse.json({ 
