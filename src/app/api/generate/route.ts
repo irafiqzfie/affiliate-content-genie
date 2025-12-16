@@ -178,18 +178,18 @@ export async function POST(request: Request) {
     // Handle Auto (Context-Based) image style
     let effectiveImageStyle = advancedInputs.imageStyle;
     if (advancedInputs.imageStyle === 'Auto (Context-Based)') {
-      const videoFormat = advancedInputs.format || 'Tutorial / Demo';
+      const contentFormat = advancedInputs.format || 'Tutorial / Demo';
       const styleMapping: Record<string, string> = {
-        'Unboxing': 'Natural desk setup, hands-in-frame, lifestyle lighting',
-        'Problem–Solution': 'Real-world usage scenario, before/after contrast',
-        'Tutorial / Demo': 'Clean but practical setup, instructional framing',
-        'Before–After': 'Split-scene or contrasting environments emphasizing change',
-        'Lifestyle B-roll': 'Ambient lifestyle scenes, candid composition',
-        'Product Comparison': 'Neutral comparison layout, consistent angles',
-        'Storytelling / Review': 'Contextual lifestyle or narrative-driven scenes'
+        'Unboxing': 'UNBOXING STYLE: Natural desk or table setup (wood, matte surfaces). Hands clearly visible interacting with packaging. Partially opened box with packaging materials in frame. Casual indoor lighting (window or room light). Slight imperfections allowed. AVOID: Isolated product on white background, perfect symmetry, catalog framing.',
+        'Problem–Solution': 'PROBLEM-SOLUTION STYLE: Real-world usage context (home, office, daily environment). Clear before vs after contrast showing messy vs organized, slow vs efficient, or old vs improved. Same environment and angle when possible. Lighting may shift subtly to reinforce improvement. AVOID: Abstract backgrounds, studio spotlighting.',
+        'Tutorial / Demo': 'TUTORIAL/DEMO STYLE: Clean but practical setup (desk, kitchen counter, workspace). Over-the-shoulder or top-down instructional framing. Hands demonstrating steps clearly. Neutral background but still real-world. Clear focus on interaction, not beauty shots. AVOID: Lifestyle glamour shots, cinematic blur that hides details.',
+        'Before–After': 'BEFORE-AFTER STYLE: Split-scene or side-by-side composition. Same product, same framing, different state. Strong environmental contrast (lighting, cleanliness, mood). Clear visual story without text. AVOID: Abstract or studio backgrounds.',
+        'Lifestyle B-roll': 'LIFESTYLE B-ROLL STYLE: Ambient lifestyle scenes with candid composition. Natural environment showing everyday use. Relaxed, authentic moments. Soft natural lighting. AVOID: Overly staged or perfect studio setups.',
+        'Product Comparison': 'PRODUCT COMPARISON STYLE: Neutral comparison layout with consistent angles. Side-by-side or sequential presentation. Same lighting and background for fair comparison. Clear visual differentiation. AVOID: Bias through different lighting or angles.',
+        'Storytelling / Review': 'STORYTELLING/REVIEW STYLE: Contextual lifestyle or narrative-driven scenes. Personal use context that tells a story. Authentic environment matching the narrative. Natural, documentary-style framing. AVOID: Generic product shots without context.'
       };
-      effectiveImageStyle = styleMapping[videoFormat] || 'Studio / Clean Product Shot';
-      console.log(`🎨 Auto Image Style: "${effectiveImageStyle}" (based on format: ${videoFormat})`);
+      effectiveImageStyle = styleMapping[contentFormat] || 'Studio / Clean Product Shot';
+      console.log(`🎨 Auto Image Style: "${effectiveImageStyle}" (based on content format: ${contentFormat})`);
     } else {
       console.log(`🎨 Image Style: "${effectiveImageStyle}" (manual selection)`);
     }

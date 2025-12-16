@@ -2997,7 +2997,7 @@ export default function Home() {
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label htmlFor="format" className="input-label">Video Format</label>
+                                <label htmlFor="format" className="input-label">Content Format</label>
                                 <select id="format" name="format" className="select-field" value={advancedInputs.format} onChange={handleAdvancedInputChange}>
                                     <option>Unboxing</option>
                                     <option>Problem–Solution</option>
