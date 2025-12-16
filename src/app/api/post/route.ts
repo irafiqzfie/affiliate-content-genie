@@ -108,6 +108,27 @@ export async function POST(request: NextRequest) {
     const allSuccessful = results.every(r => r.success);
     const someSuccessful = results.some(r => r.success);
 
+    // Track analytics for successful posts
+    const now = new Date();
+    const monthKey = now.toISOString().substring(0, 7); // YYYY-MM
+    const yearKey = now.toISOString().substring(0, 4);  // YYYY
+    
+    for (const result of results) {
+      if (result.success) {
+        await prisma.analyticsEvent.create({
+          data: {
+            userId: session.user.id,
+            eventType: 'content_posted',
+            platform: result.platform === 'facebook' ? 'Facebook' : 'Threads',
+            timestamp: now,
+            monthKey,
+            yearKey,
+          },
+        });
+        console.log(`📊 Analytics tracked: ${result.platform} post`);
+      }
+    }
+
     return NextResponse.json({
       success: allSuccessful,
       partial: someSuccessful && !allSuccessful,
