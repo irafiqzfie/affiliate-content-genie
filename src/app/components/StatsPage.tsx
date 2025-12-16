@@ -431,7 +431,7 @@ export default function StatsPage() {
                 className={`legend-btn ${visibleSeries.posted ? 'active' : ''}`}
                 onClick={() => toggleSeries('posted')}
               >
-                <span className="legend-color" style={{ backgroundColor: '#8b5cf6' }} />
+                <span className="legend-color" style={{ backgroundColor: '#10b981' }} />
                 Posted
               </button>
             </div>
@@ -453,8 +453,8 @@ export default function StatsPage() {
                           <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1}/>
                         </linearGradient>
                         <linearGradient id="colorPosted" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
@@ -495,7 +495,7 @@ export default function StatsPage() {
                         <Area 
                           type="monotone" 
                           dataKey="posted" 
-                          stroke="#8b5cf6" 
+                          stroke="#10b981" 
                           strokeWidth={2}
                           fillOpacity={1}
                           fill="url(#colorPosted)" 
@@ -512,8 +512,8 @@ export default function StatsPage() {
                           <stop offset="100%" stopColor="#6366f1" stopOpacity={0.7}/>
                         </linearGradient>
                         <linearGradient id="barPosted" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1}/>
-                          <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.7}/>
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#10b981" stopOpacity={0.7}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
@@ -543,7 +543,8 @@ export default function StatsPage() {
                           dataKey="generated" 
                           fill="url(#barGenerated)" 
                           name="Generated" 
-                          radius={[6, 6, 0, 0]}
+                          stackId="a"
+                          radius={[0, 0, 0, 0]}
                           animationDuration={800}
                         />
                       )}
@@ -552,6 +553,7 @@ export default function StatsPage() {
                           dataKey="posted" 
                           fill="url(#barPosted)" 
                           name="Posted" 
+                          stackId="a"
                           radius={[6, 6, 0, 0]}
                           animationDuration={800}
                         />
@@ -570,60 +572,6 @@ export default function StatsPage() {
                 </div>
               );
             })()}
-          </div>
-        </div>
-
-        {/* Platform Breakdown with Enhanced Empty State */}
-        <div className="analytics-card">
-          <h3 className="analytics-title">🌐 Platform Breakdown</h3>
-          <div className="analytics-chart">
-            {platformData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <PieChart>
-                  <Pie
-                    data={platformData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={(props: { name?: string; percent?: number }) => {
-                      const name = props.name || '';
-                      const percent = props.percent || 0;
-                      return `${name}: ${(percent * 100).toFixed(0)}%`;
-                    }}
-                    outerRadius={70}
-                    fill="#8884d8"
-                    dataKey="value"
-                    animationDuration={1000}
-                    animationBegin={0}
-                  >
-                    {platformData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(13, 15, 27, 0.95)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      color: '#fff',
-                      fontSize: '12px',
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="chart-empty-state">
-                <div className="empty-icon">📱</div>
-                <h4>No posts yet</h4>
-                <p>Schedule your first post to see platform distribution!</p>
-                <button className="empty-action-btn" onClick={() => window.location.href = '/'}>
-                  📮 Schedule Post
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
