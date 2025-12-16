@@ -34,10 +34,13 @@ export async function GET() {
     // Aggregate by month and event type
     const dailyGenerated: Record<string, number> = {};
     const dailyPosted: Record<string, number> = {};
+    const dailyPlatforms: Record<string, Record<string, number>> = {}; // day -> platform -> count
     const monthlyGenerated: Record<string, number> = {};
     const monthlyPosted: Record<string, number> = {};
+    const monthlyPlatforms: Record<string, Record<string, number>> = {}; // month -> platform -> count
     const yearlyGenerated: Record<string, number> = {};
     const yearlyPosted: Record<string, number> = {};
+    const yearlyPlatforms: Record<string, Record<string, number>> = {}; // year -> platform -> count
     const platformBreakdown: Record<string, number> = {};
 
     let totalGenerated = 0;
@@ -60,6 +63,18 @@ export async function GET() {
         
         if (event.platform) {
           platformBreakdown[event.platform] = (platformBreakdown[event.platform] || 0) + 1;
+          
+          // Track platform per day
+          if (!dailyPlatforms[dayKey]) dailyPlatforms[dayKey] = {};
+          dailyPlatforms[dayKey][event.platform] = (dailyPlatforms[dayKey][event.platform] || 0) + 1;
+          
+          // Track platform per month
+          if (!monthlyPlatforms[event.monthKey]) monthlyPlatforms[event.monthKey] = {};
+          monthlyPlatforms[event.monthKey][event.platform] = (monthlyPlatforms[event.monthKey][event.platform] || 0) + 1;
+          
+          // Track platform per year
+          if (!yearlyPlatforms[event.yearKey]) yearlyPlatforms[event.yearKey] = {};
+          yearlyPlatforms[event.yearKey][event.platform] = (yearlyPlatforms[event.yearKey][event.platform] || 0) + 1;
         }
       }
 
@@ -79,6 +94,7 @@ export async function GET() {
       day,
       generated: dailyGenerated[day] || 0,
       posted: dailyPosted[day] || 0,
+      ...(dailyPlatforms[day] || {})
     }));
 
     // Get all unique months and sort them
@@ -91,6 +107,7 @@ export async function GET() {
       month,
       generated: monthlyGenerated[month] || 0,
       posted: monthlyPosted[month] || 0,
+      ...(monthlyPlatforms[month] || {})
     }));
 
     // Get all unique years and sort them
@@ -103,6 +120,7 @@ export async function GET() {
       year,
       generated: yearlyGenerated[year] || 0,
       posted: yearlyPosted[year] || 0,
+      ...(yearlyPlatforms[year] || {})
     }));
 
     // Calculate additional metrics

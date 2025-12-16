@@ -270,8 +270,17 @@ export default function StatsPage() {
     name: platform,
     value: count,
   }));
+  
+  // Get unique platforms for stacked bars
+  const platforms = Object.keys(stats.platformBreakdown);
+  const platformColors: Record<string, string> = {
+    'Facebook': '#1877f2',
+    'Threads': '#10b981',
+    'Instagram': '#e4405f',
+    'TikTok': '#000000',
+  };
 
-  const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b'];
+  const COLORS = ['#6366f1', '#10b981', '#ec4899', '#f59e0b'];
 
   return (
     <div className="stats-page">
@@ -427,13 +436,26 @@ export default function StatsPage() {
                 <span className="legend-color" style={{ backgroundColor: '#6366f1' }} />
                 Generated
               </button>
-              <button
-                className={`legend-btn ${visibleSeries.posted ? 'active' : ''}`}
-                onClick={() => toggleSeries('posted')}
-              >
-                <span className="legend-color" style={{ backgroundColor: '#10b981' }} />
-                Posted
-              </button>
+              {platforms.length > 0 ? (
+                platforms.map((platform, index) => (
+                  <button
+                    key={platform}
+                    className={`legend-btn ${visibleSeries.posted ? 'active' : ''}`}
+                    onClick={() => toggleSeries('posted')}
+                  >
+                    <span className="legend-color" style={{ backgroundColor: platformColors[platform] || COLORS[index % COLORS.length] }} />
+                    {platform}
+                  </button>
+                ))
+              ) : (
+                <button
+                  className={`legend-btn ${visibleSeries.posted ? 'active' : ''}`}
+                  onClick={() => toggleSeries('posted')}
+                >
+                  <span className="legend-color" style={{ backgroundColor: '#10b981' }} />
+                  Posted
+                </button>
+              )}
             </div>
           </div>
           <div className="analytics-chart">
@@ -543,21 +565,21 @@ export default function StatsPage() {
                           dataKey="generated" 
                           fill="url(#barGenerated)" 
                           name="Generated" 
-                          stackId="a"
-                          radius={[0, 0, 0, 0]}
-                          animationDuration={800}
-                        />
-                      )}
-                      {visibleSeries.posted && (
-                        <Bar 
-                          dataKey="posted" 
-                          fill="url(#barPosted)" 
-                          name="Posted" 
-                          stackId="a"
                           radius={[6, 6, 0, 0]}
                           animationDuration={800}
                         />
                       )}
+                      {visibleSeries.posted && platforms.map((platform, index) => (
+                        <Bar 
+                          key={platform}
+                          dataKey={platform} 
+                          fill={platformColors[platform] || COLORS[index % COLORS.length]}
+                          name={platform} 
+                          stackId="posted"
+                          radius={index === platforms.length - 1 ? [6, 6, 0, 0] : [0, 0, 0, 0]}
+                          animationDuration={800}
+                        />
+                      ))}
                     </BarChart>
                   )}
                 </ResponsiveContainer>
