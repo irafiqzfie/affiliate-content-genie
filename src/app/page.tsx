@@ -98,7 +98,7 @@ const goalPresets = {
 
 
 const initialAdvancedInputs = {
-    category: '',
+    imageStyle: 'Studio / Clean Product Shot',
     audienceGender: 'Unisex',
     audienceAge: '20s',
     platform: 'TikTok',
@@ -2940,8 +2940,11 @@ export default function Home() {
                                 <input type="text" id="callToActionStyle" name="callToActionStyle" className="input-field" value={advancedInputs.callToActionStyle} onChange={handleAdvancedInputChange} placeholder="e.g., Soft suggestion"/>
                             </div>
                              <div className="form-group">
-                                <label htmlFor="category" className="input-label">Product Category</label>
-                                <input type="text" id="category" name="category" className="input-field" value={advancedInputs.category} onChange={handleAdvancedInputChange} placeholder="e.g., Tech, Beauty, Kitchen"/>
+                                <label htmlFor="imageStyle" className="input-label">Image Style</label>
+                                <select id="imageStyle" name="imageStyle" className="select-field" value={advancedInputs.imageStyle} onChange={handleAdvancedInputChange}>
+                                    <option>Studio / Clean Product Shot</option>
+                                    <option>Auto (Context-Based)</option>
+                                </select>
                             </div>
                             <div className="form-group">
                                 <label htmlFor="videoLength" className="input-label">Video Length</label>

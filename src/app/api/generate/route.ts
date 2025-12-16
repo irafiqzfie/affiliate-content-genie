@@ -29,6 +29,13 @@ If the user provides custom keywords in the parameters:
 - DO NOT apply keywords to: Title, Caption, Hashtags, Video Idea, B-roll, Hook, or Call to Action
 - If no keywords are provided, proceed with default content generation
 
+IMAGE STYLE HANDLING:
+The user provides an Image Style parameter that determines the visual style for generated image prompts:
+- If imageStyle is "Studio / Clean Product Shot": Generate clean, professional studio-style product photography prompts with neutral backgrounds and proper lighting
+- If imageStyle contains a different description (e.g., "Natural desk setup, hands-in-frame, lifestyle lighting"): Use that exact style as the guiding principle for ALL image prompts you generate
+- Image prompts must align consistently with the provided imageStyle across all generated content
+- When product images are uploaded, enhance those images according to the imageStyle while maintaining product consistency
+
 You MUST adhere to ALL of the following parameters provided by the user in the prompt, including the CREATIVE DIRECTION section.
 You MUST provide exactly THREE distinct options for each of the sections in both formats. Each option should be on a new line, formatted as a numbered list.
 
@@ -162,7 +169,30 @@ export async function POST(request: Request) {
       console.log(`📸 ${productImages.length} product image(s) included for context`);
     }
 
-    const prompt = `Here is the product title: ${productTitle}\n\nAnd here are the parameters for the content I want you to create:\n${JSON.stringify(advancedInputs, null, 2)}`;
+    // Handle Auto (Context-Based) image style
+    let effectiveImageStyle = advancedInputs.imageStyle;
+    if (advancedInputs.imageStyle === 'Auto (Context-Based)') {
+      const videoFormat = advancedInputs.format || 'Tutorial / Demo';
+      const styleMapping: Record<string, string> = {
+        'Unboxing': 'Natural desk setup, hands-in-frame, lifestyle lighting',
+        'Problem–Solution': 'Real-world usage scenario, before/after contrast',
+        'Tutorial / Demo': 'Clean but practical setup, instructional framing',
+        'Before–After': 'Split-scene or contrasting environments emphasizing change',
+        'Lifestyle B-roll': 'Ambient lifestyle scenes, candid composition',
+        'Product Comparison': 'Neutral comparison layout, consistent angles',
+        'Storytelling / Review': 'Contextual lifestyle or narrative-driven scenes'
+      };
+      effectiveImageStyle = styleMapping[videoFormat] || 'Studio / Clean Product Shot';
+      console.log(`🎨 Auto Image Style: "${effectiveImageStyle}" (based on format: ${videoFormat})`);
+    }
+
+    // Create modified advancedInputs with effective image style
+    const effectiveInputs = {
+      ...advancedInputs,
+      imageStyle: effectiveImageStyle
+    };
+
+    const prompt = `Here is the product title: ${productTitle}\n\nAnd here are the parameters for the content I want you to create:\n${JSON.stringify(effectiveInputs, null, 2)}`;
     
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
     
