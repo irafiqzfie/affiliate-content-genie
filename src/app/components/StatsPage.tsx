@@ -4,18 +4,12 @@ import React, { useState, useEffect } from 'react';
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
   AreaChart,
   Area,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
 
@@ -27,19 +21,19 @@ interface StatsData {
     day: string;
     generated: number;
     posted: number;
-    [platform: string]: any;
+    [platform: string]: string | number;
   }>;
   monthlyData: Array<{
     month: string;
     generated: number;
     posted: number;
-    [platform: string]: any;
+    [platform: string]: string | number;
   }>;
   yearlyData: Array<{
     year: string;
     generated: number;
     posted: number;
-    [platform: string]: any;
+    [platform: string]: string | number;
   }>;
   platformBreakdown: Record<string, number>;
   mostActiveMonth: string;
@@ -271,12 +265,6 @@ export default function StatsPage() {
     );
   }
 
-  // Prepare platform breakdown data for pie chart
-  const platformData = Object.entries(stats.platformBreakdown).map(([platform, count]) => ({
-    name: platform,
-    value: count,
-  }));
-  
   // Get unique platforms for stacked bars (order matters for stacking)
   const platforms = ['Threads', 'Facebook'].filter(p => stats.platformBreakdown[p] > 0);
   const platformColors: Record<string, string> = {
