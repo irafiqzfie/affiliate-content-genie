@@ -2459,6 +2459,87 @@ export default function Home() {
         );
     };
 
+    // Render skeleton loading cards during generation
+    const renderSkeletonCard = (index: number, type: 'text' | 'visual' = 'text') => {
+        return (
+            <div key={`skeleton-${index}`} className="output-card skeleton-card">
+                <div className="skeleton-header">
+                    <div className="skeleton-icon"></div>
+                    <div className="skeleton-title"></div>
+                </div>
+                <div className="card-content">
+                    {type === 'visual' ? (
+                        <div className="skeleton" style={{ height: '200px', marginBottom: 'var(--spacing-sm)' }}></div>
+                    ) : (
+                        <>
+                            <div className="skeleton-line"></div>
+                            <div className="skeleton-line"></div>
+                            <div className="skeleton-line"></div>
+                            <div className="skeleton-line"></div>
+                        </>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    const renderSkeletonGrid = () => {
+        if (activeOutputTab === 'info') {
+            return (
+                <div className="loading-state-container">
+                    <div className="progress-bar-container">
+                        <div className="progress-bar-fill"></div>
+                    </div>
+                    <div className="info-grid-layout">
+                        {renderSkeletonCard(1, 'text')}
+                        {renderSkeletonCard(2, 'text')}
+                        {renderSkeletonCard(3, 'text')}
+                        {renderSkeletonCard(4, 'text')}
+                    </div>
+                </div>
+            );
+        } else if (activeOutputTab === 'post') {
+            return (
+                <div className="loading-state-container">
+                    <div className="progress-dots">
+                        <div className="progress-dot"></div>
+                        <div className="progress-dot"></div>
+                        <div className="progress-dot"></div>
+                    </div>
+                    {renderSkeletonCard(1, 'visual')}
+                    <div className="three-column-row">
+                        {renderSkeletonCard(2, 'text')}
+                        {renderSkeletonCard(3, 'text')}
+                        {renderSkeletonCard(4, 'text')}
+                    </div>
+                </div>
+            );
+        } else {
+            // Video tab
+            return (
+                <div className="loading-state-container">
+                    <div className="progress-dots">
+                        <div className="progress-dot"></div>
+                        <div className="progress-dot"></div>
+                        <div className="progress-dot"></div>
+                    </div>
+                    <div className="standard-section-row">
+                        {renderSkeletonCard(1, 'text')}
+                        {renderSkeletonCard(2, 'text')}
+                    </div>
+                    <div className="standard-section-row">
+                        {renderSkeletonCard(3, 'text')}
+                        {renderSkeletonCard(4, 'text')}
+                    </div>
+                    <div className="standard-section-row">
+                        {renderSkeletonCard(5, 'text')}
+                        {renderSkeletonCard(6, 'text')}
+                    </div>
+                </div>
+            );
+        }
+    };
+
     const renderPromptCard = (section: {key: string; title: string; icon: string;}, isVisual = false) => {
         if (!section) return <div/>;
         
@@ -2994,8 +3075,15 @@ export default function Home() {
                       </fieldset>
                     </div>
 
-                    <button type="submit" className="generate-button" disabled={isLoading || !productTitle}>
-                      {isLoading ? 'Generating...' : '✨ Generate Content'}
+                    <button type="submit" className={`generate-button ${isLoading ? 'generating' : ''}`} disabled={isLoading || !productTitle}>
+                      {isLoading ? (
+                        <>
+                          <span>Generating</span>
+                          <span className="generating-dots">
+                            <span>.</span><span>.</span><span>.</span>
+                          </span>
+                        </>
+                      ) : '✨ Generate Content'}
                     </button>
                 </form>
                 </div>
@@ -3129,7 +3217,10 @@ export default function Home() {
       {(hasGeneratedAttempt && (isLoading || generatedContent.video || generatedContent.post || error)) && (
         <>
         <div className="output-container">
-            {activeOutputTab === 'info' ? (
+            {isLoading && !generatedContent.video && !generatedContent.post ? (
+              // Show skeleton loaders during initial generation
+              renderSkeletonGrid()
+            ) : activeOutputTab === 'info' ? (
               <>
                 {(trendscore !== null || productSummary || affiliatePotential || productFeatures) ? (
                   <div className="info-grid-layout">
