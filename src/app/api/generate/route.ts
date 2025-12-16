@@ -30,11 +30,17 @@ If the user provides custom keywords in the parameters:
 - If no keywords are provided, proceed with default content generation
 
 IMAGE STYLE HANDLING:
-The user provides an Image Style parameter that determines the visual style for generated image prompts:
-- If imageStyle is "Studio / Clean Product Shot": Generate clean, professional studio-style product photography prompts with neutral backgrounds and proper lighting
-- If imageStyle contains a different description (e.g., "Natural desk setup, hands-in-frame, lifestyle lighting"): Use that exact style as the guiding principle for ALL image prompts you generate
-- Image prompts must align consistently with the provided imageStyle across all generated content
-- When product images are uploaded, enhance those images according to the imageStyle while maintaining product consistency
+The user provides an Image Style parameter that determines the visual style and context for content:
+- If imageStyle is "Studio / Clean Product Shot": Generate content assuming clean, professional studio-style product photography with neutral backgrounds and proper lighting
+- If imageStyle contains a different description (e.g., "Natural desk setup, hands-in-frame, lifestyle lighting"): This describes the VISUAL CONTEXT and SCENE SETTING for the product. You MUST:
+  * Incorporate this visual style into your Video Ideas, B-roll suggestions, and overall creative direction
+  * Describe scenes, camera angles, and visual elements that match this style
+  * For "Natural desk setup, hands-in-frame" → suggest shots with hands interacting with product on desk
+  * For "Real-world usage scenario" → describe the product being used in actual situations
+  * For "Ambient lifestyle scenes" → frame content in relaxed, everyday contexts
+  * The imageStyle is NOT just for image generation - it defines the ENTIRE VISUAL NARRATIVE
+- Apply this visual style consistently across Video Ideas (💡), B-roll Suggestions (🎥), and any visual descriptions
+- When product images are uploaded, your suggestions should enhance and complement those images using the specified imageStyle
 
 You MUST adhere to ALL of the following parameters provided by the user in the prompt, including the CREATIVE DIRECTION section.
 You MUST provide exactly THREE distinct options for each of the sections in both formats. Each option should be on a new line, formatted as a numbered list.
@@ -184,6 +190,8 @@ export async function POST(request: Request) {
       };
       effectiveImageStyle = styleMapping[videoFormat] || 'Studio / Clean Product Shot';
       console.log(`🎨 Auto Image Style: "${effectiveImageStyle}" (based on format: ${videoFormat})`);
+    } else {
+      console.log(`🎨 Image Style: "${effectiveImageStyle}" (manual selection)`);
     }
 
     // Create modified advancedInputs with effective image style
@@ -191,6 +199,8 @@ export async function POST(request: Request) {
       ...advancedInputs,
       imageStyle: effectiveImageStyle
     };
+
+    console.log(`📤 Sending to AI - imageStyle: "${effectiveInputs.imageStyle}"`);
 
     const prompt = `Here is the product title: ${productTitle}\n\nAnd here are the parameters for the content I want you to create:\n${JSON.stringify(effectiveInputs, null, 2)}`;
     
