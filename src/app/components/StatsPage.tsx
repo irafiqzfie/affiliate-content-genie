@@ -27,16 +27,19 @@ interface StatsData {
     day: string;
     generated: number;
     posted: number;
+    [platform: string]: any;
   }>;
   monthlyData: Array<{
     month: string;
     generated: number;
     posted: number;
+    [platform: string]: any;
   }>;
   yearlyData: Array<{
     year: string;
     generated: number;
     posted: number;
+    [platform: string]: any;
   }>;
   platformBreakdown: Record<string, number>;
   mostActiveMonth: string;
@@ -72,6 +75,9 @@ export default function StatsPage() {
       
       const data = await response.json();
       setStats(data);
+      console.log('📊 Stats data received:', data);
+      console.log('📊 Daily data sample:', data.dailyData.slice(0, 3));
+      console.log('📊 Platform breakdown:', data.platformBreakdown);
     } catch (err) {
       console.error('Error fetching stats:', err);
       setError(err instanceof Error ? err.message : 'Failed to load stats');
@@ -271,11 +277,11 @@ export default function StatsPage() {
     value: count,
   }));
   
-  // Get unique platforms for stacked bars
-  const platforms = Object.keys(stats.platformBreakdown);
+  // Get unique platforms for stacked bars (order matters for stacking)
+  const platforms = ['Threads', 'Facebook'].filter(p => stats.platformBreakdown[p] > 0);
   const platformColors: Record<string, string> = {
-    'Facebook': '#1877f2',
-    'Threads': '#10b981',
+    'Threads': '#10b981',    // Green
+    'Facebook': '#1877f2',  // Blue
     'Instagram': '#e4405f',
     'TikTok': '#000000',
   };
@@ -569,13 +575,13 @@ export default function StatsPage() {
                           animationDuration={800}
                         />
                       )}
-                      {visibleSeries.posted && platforms.map((platform, index) => (
+                      {visibleSeries.posted && platforms.length > 0 && platforms.map((platform, index) => (
                         <Bar 
                           key={platform}
                           dataKey={platform} 
-                          fill={platformColors[platform] || COLORS[index % COLORS.length]}
+                          fill={platformColors[platform]}
                           name={platform} 
-                          stackId="posted"
+                          stackId="platforms"
                           radius={index === platforms.length - 1 ? [6, 6, 0, 0] : [0, 0, 0, 0]}
                           animationDuration={800}
                         />
