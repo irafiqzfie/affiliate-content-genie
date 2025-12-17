@@ -393,7 +393,7 @@ export default function StatsPage() {
         <div className="analytics-card">
           <div className="analytics-header">
             <h3 className="analytics-title">
-              {timeFilter === 'yearly' ? '📊 Yearly Overview' : '📅 Activity Overview'}
+              {timeFilter === 'year' ? '📊 Yearly Overview' : '📅 Activity Overview'}
             </h3>
             <div className="chart-legend-toggle">
               <button
