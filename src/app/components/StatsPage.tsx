@@ -440,8 +440,7 @@ export default function StatsPage() {
           <div className="analytics-chart">
             {(() => {
               const { data, label } = getFilteredData();
-              const formatLabel = label === 'year' ? (year: string) => year : 
-                                  label === 'day' ? formatDay : formatMonth;
+              const formatLabel = label === 'month' ? formatMonth : formatDay;
               const dataKey = label;
               
               return data.length > 0 ? (
