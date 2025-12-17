@@ -159,6 +159,11 @@ export default function StatsPage() {
           year: year.toString(),
           generated: existing?.generated || 0,
           posted: existing?.posted || 0,
+          ...(existing ? Object.fromEntries(
+            Object.entries(existing).filter(([key]) => 
+              key !== 'year' && key !== 'generated' && key !== 'posted'
+            )
+          ) : {})
         });
       }
       
@@ -168,7 +173,7 @@ export default function StatsPage() {
     // Handle daily views (7 days / 30 days)
     if (timeFilter === '7days' || timeFilter === '30days') {
       const days = timeFilter === '7days' ? 7 : 30;
-      const dailyData: Array<{ day: string; generated: number; posted: number }> = [];
+      const dailyData: Array<{ day: string; generated: number; posted: number; [key: string]: string | number }> = [];
       
       // Generate complete daily range for the last N days
       for (let i = days - 1; i >= 0; i--) {
@@ -183,6 +188,11 @@ export default function StatsPage() {
           day: dateStr,
           generated: existing?.generated || 0,
           posted: existing?.posted || 0,
+          ...(existing ? Object.fromEntries(
+            Object.entries(existing).filter(([key]) => 
+              key !== 'day' && key !== 'generated' && key !== 'posted'
+            )
+          ) : {})
         });
       }
       
@@ -213,6 +223,11 @@ export default function StatsPage() {
         month: monthKey,
         generated: existing?.generated || 0,
         posted: existing?.posted || 0,
+        ...(existing ? Object.fromEntries(
+          Object.entries(existing).filter(([key]) => 
+            key !== 'month' && key !== 'generated' && key !== 'posted'
+          )
+        ) : {})
       });
       
       currentMonth++;
@@ -266,7 +281,21 @@ export default function StatsPage() {
   }
 
   // Get unique platforms for stacked bars (order matters for stacking)
-  const platforms = ['Threads', 'Facebook'].filter(p => stats.platformBreakdown[p] > 0);
+  // Check which platforms have data in the filtered time period
+  const allPlatformKeys = new Set<string>();
+  const { data: filteredData } = getFilteredData();
+  filteredData.forEach(item => {
+    Object.keys(item).forEach(key => {
+      if (key !== 'day' && key !== 'month' && key !== 'year' && key !== 'generated' && key !== 'posted') {
+        allPlatformKeys.add(key);
+      }
+    });
+  });
+  const platforms = Array.from(allPlatformKeys).filter(p => 
+    filteredData.some(d => (d[p as keyof typeof d] as number) > 0)
+  );
+  console.log('🔍 Platform detection:', { platforms, filteredData, allPlatformKeys: Array.from(allPlatformKeys) });
+  
   const platformColors: Record<string, string> = {
     'Threads': '#10b981',    // Green
     'Facebook': '#1877f2',  // Blue
@@ -388,11 +417,17 @@ export default function StatsPage() {
               </div>
             </div>
             <div className="kpi-label">Post Ratio</div>
-            <div className="kpi-progress-bar">
-              <div 
-                className="kpi-progress-fill" 
-                style={{ width: `${stats.postingRatio}%` }}
-              />
+            <div className="kpi-ratio-indicator">
+              {stats.postingRatio >= 100 ? (
+                <div className="ratio-badge ratio-high">🔥 {stats.postingRatio}% of generated content posted</div>
+              ) : (
+                <div className="kpi-progress-bar">
+                  <div 
+                    className="kpi-progress-fill" 
+                    style={{ width: `${stats.postingRatio}%` }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -479,12 +514,16 @@ export default function StatsPage() {
                         tickFormatter={formatLabel}
                         stroke="rgba(255,255,255,0.5)"
                         style={{ fontSize: '11px' }}
-                        interval={0}
-                        angle={-45}
+                        interval="preserveStartEnd"
+                        angle={-30}
                         textAnchor="end"
                         height={60}
                       />
-                      <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '11px' }} />
+                      <YAxis 
+                        stroke="rgba(255,255,255,0.5)" 
+                        style={{ fontSize: '11px' }}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'rgba(13, 15, 27, 0.95)',
@@ -538,12 +577,16 @@ export default function StatsPage() {
                         tickFormatter={formatLabel}
                         stroke="rgba(255,255,255,0.5)"
                         style={{ fontSize: '11px' }}
-                        interval={0}
-                        angle={-45}
+                        interval="preserveStartEnd"
+                        angle={-30}
                         textAnchor="end"
                         height={60}
                       />
-                      <YAxis stroke="rgba(255,255,255,0.5)" style={{ fontSize: '11px' }} />
+                      <YAxis 
+                        stroke="rgba(255,255,255,0.5)" 
+                        style={{ fontSize: '11px' }}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'rgba(13, 15, 27, 0.95)',
@@ -595,9 +638,13 @@ export default function StatsPage() {
       {/* Inline Metadata Info Bar */}
       <div className="stats-metadata-bar">
         <div className="metadata-item">
-          <span className="metadata-icon">🔥</span>
+          <span className="metadata-icon">🏆</span>
           <span className="metadata-text">
-            Most Active: <strong>{stats.mostActiveMonth ? formatMonth(stats.mostActiveMonth) : 'N/A'}</strong>
+            Best Platform: <strong>
+              {stats.platformBreakdown.Threads > stats.platformBreakdown.Facebook ? 'Threads' : 
+               stats.platformBreakdown.Facebook > stats.platformBreakdown.Threads ? 'Facebook' : 
+               'Tied'}
+            </strong>
           </span>
         </div>
         <div className="metadata-item">
