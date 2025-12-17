@@ -51,7 +51,8 @@ export default function StatsPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeFilter, setTimeFilter] = useState<'7days' | '30days' | 'yearly' | 'all'>('all');
+  const [timeFilter, setTimeFilter] = useState<'7days' | '30days' | 'year'>('year');
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [visibleSeries, setVisibleSeries] = useState({ generated: true, posted: true });
 
   useEffect(() => {
@@ -123,7 +124,7 @@ export default function StatsPage() {
   const formatMonth = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('en-US', { month: 'short' });
   };
 
   const formatDay = (dayStr: string) => {
@@ -143,31 +144,27 @@ export default function StatsPage() {
   const getFilteredData = () => {
     if (!stats) return { data: [], label: 'month' as const };
     
-    // Handle yearly view
-    if (timeFilter === 'yearly') {
-      // Generate complete year range
-      const years = stats.yearlyData.map(item => parseInt(item.year));
-      if (years.length === 0) return { data: [], label: 'year' as const };
+    // Handle year view (monthly breakdown) - always show all 12 months of selected year
+    if (timeFilter === 'year') {
+      const completeMonthlyData = [];
       
-      const minYear = Math.min(...years);
-      const maxYear = Math.max(...years);
-      const completeYearData = [];
-      
-      for (let year = minYear; year <= maxYear; year++) {
-        const existing = stats.yearlyData.find(item => parseInt(item.year) === year);
-        completeYearData.push({
-          year: year.toString(),
+      // Always generate all 12 months for selected year (Jan - Dec)
+      for (let month = 1; month <= 12; month++) {
+        const monthKey = `${selectedYear}-${String(month).padStart(2, '0')}`;
+        const existing = stats.monthlyData.find(item => item.month === monthKey);
+        
+        completeMonthlyData.push({
+          month: monthKey,
           generated: existing?.generated || 0,
           posted: existing?.posted || 0,
-          ...(existing ? Object.fromEntries(
-            Object.entries(existing).filter(([key]) => 
-              key !== 'year' && key !== 'generated' && key !== 'posted'
-            )
-          ) : {})
+          Facebook: (existing && 'Facebook' in existing) ? (existing as any).Facebook : 0,
+          Threads: (existing && 'Threads' in existing) ? (existing as any).Threads : 0,
+          Instagram: (existing && 'Instagram' in existing) ? (existing as any).Instagram : 0,
+          TikTok: (existing && 'TikTok' in existing) ? (existing as any).TikTok : 0,
         });
       }
       
-      return { data: completeYearData, label: 'year' as const };
+      return { data: completeMonthlyData, label: 'month' as const };
     }
     
     // Handle daily views (7 days / 30 days)
@@ -199,45 +196,7 @@ export default function StatsPage() {
       return { data: dailyData, label: 'day' as const };
     }
     
-    // Handle monthly view (all time)
-    // Generate complete month range
-    const months = stats.monthlyData.map(item => item.month);
-    if (months.length === 0) return { data: [], label: 'month' as const };
-    
-    const sortedMonths = months.sort();
-    const firstMonth = sortedMonths[0];
-    const lastMonth = sortedMonths[sortedMonths.length - 1];
-    
-    const [firstYear, firstMonthNum] = firstMonth.split('-').map(Number);
-    const [lastYear, lastMonthNum] = lastMonth.split('-').map(Number);
-    
-    const completeMonthlyData = [];
-    let currentYear = firstYear;
-    let currentMonth = firstMonthNum;
-    
-    while (currentYear < lastYear || (currentYear === lastYear && currentMonth <= lastMonthNum)) {
-      const monthKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
-      const existing = stats.monthlyData.find(item => item.month === monthKey);
-      
-      completeMonthlyData.push({
-        month: monthKey,
-        generated: existing?.generated || 0,
-        posted: existing?.posted || 0,
-        ...(existing ? Object.fromEntries(
-          Object.entries(existing).filter(([key]) => 
-            key !== 'month' && key !== 'generated' && key !== 'posted'
-          )
-        ) : {})
-      });
-      
-      currentMonth++;
-      if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear++;
-      }
-    }
-    
-    return { data: completeMonthlyData, label: 'month' as const };
+    return { data: [], label: 'month' as const };
   };
 
   if (loading) {
@@ -297,13 +256,15 @@ export default function StatsPage() {
   console.log('🔍 Platform detection:', { platforms, filteredData, allPlatformKeys: Array.from(allPlatformKeys) });
   
   const platformColors: Record<string, string> = {
-    'Threads': '#10b981',    // Green
-    'Facebook': '#1877f2',  // Blue
+    'Threads': '#2c2c2e',    // Dark charcoal for Threads
+    'Facebook': '#1877f2',  // Facebook blue
     'Instagram': '#e4405f',
     'TikTok': '#000000',
   };
 
-  const COLORS = ['#6366f1', '#10b981', '#ec4899', '#f59e0b'];
+  // Generated content color - solid orange
+  const GENERATED_COLOR = '#f97316'; // Modern muted orange
+  const COLORS = ['#f97316', '#1877f2', '#ec4899', '#f59e0b'];
 
   return (
     <div className="stats-page">
@@ -328,17 +289,35 @@ export default function StatsPage() {
               30 days
             </button>
             <button
-              className={`filter-btn ${timeFilter === 'yearly' ? 'active' : ''}`}
-              onClick={() => setTimeFilter('yearly')}
+              className={`filter-btn ${timeFilter === 'year' ? 'active' : ''}`}
+              onClick={() => setTimeFilter('year')}
             >
-              Yearly
+              Year
             </button>
-            <button
-              className={`filter-btn ${timeFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setTimeFilter('all')}
-            >
-              All time
-            </button>
+            {timeFilter === 'year' && (
+              <select 
+                className="year-selector"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                style={{
+                  marginLeft: '8px',
+                  padding: '8px 12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  outline: 'none',
+                }}
+              >
+                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                  <option key={year} value={year} style={{ backgroundColor: '#0d0f1b' }}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <button className="export-btn" onClick={exportData} title="Export data to CSV">
             📥 Export
@@ -361,18 +340,6 @@ export default function StatsPage() {
               </div>
             </div>
             <div className="kpi-label">Generated</div>
-            {/* Mini sparkline */}
-            <div className="kpi-sparkline">
-              {stats.dailyData.slice(-7).map((d, i) => (
-                <div 
-                  key={i} 
-                  className="sparkline-bar"
-                  style={{ 
-                    height: `${(d.generated / Math.max(...stats.dailyData.slice(-7).map(x => x.generated), 1)) * 100}%` 
-                  }}
-                />
-              ))}
-            </div>
           </div>
         </div>
 
@@ -389,18 +356,6 @@ export default function StatsPage() {
               </div>
             </div>
             <div className="kpi-label">Posted</div>
-            {/* Mini sparkline */}
-            <div className="kpi-sparkline">
-              {stats.dailyData.slice(-7).map((d, i) => (
-                <div 
-                  key={i} 
-                  className="sparkline-bar"
-                  style={{ 
-                    height: `${(d.posted / Math.max(...stats.dailyData.slice(-7).map(x => x.posted), 1)) * 100}%` 
-                  }}
-                />
-              ))}
-            </div>
           </div>
         </div>
 
@@ -417,18 +372,6 @@ export default function StatsPage() {
               </div>
             </div>
             <div className="kpi-label">Post Ratio</div>
-            <div className="kpi-ratio-indicator">
-              {stats.postingRatio >= 100 ? (
-                <div className="ratio-badge ratio-high">🔥 {stats.postingRatio}% of generated content posted</div>
-              ) : (
-                <div className="kpi-progress-bar">
-                  <div 
-                    className="kpi-progress-fill" 
-                    style={{ width: `${stats.postingRatio}%` }}
-                  />
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -440,11 +383,6 @@ export default function StatsPage() {
               <div className="kpi-badge">days</div>
             </div>
             <div className="kpi-label">Current Streak</div>
-            <div className="kpi-streak-indicator">
-              {Array.from({ length: Math.min(stats.streak, 7) }).map((_, i) => (
-                <span key={i} className="streak-dot">🔥</span>
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -462,20 +400,32 @@ export default function StatsPage() {
                 className={`legend-btn ${visibleSeries.generated ? 'active' : ''}`}
                 onClick={() => toggleSeries('generated')}
               >
-                <span className="legend-color" style={{ backgroundColor: '#6366f1' }} />
+                <span className="legend-color" style={{ backgroundColor: '#f97316' }} />
                 Generated
               </button>
               {platforms.length > 0 ? (
-                platforms.map((platform, index) => (
-                  <button
-                    key={platform}
-                    className={`legend-btn ${visibleSeries.posted ? 'active' : ''}`}
-                    onClick={() => toggleSeries('posted')}
-                  >
-                    <span className="legend-color" style={{ backgroundColor: platformColors[platform] || COLORS[index % COLORS.length] }} />
-                    {platform}
-                  </button>
-                ))
+                platforms.map((platform, index) => {
+                  // Use gradient styles for legend to match chart
+                  const legendStyle = platform === 'Facebook' ? { 
+                    background: 'linear-gradient(to top, #1877f2, #60a5fa)'
+                  } : platform === 'Threads' ? {
+                    background: 'linear-gradient(to top, #2c2c2e, #6b7280)'
+                  } : platform === 'Instagram' ? {
+                    background: 'linear-gradient(to top, #e4405f, #f472b6)'
+                  } : {
+                    backgroundColor: platformColors[platform] || COLORS[index % COLORS.length]
+                  };
+                  return (
+                    <button
+                      key={platform}
+                      className={`legend-btn ${visibleSeries.posted ? 'active' : ''}`}
+                      onClick={() => toggleSeries('posted')}
+                    >
+                      <span className="legend-color" style={legendStyle} />
+                      {platform} (Posted)
+                    </button>
+                  );
+                })
               ) : (
                 <button
                   className={`legend-btn ${visibleSeries.posted ? 'active' : ''}`}
@@ -496,16 +446,31 @@ export default function StatsPage() {
               
               return data.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
-                  {timeFilter === 'all' || timeFilter === 'yearly' ? (
+                  {timeFilter === 'year' ? (
                     <AreaChart data={data}>
                       <defs>
-                        <linearGradient id="colorGenerated" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1}/>
+                        {/* Generated: Orange gradient */}
+                        <linearGradient id="colorGenerated" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#f97316" stopOpacity={0.3}/>
+                          <stop offset="100%" stopColor="#fb923c" stopOpacity={0.15}/>
                         </linearGradient>
-                        <linearGradient id="colorPosted" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                        {/* Facebook: Blue to White gradient */}
+                        <linearGradient id="colorFacebook" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#1877f2" stopOpacity={0.3}/>
+                          <stop offset="100%" stopColor="#ffffff" stopOpacity={0.15}/>
+                        </linearGradient>
+                        {/* Threads: Dark charcoal to White gradient */}
+                        <linearGradient id="colorThreads" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#2c2c2e" stopOpacity={0.3}/>
+                          <stop offset="100%" stopColor="#ffffff" stopOpacity={0.12}/>
+                        </linearGradient>
+                        <linearGradient id="colorInstagram" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#e4405f" stopOpacity={0.3}/>
+                          <stop offset="100%" stopColor="#ffffff" stopOpacity={0.15}/>
+                        </linearGradient>
+                        <linearGradient id="colorTikTok" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#000000" stopOpacity={0.3}/>
+                          <stop offset="100%" stopColor="#ffffff" stopOpacity={0.1}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
@@ -514,7 +479,7 @@ export default function StatsPage() {
                         tickFormatter={formatLabel}
                         stroke="rgba(255,255,255,0.5)"
                         style={{ fontSize: '11px' }}
-                        interval="preserveStartEnd"
+                        interval={0}
                         angle={-30}
                         textAnchor="end"
                         height={60}
@@ -533,28 +498,71 @@ export default function StatsPage() {
                           fontSize: '12px',
                         }}
                         labelFormatter={formatLabel}
+                        formatter={(value: number, name: string) => [
+                          value,
+                          name === 'Generated' ? 'Generated' :
+                          name === 'Facebook' ? 'Facebook' :
+                          name === 'Threads' ? 'Threads' :
+                          name === 'Instagram' ? 'Instagram' :
+                          name === 'TikTok' ? 'TikTok' : name
+                        ]}
                       />
                       {visibleSeries.generated && (
                         <Area 
                           type="monotone" 
                           dataKey="generated" 
-                          stroke="#6366f1" 
+                          stroke="#f97316" 
                           strokeWidth={2}
-                          fillOpacity={1}
                           fill="url(#colorGenerated)" 
                           name="Generated" 
                           animationDuration={1000}
                         />
                       )}
-                      {visibleSeries.posted && (
+                      {visibleSeries.posted && platforms.includes('Facebook') && (
                         <Area 
                           type="monotone" 
-                          dataKey="posted" 
-                          stroke="#10b981" 
+                          dataKey="Facebook" 
+                          stackId="platforms"
+                          stroke="#1877f2" 
                           strokeWidth={2}
-                          fillOpacity={1}
-                          fill="url(#colorPosted)" 
-                          name="Posted" 
+                          fill="url(#colorFacebook)" 
+                          name="Facebook" 
+                          animationDuration={1000}
+                        />
+                      )}
+                      {visibleSeries.posted && platforms.includes('Threads') && (
+                        <Area 
+                          type="monotone" 
+                          dataKey="Threads" 
+                          stackId="platforms"
+                          stroke="#4a4a4e" 
+                          strokeWidth={2}
+                          fill="url(#colorThreads)" 
+                          name="Threads" 
+                          animationDuration={1000}
+                        />
+                      )}
+                      {visibleSeries.posted && platforms.includes('Instagram') && (
+                        <Area 
+                          type="monotone" 
+                          dataKey="Instagram" 
+                          stackId="platforms"
+                          stroke="#e4405f" 
+                          strokeWidth={1.5}
+                          fill="url(#colorInstagram)" 
+                          name="Instagram" 
+                          animationDuration={1000}
+                        />
+                      )}
+                      {visibleSeries.posted && platforms.includes('TikTok') && (
+                        <Area 
+                          type="monotone" 
+                          dataKey="TikTok" 
+                          stackId="platforms"
+                          stroke="#000000" 
+                          strokeWidth={1.5}
+                          fill="url(#colorTikTok)" 
+                          name="TikTok" 
                           animationDuration={1000}
                         />
                       )}
@@ -562,9 +570,24 @@ export default function StatsPage() {
                   ) : (
                     <BarChart data={data}>
                       <defs>
-                        <linearGradient id="barGenerated" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#6366f1" stopOpacity={1}/>
-                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.7}/>
+                        {/* Generated: Solid orange */}
+                        <linearGradient id="barGenerated" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#f97316" stopOpacity={0.9}/>
+                          <stop offset="100%" stopColor="#fb923c" stopOpacity={1}/>
+                        </linearGradient>
+                        {/* Facebook: Blue to White gradient */}
+                        <linearGradient id="barFacebook" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#1877f2" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.85}/>
+                        </linearGradient>
+                        {/* Threads: Charcoal to White gradient */}
+                        <linearGradient id="barThreads" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#2c2c2e" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#6b7280" stopOpacity={0.9}/>
+                        </linearGradient>
+                        <linearGradient id="barInstagram" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#e4405f" stopOpacity={1}/>
+                          <stop offset="100%" stopColor="#f472b6" stopOpacity={0.9}/>
                         </linearGradient>
                         <linearGradient id="barPosted" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
@@ -606,17 +629,33 @@ export default function StatsPage() {
                           animationDuration={800}
                         />
                       )}
-                      {visibleSeries.posted && platforms.length > 0 && platforms.map((platform, index) => (
+                      {visibleSeries.posted && platforms.length > 0 ? (
+                        platforms.map((platform, index) => {
+                          // Use gradient IDs for Facebook and Threads
+                          const barFill = platform === 'Facebook' ? 'url(#barFacebook)' :
+                                         platform === 'Threads' ? 'url(#barThreads)' :
+                                         platform === 'Instagram' ? 'url(#barInstagram)' :
+                                         platformColors[platform] || COLORS[index % COLORS.length];
+                          return (
+                            <Bar 
+                              key={platform}
+                              dataKey={platform} 
+                              fill={barFill}
+                              name={platform} 
+                              radius={[6, 6, 0, 0]}
+                              animationDuration={800}
+                            />
+                          );
+                        })
+                      ) : visibleSeries.posted && (
                         <Bar 
-                          key={platform}
-                          dataKey={platform} 
-                          fill={platformColors[platform]}
-                          name={platform} 
-                          stackId="platforms"
-                          radius={index === platforms.length - 1 ? [6, 6, 0, 0] : [0, 0, 0, 0]}
+                          dataKey="posted" 
+                          fill="url(#barPosted)" 
+                          name="Posted" 
+                          radius={[6, 6, 0, 0]}
                           animationDuration={800}
                         />
-                      ))}
+                      )}
                     </BarChart>
                   )}
                 </ResponsiveContainer>
