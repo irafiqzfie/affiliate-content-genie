@@ -3186,7 +3186,7 @@ export default function Home() {
                 }}
                 className="output-action-btn primary"
               >
-                ✈️ Ready to Post
+                📮 Ready to Post
               </button>
             )}
             <button 
@@ -3341,7 +3341,7 @@ export default function Home() {
             <div className="post-section-header">
               <div className="post-header-title">
                 <h2 className="section-title">
-                  📤 Ready To Post
+                  � Ready To Post
                 </h2>
                 <p className="post-count-subtext">{readyToPostItems.length} {readyToPostItems.length === 1 ? 'post' : 'posts'} queued</p>
               </div>
