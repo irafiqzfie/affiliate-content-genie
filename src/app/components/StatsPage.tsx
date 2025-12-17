@@ -157,10 +157,10 @@ export default function StatsPage() {
           month: monthKey,
           generated: existing?.generated || 0,
           posted: existing?.posted || 0,
-          Facebook: (existing && 'Facebook' in existing) ? (existing as any).Facebook : 0,
-          Threads: (existing && 'Threads' in existing) ? (existing as any).Threads : 0,
-          Instagram: (existing && 'Instagram' in existing) ? (existing as any).Instagram : 0,
-          TikTok: (existing && 'TikTok' in existing) ? (existing as any).TikTok : 0,
+          Facebook: (existing && 'Facebook' in existing) ? (existing as Record<string, string | number>).Facebook as number : 0,
+          Threads: (existing && 'Threads' in existing) ? (existing as Record<string, string | number>).Threads as number : 0,
+          Instagram: (existing && 'Instagram' in existing) ? (existing as Record<string, string | number>).Instagram as number : 0,
+          TikTok: (existing && 'TikTok' in existing) ? (existing as Record<string, string | number>).TikTok as number : 0,
         });
       }
       
