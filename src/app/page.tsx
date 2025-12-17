@@ -3186,7 +3186,7 @@ export default function Home() {
                 }}
                 className="output-action-btn primary"
               >
-                📮 Ready to Post
+                ✈️ Ready to Post
               </button>
             )}
             <button 
