@@ -25,7 +25,22 @@ export function ScheduledPostsList({ scheduledPosts, onDeletePost, onPostNow }: 
     <div className="scheduler-page">
       <div className="scheduled-list-container">
         <div className="scheduled-list-header">
-          <h2 className="section-title">✈️ Ready to Post</h2>
+          <h2 className="section-title">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="20" 
+              height="20" 
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '8px' }}
+            >
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            Ready to Post
+          </h2>
           <p className="section-subtitle">
             Review your saved posts and publish when ready
           </p>
