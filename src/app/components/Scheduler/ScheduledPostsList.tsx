@@ -122,7 +122,7 @@ export function ScheduledPostsList({ scheduledPosts, onDeletePost, onPostNow }: 
                 <div className="scheduled-item-actions">
                   <button 
                     onClick={() => onPostNow(post)} 
-                    className="scheduled-item-button post-now-button" 
+                    className="scheduled-item-button post-now-button animate" 
                     aria-label="Post now to Threads"
                     title="Post to Threads immediately"
                   >

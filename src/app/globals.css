@@ -5265,27 +5265,51 @@ body::after {
 }
 
 .scheduled-item-button.post-now-button {
-    background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* Professional blue */
     border: none;
     color: white;
-    padding: 0.6rem 1.25rem;
-    border-radius: 9999px;
+    padding: 0.7rem 1.4rem;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 700;
     font-family: 'Inter', sans-serif;
-    transition: all var(--transition-base);
-    display: flex;
+    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease, filter 200ms ease;
+    display: inline-flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 10px;
     margin-left: auto;
-    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.14);
+    will-change: transform, box-shadow;
+    transform: translateY(0);
+}
+
+/* subtle, low-impact pulsing ring to draw attention */
+@keyframes postNowPulse {
+  0% { box-shadow: 0 6px 18px rgba(37,99,235,0.12); transform: translateY(0); }
+  50% { box-shadow: 0 10px 26px rgba(37,99,235,0.16); transform: translateY(-2px); }
+  100% { box-shadow: 0 6px 18px rgba(37,99,235,0.12); transform: translateY(0); }
+}
+
+.scheduled-item-button.post-now-button.animate {
+  animation: postNowPulse 3.2s ease-in-out infinite;
 }
 
 .scheduled-item-button.post-now-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-    filter: brightness(1.1);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 14px 36px rgba(37, 99, 235, 0.22);
+    filter: brightness(1.03);
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .scheduled-item-button.post-now-button.animate,
+  .scheduled-item-button.post-now-button:hover {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.14) !important;
+  }
 }
 
 .scheduled-item-button.cancel-button {
@@ -5533,13 +5557,29 @@ body::after {
     color: var(--primary-text-color);
   border-radius: 9999px;}
 .modal-footer-button.primary {
-    background-image: var(--primary-gradient);
+    background: linear-gradient(-45deg, #2563eb, #1d4ed8, #3b82f6, #1e40af);
+    background-size: 300% 300%;
     border-color: transparent;
     color: #fff;
-  border-radius: 9999px;}
+    border-radius: 9999px;
+    position: relative;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    animation: gradientShift 4s ease infinite;
+}
+.modal-footer-button.primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
 .modal-footer-button.primary:hover {
-    background-image: var(--primary-gradient-hover);
-  border-radius: 9999px;}
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.35);
+    transform: translateY(-2px);
+    border-radius: 9999px;
+}
 
 
 .social-platform-button {
@@ -5554,22 +5594,55 @@ body::after {
   border-radius: 9999px;}
 
 .social-platform-button.facebook {
-    background-color: #1877F2;
+    background: linear-gradient(-45deg, #1877F2, #0d47a1, #2563eb, #1565c0);
+    background-size: 300% 300%;
     border-color: #1877F2;
     color: white;
-  border-radius: 9999px;}
+    border-radius: 9999px;
+    position: relative;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    animation: gradientShift 4s ease infinite;
+}
+.social-platform-button.facebook::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.12), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
 .social-platform-button.facebook:hover:not(:disabled) {
-    background-color: #4091ff;
-  border-radius: 9999px;}
+    box-shadow: 0 8px 24px rgba(24, 119, 242, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    border-radius: 9999px;
+}
 
 .social-platform-button.threads {
-    background-color: #1c1e21;
-    border-color: #8a8d91;
+    background: linear-gradient(-45deg, #1877f2, #0d47a1, #2563eb, #1565c0);
+    background-size: 300% 300%;
+    border-color: #1877f2;
     color: white;
-  border-radius: 9999px;}
+    border-radius: 9999px;
+    position: relative;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    animation: gradientShift 4s ease infinite;
+}
+.social-platform-button.threads::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.12), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
 .social-platform-button.threads:hover:not(:disabled) {
     border-color: #fff;
-  border-radius: 9999px;}
+    box-shadow: 0 8px 24px rgba(30, 144, 255, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    border-radius: 9999px;
+}
 
 .social-platform-button:disabled {
     opacity: 0.4;
@@ -9040,22 +9113,47 @@ body::after {
   white-space: nowrap;
 }
 
-/* Primary Action - Post Now with Lift & Glow */
+/* Primary Action - Post Now with Animated Gradient */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .scheduled-btn-post {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(-45deg, #2563eb, #1d4ed8, #3b82f6, #1e40af);
+  background-size: 300% 300%;
   color: white;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4), 0 0 30px rgba(37, 99, 235, 0.15);
+  position: relative;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  animation: gradientShift 4s ease infinite;
+}
+
+.scheduled-btn-post::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .scheduled-btn-post:hover:not(:disabled) {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45), 0 0 20px rgba(37, 99, 235, 0.25);
-  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(37, 99, 235, 0.55), 0 0 40px rgba(37, 99, 235, 0.25);
+  transform: translateY(-3px) scale(1.02);
 }
 
 .scheduled-btn-post:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px) scale(1);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
 }
 
 /* Secondary Action - Ghost Button */
@@ -9253,15 +9351,28 @@ body::after {
 }
 
 .detail-btn-post {
-  background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+  background: linear-gradient(-45deg, #2563eb, #1d4ed8, #3b82f6, #1e40af);
+  background-size: 300% 300%;
   color: white;
-  box-shadow: 0 4px 12px rgba(88, 101, 242, 0.35);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45), 0 0 35px rgba(37, 99, 235, 0.18);
+  position: relative;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  animation: gradientShift 4s ease infinite;
+}
+
+.detail-btn-post::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.12), transparent);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .detail-btn-post:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4752c4 0%, #3c45a6 100%);
-  box-shadow: 0 6px 20px rgba(88, 101, 242, 0.5);
-  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(37, 99, 235, 0.6), 0 0 45px rgba(37, 99, 235, 0.28);
+  transform: translateY(-3px) scale(1.03);
 }
 
 .detail-btn-close {
@@ -9274,6 +9385,27 @@ body::after {
   background: rgba(255, 255, 255, 0.08);
   color: white;
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Respect prefers-reduced-motion for animated buttons */
+@media (prefers-reduced-motion: reduce) {
+  .scheduled-btn-post,
+  .detail-btn-post,
+  .modal-footer-button.primary,
+  .social-platform-button.facebook,
+  .social-platform-button.threads {
+    animation: none !important;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  }
+
+  .scheduled-btn-post:hover:not(:disabled),
+  .detail-btn-post:hover:not(:disabled),
+  .modal-footer-button.primary:hover,
+  .social-platform-button.facebook:hover:not(:disabled),
+  .social-platform-button.threads:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45), 0 0 20px rgba(37, 99, 235, 0.25) !important;
+    transform: translateY(-2px) !important;
+  }
 }
 
 .detail-modal-btn:disabled {
