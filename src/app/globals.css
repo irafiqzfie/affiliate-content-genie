@@ -3325,6 +3325,26 @@ body::after {
     }
 }
 
+/* Mobile: Stack image on top, text below */
+@media (max-width: 768px) {
+    .body-card-with-image {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        gap: 0;
+    }
+    
+    .body-image-section {
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+        padding: var(--spacing-md);
+        min-height: 200px;
+    }
+    
+    .body-card-content {
+        width: 100%;
+    }
+}
+
 .subsection-header {
     padding: 0.75rem 1rem;
     background: rgba(255, 255, 255, 0.015);
